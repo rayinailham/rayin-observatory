@@ -70,6 +70,8 @@ observatorium. Dikerjakan **mobile-first**, desktop menyusul, dalam 10 fase bert
 | Q32 | Gate Fase 3 + copy homepage | (2026-09-15) Gate Fase 3 lolos dari paket bukti; seluruh copy homepage di-approve, label DRAFT dilepas. Kontak: rayinailham9@gmail.com, LinkedIn `in/rayinailham`, GitHub `rayinailham`, Upwork; label link menampilkan "Rayina Ilham". Skill kerja harian Go/MySQL/TiDB/Redis masih menunggu konfirmasi |
 | Q33 | Skill kerja harian | (2026-09-15) Pemilik konfirmasi **Go, MySQL/TiDB, Redis** → dipasang di Skills sebagai grup "Daily work", tanpa tautan project dan tanpa nama pemberi kerja |
 | Q34 | Gate Fase 4 + copy case CrossCheck | (2026-09-15) Gate Fase 4 lolos dari paket bukti ("lolos semua ini fase 4 aman"); copy case CrossCheck di-approve, label DRAFT dilepas; transisi flight-in diterima apa adanya. Folder `assets/` tidak lagi dilacak git (lokal saja) |
+| Q35 | Gate Fase 5 + copy 4 case baru | (2026-09-15) Gate Fase 5 lolos dari paket bukti ("semuanya lulus dan approved, duewatch opsi no 1"); copy 4 case baru (SurgeLine, DriftWatch, DueWatch, BrandWall) dan blok Next CrossCheck di-approve, seluruh label DRAFT dilepas. Video DueWatch diterima dengan opsi 1 (catatan tanggal simulasi di bawah video dipertahankan) |
+| Q36 | Gate Fase 6 (Desktop) | (2026-09-15) Gate Fase 6 lolos dari video bukti desktop ("okay semuanya lolos catat"); layar pertama case file desktop (brief dua kolom, instrumen di bawah lipatan) diterima apa adanya |
 
 ---
 

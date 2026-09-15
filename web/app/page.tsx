@@ -32,7 +32,7 @@ export default function Home() {
         </div>
         <div className="instrument-reading">
           <div className="proof-reading"><strong>{instrument.reading}</strong><span>{instrument.unit}<br /><small>{instrument.context}</small></span></div>
-          <button className="case-button" data-open-case={instrument.id} aria-haspopup={instrument.id === 'crosscheck' ? undefined : 'dialog'}>Open case file <span aria-hidden="true">↗</span></button>
+          <button className="case-button" data-open-case={instrument.id}>Open case file <span aria-hidden="true">↗</span></button>
           {instrument.id === 'brandwall'
             ? <p className="orbit-hint" id="observer-readout" data-observed="false">Tap to observe · <b className="when-off">detector off, wave pattern</b><b className="when-on">detector on, particle pattern</b></p>
             : <p className="orbit-hint">Scroll to orbit the instrument</p>}
@@ -53,7 +53,7 @@ export default function Home() {
         <p className="section-kicker">Behind the instruments</p>
         <h2 id="about-heading" tabIndex={-1}>I’m Rayina Ilham.</h2>
         <figure className="portrait-scan">
-          <Image src="/images/rayina-duotone.png" alt="Portrait of Rayina Ilham, treated in navy duotone with subtle scan lines" width={1086} height={1448} sizes="(max-width: 430px) calc(100vw - 48px), 382px" />
+          <Image src="/images/rayina-duotone.png" alt="Portrait of Rayina Ilham, treated in navy duotone with subtle scan lines" width={1086} height={1448} sizes="(min-width: 1024px) 440px, (max-width: 430px) calc(100vw - 48px), 382px" />
           <span className="scan-line" aria-hidden="true" />
           <figcaption>Rayina Ilham / Rayin Observatory</figcaption>
         </figure>

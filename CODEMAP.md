@@ -4,7 +4,7 @@
 > menunjuknya dan berkas akan diubah. Update setiap berkas dibuat/diubah/dipindah/dihapus.
 > Entri tidak cocok dengan kode = bug; perbaiki saat ditemukan.
 
-**Terakhir diperbarui:** 2026-09-15 · Claude Code · revisi 3 pasca gate Fase 4 (bintang jarang hanya 30% atas; leader 01/03 ditukar lens), diterima pemilik. Fase 5 `todo`.
+**Terakhir diperbarui:** 2026-09-15 · Claude Code · Fase 6 Desktop Testing: `desktop_evidence.py` + paket bukti `assets/renders/desktop/evidence/`; fix grid About/Skills desktop (baris terakhir `1fr`). Gate Fase 6 lolos 2026-09-15 → `done`; Fase 7 `todo`.
 
 ## 1. Ringkasan arsitektur
 
@@ -21,9 +21,9 @@ Font, decoder Draco, fallback PNG dan model disajikan lokal dari `web/public/`.
 Fase 2 menambah section `#crosscheck` (sticky, 270svh) setelah hero: ScrollTrigger `reveal`
 (masuk) + `orbit` (di-pin) ditulis ke ref `chapter`, dibaca `useFrame` untuk kamera orbit
 di sekitar teleskop `crosscheck.glb`; idle = ayun `OpticsPivot` + nyala `Lens1..3Glow` bergiliran.
-"Open case file" CrossCheck kini menuju `/work/crosscheck` dengan transisi kamera; empat project lain tetap dialog preview.
+Sejak Fase 5 kelima "Open case file" terbang ke `/work/<slug>`; dialog preview Fase 3 dihapus.
 
-Fase 3: `lib/instruments.ts` menjadi sumber lima chapter/copy/dialog; `lib/skills.ts` memetakan
+Fase 3: `lib/instruments.ts` menjadi sumber lima chapter/copy; `lib/skills.ts` memetakan
 skill ke project. Shell menghitung chapter aktif, orbit, transisi dan outro dari posisi section
 nyata. Scene memuat tujuh GLB dalam satu Canvas; lima group instrumen berbagi kamera. Skills
 memakai disclosure native; setiap tautan mengembalikan scroll/fokus ke project dan menyorot judul.
@@ -31,7 +31,9 @@ About: portrait approved + GSAP clip/scan. Contact: CTA `mailto:` + empat link a
 Hero menegaskan Automation Engineer sesuai arahan pemilik sesi ini.
 
 Preview pada port 8767. Preview Fase 0 tetap arsip HTML `assets/style-lock/` pada 8766.
-Fase 3 menambahkan empat instrumen, Skills, About dan Contact. Fase 4 menambahkan case file CrossCheck; empat case lain Fase 5, desktop Fase 6.
+Fase 3 menambahkan empat instrumen, Skills, About dan Contact. Fase 4 menambahkan case file CrossCheck.
+Fase 5: satu template case (`case-file.tsx`) dari data `lib/cases.ts` untuk lima route statis `/work/[slug]`;
+Next instrument berantai (mundur → sapuan chapter ke instrumen berikut → terbang masuk), BrandWall → CrossCheck. Fase 6: stage desktop penuh, teks kiri/objek kanan, header nav langsung; case brief dua kolom, panel inspeksi, alur mendatar, readings/tools grid.
 
 ## 2. Perintah
 
@@ -44,7 +46,11 @@ Semua dari root project kecuali disebut lain.
 | `npm run start --prefix web` | Preview produksi `0.0.0.0:8767`. |
 | `npm run dev --prefix web` | Dev server port 8767; gunakan saat produksi tidak berjalan. |
 | `npm run lint --prefix web` / `npm run typecheck --prefix web` | ESLint / TypeScript terpisah. |
+| `cd web/scripts && timeout 1500 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python desktop_evidence.py` | Paket bukti Testing Fase 6 → `assets/renders/desktop/evidence/`: 21 item pass/fail, MP4 1440×900, contact sheet, sheet desktop/resize/HP, `evidence.json`; exit 1 bila ada fail. Jalankan setelah regresi dev (item `phones` membaca status JSON-nya). Server :8767 aktif. |
+| `timeout 900 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python web/scripts/verify_desktop.py` | Development Fase 6: HP → tiga desktop, layout + 5-case chain/history/hotspot/fallback → `assets/renders/desktop/dev/`. |
 | `timeout 300 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python web/scripts/verify_case.py` | Tes fokus Fase 4: tiga viewport HP, route/return/history, Canvas sama, hotspot, readings, video, direct URL + fallback → `assets/renders/case-crosscheck/dev/`. |
+| `cd web/scripts && timeout 900 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python verify_cases.py` | Tes fokus Fase 5: lima case, buka-dari-chapter + Return, rantai Next penuh (wrap), Back/Forward, 5 direct URL, slug asing 404, fallback DueWatch; 3 viewport HP → `assets/renders/case-files/dev/`. Server :8767 aktif. |
+| `cd web/scripts && timeout 900 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python case_files_evidence.py` | Paket bukti Testing Fase 5 → `assets/renders/case-files/evidence/`: 17 item pass/fail, MP4 390×844 walkthrough rantai penuh, contact sheet 24 frame, viewports sheet, `evidence.json`; exit 1 bila ada fail. Server :8767 aktif. |
 | `timeout 600 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python web/scripts/case_crosscheck_evidence.py` | Paket bukti Testing Fase 4 → `assets/renders/case-crosscheck/evidence/`: 14 item pass/fail, MP4 390×844, contact sheet, viewports sheet; exit 1 bila ada fail. Server :8767 aktif. |
 | `timeout 420 npm run verify:mobile --prefix web` | Regresi homepage setelah Fase 4: CrossCheck route/return + entry + lima chapter + skills/about/contact; 390×844 → 360×740 → 430×932. JSON/PNG ke `assets/renders/full-observatory/dev/`; server :8767 aktif. |
 | `timeout 600 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python web/scripts/full_observatory_evidence.py` | Arsip bukti gate Fase 3 (lolos) → `assets/renders/full-observatory/evidence/`; cek copy lama mengharapkan label DRAFT. |
@@ -91,19 +97,23 @@ Rayin Observatory/
 │   ├── app/
 │   │   ├── layout.tsx             root persistent shell, fonts CSS, metadata
 │   │   ├── page.tsx               hero + five chapters + Skills/About/Contact, approved copy
-│   │   ├── work/crosscheck/page.tsx  static case route → client CrossCheckCase
-│   │   └── globals.css            locked tokens, mobile composition, gates/dialogs
+│   │   ├── work/[slug]/page.tsx   five prerendered case routes → client CaseFile
+│   │   └── globals.css            locked tokens, mobile + desktop composition, gate/menu
 │   ├── components/
-│   │   ├── crosscheck-case.tsx     case content, component cards, readings animation, video
+│   │   ├── case-file.tsx           case template: brief, hotspots, flow, readings, tools, video, Next
 │   │   ├── observatory-shell.tsx  entry/loading/audio/menu/scroll ownership
 │   │   ├── observatory-scene.tsx  one Canvas, dome/Saturn + five instrument groups
 │   │   ├── instrument-motion.ts   per-instrument idle rigs + Saturn rig (moons, ring dust)
 │   │   └── sky.tsx                full-screen sky shader: gradient, stars, nebula
-│   ├── lib/crosscheck-case.ts      approved components/readings/tools + CaseView type
+│   ├── lib/cases.ts                five approved case files + CaseView
 │   ├── lib/ambient.ts             original oscillator hum / fade / lifecycle
 │   ├── lib/instruments.ts         ordered chapter copy, readings, dialog context + types
 │   ├── lib/skills.ts              grouped skills and evidence-project IDs
-│   ├── scripts/verify_case.py     focused Phase 4 development checks
+│   ├── scripts/case_files_evidence.py  Phase 5 Testing evidence pack (all 5 cases + chain)
+│   ├── scripts/desktop_evidence.py  Phase 6 Testing evidence pack (desktop MP4 + 21 items)
+│   ├── scripts/verify_desktop.py  Phase 6 Development: HP → desktop, 5-case chain + layout checks
+│   ├── scripts/verify_cases.py    focused Phase 5 checks: five cases + Next chain
+│   ├── scripts/verify_case.py     focused Phase 4 development checks (CrossCheck detail)
 │   ├── scripts/case_crosscheck_evidence.py  Phase 4 Testing evidence pack
 │   ├── scripts/verify_mobile.py   focused browser interaction checks
 │   ├── scripts/full_observatory_evidence.py  arsip bukti gate Fase 3
@@ -112,10 +122,10 @@ Rayin Observatory/
 │   ├── scripts/revision_evidence.py  bukti revisi langit/animasi: MP4 + PNG + contact sheet
 │   ├── scripts/revision_sky_lines_evidence.py  bukti revisi 3: bintang + jarak leader line
 │   └── public/
-│       ├── videos/crosscheck-explainer.mp4  original silent English demo
+│       ├── videos/<slug>-explainer.mp4  five original silent English demos (byte-identical copies)
 │       ├── models/                dome/ambient + five instrument GLBs, Draco
 │       ├── fonts/                 approved 3 TTF + 3 OFL copies
-│       ├── images/                dome + five fallback PNGs; approved portrait copy
+│       ├── images/                dome + five fallback PNGs; five demo posters; approved portrait copy
 │       └── draco/                 WASM decoder + wrapper + README.md + LICENSE.txt
 └── assets/
     ├── blender/
@@ -138,6 +148,10 @@ Rayin Observatory/
     │   ├── rayina-crop.png         crop + edit latar tanpa logo
     │   └── rayina-duotone.png      treatment navy + scan
     ├── renders/
+    │   ├── desktop/evidence/     Phase 6 Testing: PNG per item, MP4 1440×900, contact sheet, viewports/ + phones/ sheets, evidence.json
+    │   ├── desktop/dev/          Phase 6 before/review/final PNGs, verification.json, env-check.md
+    │   ├── case-files/evidence/   Phase 5 Testing evidence: 17 items, MP4 walkthrough, contact sheet, viewports sheet, evidence.json
+    │   ├── case-files/dev/        Phase 5 verify_cases PNG per case/viewport + verification.json
     │   ├── case-crosscheck/dev/   Phase 4 screenshots, verification.json, env-check.md
     │   ├── case-crosscheck/evidence/  Phase 4 Testing: PNG per item, MP4, contact sheet, evidence.json
     │   ├── revision-sky-motion/    evidence/ revisi langit + animasi instrumen (2026-09-15)
@@ -170,43 +184,115 @@ Rayin Observatory/
 ## 4. Modul dan berkas
 
 
-### `web/app/work/crosscheck/page.tsx`
-- **Peran:** route statis `/work/crosscheck`, template PLAN §7.
-- **Ekspor utama:** `CrossCheckPage`.
+### `web/app/work/[slug]/page.tsx`
+- **Peran:** lima route statis `/work/<slug>` (generateStaticParams), template PLAN §7.
+- **Ekspor utama:** `CasePage`, `generateStaticParams`, `dynamicParams = false` (slug lain 404 saat build).
 - **Dipakai oleh:** Next App Router di dalam root shell yang persisten.
-- **Bergantung pada:** `components/crosscheck-case.tsx`.
-- **State / efek samping:** tidak ada server state.
-- **Catatan:** direct URL tetap melewati entry gate; tidak membuat Canvas kedua.
+- **Bergantung pada:** `components/case-file.tsx`, `lib/cases.ts`. `params` = Promise (Next 16).
+- **State / efek samping:** tidak ada server state; `key={slug}` me-remount template antar case (kartu reset).
+- **Catatan:** direct URL tetap melewati entry gate; tidak membuat Canvas kedua. Menggantikan `work/crosscheck/page.tsx`.
 
-### `web/components/crosscheck-case.tsx`
-- **Peran:** Brief, The instrument, How it works, Readings, Tools used, Demo video, Next instrument.
-- **Ekspor utama:** `CrossCheckCase`, `#case-heading`, `#case-instrument`, `data-home-target`, `data-hotspot-line`.
-- **Dipakai oleh:** route CrossCheck, shell navigasi, scene proyeksi leader, verify_case.
-- **Bergantung pada:** data `crosscheck-case.ts`, GSAP, Next Link; CSS + model/fallback/video lokal.
-- **State / efek samping:** selected card (3 lensa); IntersectionObserver memicu count-up sekali per reading;
-  tween/observer di-cleanup saat unmount. Video native controls, muted, playsInline, preload none.
-- **Catatan:** copy approved di gate Fase 4 (tanpa label DRAFT). Next Link `onNavigate` mencegah push langsung, delegasi shell
-  menyelesaikan transisi; modifier-click tetap link normal. Next instrument menuju chapter SurgeLine
-  homepage, rantai case-to-case tetap Fase 5. Fallback controls tetap berfungsi tanpa leader.
+### `web/components/case-file.tsx`
+- **Peran:** template satu case: Brief, The instrument, How it works, Readings, Tools used, Demo video, Next instrument.
+- **Ekspor utama:** `CaseFile({ id })`; `main[data-case]`, `#case-heading`, `#case-instrument`, `.hotspot-<i>` (posisi inline dari data),
+  `data-hotspot-line=<component id>`, `data-home-target`, `data-case-target=<next slug>`, `.draft-label` bila `draft`.
+- **Dipakai oleh:** route `[slug]`, shell navigasi (delegasi klik), scene proyeksi leader, verify_case / verify_cases.
+- **Bergantung pada:** `lib/cases.ts`, `lib/instruments.ts` (nama/kategori), GSAP, Next Link; `/images/<slug>-fallback.png`,
+  `/images/<slug>-demo-poster.jpg`, `/videos/<slug>-explainer.mp4`.
+- **State / efek samping:** selected card; IntersectionObserver count-up sekali per reading; cleanup tween/observer.
+  Video native controls, muted, playsInline, preload none.
+- **Catatan:** pengganti `crosscheck-case.tsx`; teks CrossCheck identik kecuali blok Next (kini "Open the next case file" → case SurgeLine, approved di gate Fase 5).
+  Fase 6: wrapper `.case-title` + `.case-brief-copy` untuk brief desktop; `.case-inspection` berisi still/SVG/marker dengan koordinat lokal, terpisah dari heading/kartu. Mobile tetap satu stage.
+  Next = case berikut urutan PLAN §5, BrandWall → CrossCheck. Link `onNavigate` preventDefault; modifier-click tetap link normal.
 
-### `web/lib/crosscheck-case.ts`
-- **Peran:** data komponen, readings berkonteks, daftar tools, tipe transisi kamera.
-- **Ekspor utama:** `components`, `readings`, `caseTools`, `CaseView` (`mix`, `active`).
-- **Dipakai oleh:** case component, scene (Lens1–3), shell (ref transisi).
-- **Bergantung pada:** CAPABILITY_CROSSCHECK §3–§7/§9; tabel provenance README.
-- **State / efek samping:** readonly data; mix runtime disimpan sebagai ref oleh shell.
-- **Catatan:** 1,080 / 216 / 18 dari 881 / 12/12; hasil controlled demo, bukan live counter.
-  Node lens (revisi 3): 01 Browser matrix → `Lens3` (tabung atas), 02 → `Lens2`, 03 End-to-end → `Lens1`,
-  supaya leader kiri atas/kiri bawah tidak memotong lens lain.
+### `web/lib/cases.ts`
+- **Peran:** sumber data lima case file + tipe transisi kamera.
+- **Ekspor utama:** `caseFiles`, `caseIndex(id)`, tipe `CaseFile`, `CaseComponent` (`node`, `part?`, `marker`), `CaseReading`, `CaseView` (`mix`, `active`, `index`).
+- **Dipakai oleh:** case-file, route, scene (anchor leader), shell (route ↔ index, chain).
+- **Bergantung pada:** lima dossier CAPABILITY_* (kolom `source` per reading); provenance README.
+- **State / efek samping:** readonly; `CaseView` runtime = ref shell.
+- **Catatan:** Seluruh lima case approved (gate Fase 4–5); CrossCheck Lens3/Lens2/Lens1, revisi 3. Anchor: SurgeLine `DishPivot1/2/3` part `signal`;
+  DriftWatch `NeedlePivot` (origin), `driftwatchMount` + `ceramic` (kertas), `RollerPivot0` + `ceramic`; DueWatch `OrbitPivot0/1/2` part
+  `ceramic`/`alarm`/`ceramic` (planet mengorbit → leader ikut); BrandWall `brandwallMount` + `ceramic` (kolimator), `PrismPivot` + `Prism`,
+  `SpectrumPivot` + `Spectrum0`. Marker dipilih lewat screenshot 390×844 agar leader tak memotong bagian lain.
 
-### `web/public/videos/crosscheck-explainer.mp4`, `web/public/images/crosscheck-demo-poster.jpg`
-- **Peran:** demo English asli + poster sebelum playback.
-- **Ekspor utama:** MP4 H.264 1920×1080, 126.866667 detik, 5,002,746 byte, 0 audio streams;
-  poster frame detik 1, 960×540 JPEG.
-- **Dipakai oleh:** video di case CrossCheck.
-- **Bergantung pada:** salinan byte-identik `crosscheck/assets/explainer.mp4`; poster lewat ffmpeg.
-- **State / efek samping:** browser download hanya setelah play; tidak dibuat ulang sebagai bukti baru.
-- **Catatan:** caption English dibakar, segmen replay tetap berlabel. Dossier §6 K13 / §9.
+### `web/public/videos/<slug>-explainer.mp4`, `web/public/images/<slug>-demo-poster.jpg`
+- **Peran:** demo English asli tiap project + poster sebelum playback.
+- **Ekspor utama:** MP4 H.264 1920×1080, 0 audio streams: crosscheck 126.867 s / 5,002,746 B; surgeline 115.233 s / 1,812,889 B;
+  driftwatch 118.167 s / 2,227,965 B; duewatch 102.5 s / 2,221,217 B; brandwall 124.967 s / 10,457,918 B. Poster 960×540 JPEG, frame 1 s
+  (DueWatch 8 s: frame 1 s memuat notice full-screen browser).
+- **Dipakai oleh:** video di tiap case.
+- **Bergantung pada:** salinan byte-identik (`cmp`) `/home/rayin/Projects/Testing/<project>/assets/explainer.mp4`; poster via ffmpeg.
+- **State / efek samping:** browser download hanya setelah play; bukan bukti baru.
+- **Catatan:** caption English dibakar. DueWatch memuat caption "Seven days in a row…" atas tanggal simulasi (dossier §7 temuan 4);
+  case menyebutnya di bawah video — pemilik memilih opsi 1 di gate Fase 5 (terima dengan catatan).
+
+### `web/scripts/verify_cases.py`
+- **Peran:** tes fokus Development Fase 5, bukan paket gate Testing.
+- **Ekspor utama:** async `run()`, `inspect(page, case, …)`, `trace_numbers()`; `CASES` (cermin sengaja dari `lib/cases.ts`).
+- **Dipakai oleh:** perintah §2 (jalankan dari `web/scripts/`, impor `verify_case.URL/enter/idle/scroll_to`).
+- **Bergantung pada:** server :8767, Chromium ANGLE gl-egl, dossier portfolio.
+- **State / efek samping:** tulis PNG (`<slug>-brief|hotspot-1..3|readings-<vp>`, `chain-sweep-390x844`, `return-surgeline-<vp>`,
+  `fallback-duewatch-390x844`) + `verification.json` ke `assets/renders/case-files/dev/`.
+- **Catatan:** 3 viewport; open-from-chapter + Return (scroll/fokus) ×5, rantai penuh + wrap, Back/Forward, Return pasca-rantai → chapter case,
+  5 direct URL, `/work/unknown` 404, fallback DueWatch (model SurgeLine diblok). Reading multi-digit wajib ada verbatim di dossier.
+
+### `assets/renders/case-files/dev/`
+- **Peran:** screenshot + JSON Development Fase 5; terpisah dari paket gate `case-files/evidence/` (tahap Testing).
+- **Ekspor utama:** lihat verify_cases; `verification.json` status running/passed/failed.
+- **Dipakai oleh:** review developer, handoff Testing.
+- **Bergantung pada:** verify_cases.py.
+- **State / efek samping:** generated; jangan edit tangan.
+- **Catatan:** emulasi Chromium; bukan klaim fps/HP fisik.
+
+### `web/scripts/case_files_evidence.py`
+- **Peran:** generator paket bukti Testing Fase 5 untuk gate pemilik.
+- **Ekspor utama:** async `run()`, `main_flow`, `fallback_check`, `viewports_check`, `make_contact_sheet`; `ITEMS` (17), `CASES` (5).
+- **Dipakai oleh:** agen Testing Antigravity / Claude Code; perintah §2.
+- **Bergantung pada:** server :8767, Chromium GPU ANGLE gl-egl, ffmpeg, Pillow, dossier portfolio `CAPABILITY_*.md`.
+- **State / efek samping:** menulis PNG per item, MP4 walkthrough rantai penuh (`case-files-walkthrough.mp4`), `contact-sheet.jpg` (24 frame), `viewports/viewports-sheet.jpg`, dan `evidence.json` (17/17 pass) ke `assets/renders/case-files/evidence/`.
+- **Catatan:** merekam alur utama 390×844: gate → CrossCheck → SurgeLine → DriftWatch → DueWatch → BrandWall → CrossCheck (wrap) → Return → history → SurgeLine return; fallback model diblok; viewports 360×740 dan 430×932; verifikasi semua angka di dossier.
+
+### `assets/renders/case-files/evidence/`
+- **Peran:** paket bukti gate Testing Fase 5 untuk penilaian pemilik.
+- **Ekspor utama:** `case-files-walkthrough.mp4` (H.264 390×844, 130.4 s), `contact-sheet.jpg` (2340×3376, 24 frame), `viewports/viewports-sheet.jpg` (1170×2532), `evidence.json` (status `passed`, 17/17 pass), screenshot per item (brief, hotspot, readings, flight, return, fallback).
+- **Dipakai oleh:** pemilik saat evaluasi gate Fase 5; PROGRESS.
+- **Bergantung pada:** `case_files_evidence.py`.
+- **State / efek samping:** generated; jangan diedit tangan.
+- **Catatan:** emulasi Chromium GPU; bukan klaim fps/HP fisik (diuji di Fase 8).
+
+### `web/scripts/desktop_evidence.py`
+- **Peran:** generator paket bukti Testing Fase 6 (gate pemilik), bukan tes Development.
+- **Ekspor utama:** async `run()`, `main_flow`, `desktop_size`, `resize`, `fallback`, `phones`, `copy_check`, `sheets`, `centroid` (pusat piksel terang screenshot Canvas-saja → objek 3D di kanan); `ITEMS` (21), `FINDINGS`, `REGRESSIONS`.
+- **Dipakai oleh:** agen Testing; jalankan dari `web/scripts/` (impor `case_files_evidence.CASES/flight/glide/tile…` + `verify_case.enter/idle`).
+- **Bergantung pada:** server :8767, Chromium GPU ANGLE gl-egl, NumPy + Pillow + ffmpeg/ffprobe (venv CrossCheck); JSON status empat suite regresi dev (`REGRESSIONS`).
+- **State / efek samping:** hapus lalu tulis ulang `assets/renders/desktop/evidence/`.
+- **Catatan:** alur utama 1440×900 DPR 1 direkam (gate → hero → nav Work → 5 chapter + orbit → Skills + link → About → Contact → flight in → rantai 5 case + wrap → Back/Forward → nav About dari case → Return); lalu 1366×768 + 1920×1080, resize 390→768→1024→1440→1920→390 (Canvas sama), model BrandWall diblok (still DriftWatch), tiga HP DPR 2, teks homepage/case identik HP vs desktop. `FINDINGS.caseBrief` = penilaian visual tester (brief desktop tanpa instrumen di layar pertama).
+  Jebakan: HTML prerender sudah memuat nilai akhir readings; cek `[data-count]` = nilai akhir langsung lolos sebelum observer me-reset + count-up → tunggu ±1.8 dtk setelah scroll dulu. Fallback Return dibandingkan dengan scrollY asal (bukan top section).
+
+### `assets/renders/desktop/evidence/`
+- **Peran:** paket bukti gate Fase 6 untuk penilaian pemilik.
+- **Ekspor utama:** `desktop-walkthrough.mp4` (H.264 1440×900), `contact-sheet.jpg` (24 frame berlabel), `01-gate` … `16-fallback.png` (per item; `07-flight-in`/`15-return-flight`/`16-fallback` komposit), `viewports/desktop-sheet.jpg` + `resize-sheet.jpg`, `phones/phones-sheet.jpg`, `evidence.json`.
+- **Dipakai oleh:** pemilik saat gate; PROGRESS.
+- **Bergantung pada:** `desktop_evidence.py`.
+- **State / efek samping:** generated; jangan edit tangan.
+- **Catatan:** emulasi Chromium GPU; bukan klaim fps/HP fisik (Fase 7/8).
+
+### `web/scripts/verify_desktop.py`
+- **Peran:** verifikasi Development Fase 6, HP 390×844 dahulu lalu 1366×768, 1440×900, 1920×1080.
+- **Ekspor utama:** `main`, `viewport`, `check_case`, `position`, `capture`, `fallback`; `--sizes` untuk rerun fokus, `--breakpoints-only` untuk resize, `--hotspots-only` untuk bukti marker stabil; `OBSERVATORY_URL` opsional.
+- **Dipakai oleh:** Codex Development; Testing dapat memakai ulang, tetapi paket gate dibuat tahap Testing.
+- **Bergantung pada:** Python Playwright dari venv CrossCheck, Chromium ANGLE GPU, preview produksi.
+- **State / efek samping:** tulis PNG dan `verification.json` ke `assets/renders/desktop/dev/`; failed check menghasilkan exit 1. Capture hotspot/fallback/resize menunggu warna aktif selesai bertransisi; data hasil terpisah dari suite penuh.
+- **Catatan:** verifikasi rail tidak tumpang tindih, header nav, 3 hotspot/case + endpoint nyata, alur horizontal, readings, rantai Next penuh/wrap, history, case→About, satu Canvas, nol overflow/error/HTTP ≥400 alur normal; fallback diblok sengaja. Resize 768→1024→1440→390 memeriksa pane, proyeksi, dan identitas Canvas.
+
+### `assets/renders/desktop/dev/`
+- **Peran:** baseline dan bukti verifikasi Development Fase 6; bukan paket gate.
+- **Ekspor utama:** `before-{hero,chapter}-390x844.png` dan `before-{hero,chapter}-1440x900.png`; screenshot final `gate-`, `hero-`, `chapter-<slug>-`, `skills-`, `about-`, `contact-`, `<slug>-brief/hotspot-1/2/3/flow/readings/demo-`, `case-to-about-` per viewport; `fallback-*`, `resize-inspection-*`, `verification.json`, `breakpoint-verification.json`, `hotspot-verification.json`, `env-check.md`.
+- **Dipakai oleh:** review developer, handoff Testing.
+- **Bergantung pada:** `verify_desktop.py`; baseline/smoke via Playwright sementara (`/tmp/observatory_baseline.py`, `/tmp/observatory_review.py`). `review-{hero,crosscheck,brief,inspection}-1440x900.png` adalah smoke awal, bukan hasil final. Dua smoke salah posisi (`review-about-1440x900.png`, `review-contact-1440x900.png`) dihapus; bukti section yang benar bernama `about-*`/`contact-*`.
+- **State / efek samping:** hasil generated ditulis ulang saat rerun; jangan edit manual.
+- **Catatan:** Chromium emulasi; paket video/foto gate akan ditaruh Testing di `assets/renders/desktop/evidence/`.
 
 ### `web/scripts/verify_case.py`
 - **Peran:** tes fokus Development Fase 4, bukan paket gate Testing.
@@ -215,7 +301,8 @@ Rayin Observatory/
 - **Bergantung pada:** Chromium headless ANGLE gl-egl, server produksi lokal.
 - **State / efek samping:** menulis screenshot + verification.json; status running/passed/failed.
 - **Catatan:** HP 390×844 → 360×740 → 430×932; Canvas identity, route/scroll/focus, 3 cards,
-  projected endpoints, warna marker aktif selesai sebelum screenshot, flight fade/scroll lock, flow, reading count-up, lazy video/playback, Back/Forward, Skills/Next, direct/reload,
+  projected endpoints, warna marker aktif selesai sebelum screenshot, flight fade/scroll lock, flow, reading count-up, lazy video/playback, Back/Forward, Skills,
+  Next → `/work/surgeline` lalu Return → chapter SurgeLine (Fase 5), direct/reload,
   model diblok → fallback + return tanpa history; `--fallback-only` menguji ulang cabang fallback dan notice/heading tanpa mengulang alur normal. Nol error/HTTP ≥400 pada alur normal.
 
 ### `web/scripts/revision_sky_lines_evidence.py`
@@ -272,11 +359,12 @@ Rayin Observatory/
 - **State / efek samping:** tidak ada React state; disclosure native mengubah tinggi dokumen.
 - **Catatan:** English, Automation Engineer sesuai arahan pemilik; copy approved di gate Fase 3 (tanpa label DRAFT). `EMAIL` +
   `contactLinks` = tujuan asli dari pemilik; label link "Rayina Ilham" (bukan handle). Eksternal
-  `target=_blank rel=noopener noreferrer`. Skill `projects` kosong → tanpa div link. CrossCheck route Fase 4; `aria-haspopup` hanya untuk empat preview dialog lain.
+  `target=_blank rel=noopener noreferrer`. Skill `projects` kosong → tanpa div link. Fase 5: kelima CTA `[data-open-case]` membuka route case (tanpa `aria-haspopup`).
+  Fase 6: portrait `sizes` memasok gambar hingga 440px desktop; urutan DOM/copy sama.
   BrandWall: `orbit-hint` diganti `#observer-readout[data-observed]` (label revisi, approved pemilik 2026-09-15).
 
 ### `web/app/globals.css`
-- **Peran:** token FINAL §8, font lokal, komposisi HP, lima chapter, gate/menu/dialog, Skills/About/Contact.
+- **Peran:** token FINAL §8, font lokal, komposisi HP, lima chapter, gate/menu, Skills/About/Contact, komposisi desktop mulai 1024px.
 - **Ekspor utama:** variables `--journey`, `--hero-journey`, `--chapter-reveal`, `--copy-opacity`,
   `--instrument-0-offset` … `--instrument-4-offset`; `.instrument-*`, `.skill-*`, `.portrait-scan`,
   `.scan-line`, `.text-section`, `.contact-links`, `.email-cta`.
@@ -284,26 +372,35 @@ Rayin Observatory/
 - **Bergantung pada:** tiga TTF, fallback PNG lokal (image paths disuplai shell), portrait.
 - **State / efek samping:** transform/opacity, highlight skill target, sticky stages, fixed readout.
   `data-chapter` selain dome menyembunyikan CTA hero; outro mempertahankan notice still view.
-- **Catatan:** >430px tetap batas komposisi HP; desktop Fase 6. Accordion native tetap keyboard-usable.
+- **Catatan:** 431–1023px mempertahankan komposisi HP 430px; mulai 1024px komposisi desktop penuh (Fase 6). Accordion native tetap keyboard-usable.
   `.fallback-notice` `margin:0` (default `<p>` 9px dulu menimpa copy chapter); di chapter `top:82px`.
   Fase 4 menambah `.case-*`, `.instrument-hotspot`, `.component-card`, `.signal-flow` dan `.draft-label`; kartu aman di atas readout; fallback case memberi jarak label/heading dari notice fixed.
+  Fase 5: posisi `.hotspot-<i>` inline dari data (aturan `.hotspot-0..2` dihapus); `.case-instrument-still` tanpa url (gambar inline per slug);
+  `.contact-dialog` dihapus bersama dialog preview.
+  Fase 6: `--page-gutter`, breakpoint 1024px; hero/chapter rail kiri, gate dua kolom, Skills/About/Contact grid; case brief dua kolom, `.case-inspection` kanan, kartu kiri, flow horizontal, readings dua kolom dan tools tiga kolom. Fallback mengikuti area objek.
+  Testing Fase 6: `#skills` + `.about-section` `grid-template-rows: auto auto auto 1fr` — accordion/portrait yang span semua baris dulu meregangkan baris teks (paragraf About berjarak ±115px).
   `.email-cta` sekarang `<a>`; `.contact-links a` baris 58px, nilai mono amber.
   Revisi langit: `.scene-layer` gradient (fallback bila WebGL gagal), overlay tinggal fade bawah ke ink;
   header gradient hitam transparan; gate gradient + bintang CSS `::before`; `#observer-readout` `.when-on/.when-off`.
 
 ### `web/components/observatory-shell.tsx`
 - **Peran:** client shell persisten: loading, entry/audio, menu/dialog, scroll dan chapter state.
-- **Ekspor utama:** `ObservatoryShell`; `scrollFromMenu`, `returnToDome`, `goToWork`, `openContact`;
-  `measure`/`syncChapters` di efek GSAP; `selectedCase` untuk preview yang benar.
+- **Ekspor utama:** `ObservatoryShell`; `scrollFromMenu`, `returnToDome`, `goToWork`, `openContact`, `openCase(index)`,
+  `chainCase(index)`, `leaveCase(target)`; `caseOf(path)`; `measure`/`syncChapters` di efek GSAP.
 - **Dipakai oleh:** root layout.
 - **Bergantung pada:** Scene dynamic, instruments, drei useProgress, GSAP/ScrollTrigger, Lenis, audio.
 - **State / efek samping:** satu ticker Lenis; main trigger menulis readout dan chapter ref
   (`index`, `transition`, `reveal`, `orbit`, `outro`) dari bounds section. Hero trigger terpisah;
   dua trigger portrait untuk clip + scan-line. ResizeObserver main merefresh bounds saat accordion
-  berubah. Dialog menghentikan Lenis; menu scroll memulai Lenis sebelum scrollTo, fokus heading
-  saat selesai. Skill links menambah `.skill-highlight`; case CTA memilih project via data attribute.
+  berubah. Menu menghentikan Lenis; menu scroll memulai Lenis sebelum scrollTo, fokus heading
+  saat selesai. Skill links menambah `.skill-highlight`. Delegasi klik: `[data-home-target]` → leaveCase,
+  `[data-case-target]` → chainCase, `[data-open-case]` → openCase (dialog preview dihapus Fase 5).
 - **Catatan:** Enter menunggu tujuh model + font settle; error → lima still view berlabel.
-  Contact sekarang section, bukan dialog placeholder Fase 1–2. Fase 4 memisahkan lifecycle Lenis root dari trigger per pathname; `openCrossCheck` / `leaveCase`, homeScroll/homeChapter/homeTarget, `CaseView` mix, `data-route` / `data-flight`, root `pageContent` fade + inert. Focus dipulihkan sesudah inert dilepas. Cleanup trigger/ticker/observer/audio.
+  Contact sekarang section, bukan dialog placeholder Fase 1–2. Fase 4 memisahkan lifecycle Lenis root dari trigger per pathname; homeScroll/homeChapter/homeTarget, `CaseView` mix, `data-route` / `data-flight`, root `pageContent` fade + inert. Focus dipulihkan sesudah inert dilepas. Cleanup trigger/ticker/observer/audio.
+  Fase 5: `isCase` = `/work/<slug>` dikenal; layout effect set `caseView.index` + chapter case. `chainCase`: mix 1→0 (mundur), chapter
+  `{index: next, from: prev, transition 0→1}` (sapuan), lalu push → arrival terbang masuk; homeScroll/homeChapter di-null supaya Return → `#<slug>` case aktif.
+  Pulang dari case mana pun: tujuan default `#<slug>` asal, fokus ke `[data-open-case=<slug>]` bila kembali ke posisi scroll.
+  Fase 6: `.desktop-navigation` Work/About/Contact memakai handler scroll/leaveCase yang sama; inert saat flight. Menu tetap untuk <1024px.
   Lenis start() dapat membatalkan scrollTo bila dipanggil setelah scroll dimulai; urutan dipertahankan.
   Guard `live()` (Testing Fase 4): ResizeObserver/scroll homepage lama bisa memicu refresh/update setelah DOM case menggantikan
   homepage tapi sebelum cleanup React → dulu TypeError `#skills` null; kini onRefresh/onUpdate diabaikan bila section homepage terlepas.
@@ -321,7 +418,10 @@ Rayin Observatory/
   tombol/link/dialog) → `rig.observe()`; status detektor → `#observer-readout[data-observed]`.
   `pointScale` = DPR tiap frame. Satu environment lokal, DPR 1–1.5.
 - **Catatan:** langit = `<Sky>` (titik bintang lama dihapus); Saturnus (`saturn()` rig) tetap ditambat ke kamera, wobble + skala .072. Kubah approved tetap utuh.
-  SceneBoundary gagal satu model → still view menyeluruh; semua chapter tetap dapat dibaca. `CaseView` mix menginterpolasi sudut, jarak, zoom ortografis; model CrossCheck mengikuti bounds `#case-instrument`. Posisi dunia Lens1–3 diproyeksikan ke endpoint SVG leader di DOM; Canvas tetap root.
+  SceneBoundary gagal satu model → still view menyeluruh; semua chapter tetap dapat dibaca. `CaseView` mix menginterpolasi sudut, jarak, zoom ortografis; model `caseView.index` mengikuti bounds `#case-instrument` (skala case = min(w·.62, h·.33)/fit, fit 4.4 CrossCheck / 3.5 lain). Canvas tetap root.
+  Fase 6: breakpoint 1024px sama dengan CSS. Kamera menempatkan instrumen di kanan dan membatasi skala terhadap tinggi/lebar; dome/Saturnus ikut dikomposisi. Case mengikuti bounds `.case-inspection`; x2 leader dikurangi posisi pane relatif Canvas (penting saat Canvas HP terpusat di tablet).
+  Fase 5: `anchor()` = origin node, atau pusat bounding sphere child mesh yang nama materialnya memuat `part`, → proyeksi ke SVG `[data-hotspot-line=<id>]`
+  tiap frame (planet DueWatch bergerak → leader ikut). Outgoing = `chapter.from ?? index-1` supaya sapuan rantai (termasuk BrandWall → CrossCheck) benar.
 
 ### `web/components/sky.tsx`
 - **Peran:** mesh layar penuh (renderOrder -10, tanpa depth) dengan shader langit: zenith hitam → ink → horizon biru,
@@ -363,7 +463,7 @@ Rayin Observatory/
 - **Bergantung pada:** server :8767, selector page/shell, Chromium ANGLE gl-egl.
 - **State / efek samping:** PNG + `verification.json` ke `assets/renders/full-observatory/dev/`;
   timestamp/status running/passed/failed; error navigasi menyimpan detail + screenshot.
-- **Catatan:** audio/entry/mute, satu Canvas, lima sticky/idle/orbit/readings, CrossCheck route/return + empat dialog, fokus/scroll lock,
+- **Catatan:** audio/entry/mute, satu Canvas, lima sticky/idle/orbit/readings, lima route case + return (Fase 5; hanya dialog menu tersisa), fokus,
   reverse navigation, semua skill href dan lima klik project, scan clip berbeda, About, Contact
   (`CONTACTS` href persis, tap ≥44, noopener), readout 100%, touch swipe 390px, block BrandWall →
   lima fallback + notice tidak menimpa copy (`fallback-verification.json`); nol `.draft-label`; grup "Daily work" = 3 item tanpa link.
@@ -421,7 +521,7 @@ Rayin Observatory/
 - **Catatan:** `.gitignore` dibuat sebagai konfigurasi; tidak ada operasi git sesi ini.
 
 ### `web/README.md`
-- **Peran:** run/preview, handoff Fase 3–4, tabel sumber semua copy bisnis/angka dan skill-project.
+- **Peran:** run/preview, handoff Fase 3–6, tabel sumber semua copy bisnis/angka dan skill-project; seluruh copy approved Fase 5, istilah DRAFT dalam tabel adalah riwayat provenance.
 - **Ekspor utama:** commands build/start/verify/tunnel; status copy dan kontak; Blender node contracts.
 - **Dipakai oleh:** pemilik dan harness Testing.
 - **Bergantung pada:** PLAN §4–§12 relevan, lima dossier §1/§3/§5 dan batas demonstrasi masing-masing.
@@ -431,8 +531,8 @@ Rayin Observatory/
   Script bukti Fase 1–2 diarsipkan, bukan acceptance Fase 3.
 
 ### `web/lib/instruments.ts`
-- **Peran:** urutan lima instrumen + sumber data copy chapter/dialog bersama.
-- **Ekspor utama:** `instruments`, `InstrumentId`, `ChapterState`.
+- **Peran:** urutan lima instrumen + sumber data copy chapter (field `preview` dihapus Fase 5 bersama dialog).
+- **Ekspor utama:** `instruments`, `InstrumentId`, `ChapterState` (`from?` hanya selama rantai case→case).
 - **Dipakai oleh:** page, shell, scene, skills type.
 - **Bergantung pada:** tabel provenance README; dossier pemilik. Tidak ada dependency runtime luar.
 - **State / efek samping:** tidak ada; readonly data, copy approved (gate Fase 3).
@@ -694,7 +794,7 @@ Rayin Observatory/
   tahap Development (Codex/Claude Code) lalu Testing (Claude Code/Antigravity, paket bukti di
   `assets/renders/<slug-fase>/evidence/`); lihat PLAN §12 dan `PROMPT.md`.
 - **State / efek samping:** diperbarui setiap sesi; tidak menandai fase done tanpa gate pemilik.
-- **Catatan:** Fase 0 `done` 2026-09-14; Fase 1 `done` 2026-09-15; Fase 2 `done` 2026-09-15; Fase 3 `done` 2026-09-15. Fase 4 `done` 2026-09-15 (copy case approved). Fase 5 `todo`. `assets/` tidak dilacak git sejak 2026-09-15 (tetap lokal; riwayat commit lama masih memuatnya). Log sesi dijaga ringkas.
+- **Catatan:** Fase 0 `done` 2026-09-14; Fase 1 `done` 2026-09-15; Fase 2 `done` 2026-09-15; Fase 3 `done` 2026-09-15. Fase 4 `done` 2026-09-15 (copy case approved). Fase 5 `done` 2026-09-15 (gate lolos, seluruh copy approved, DRAFT dilepas, opsi 1 DueWatch). Fase 6 (Desktop) `done` 2026-09-15 (gate dari video bukti desktop). Fase 7 `todo`. `assets/` tidak dilacak git sejak 2026-09-15 (tetap lokal; riwayat commit lama masih memuatnya). Log sesi dijaga ringkas.
 
 ## 5. Aset
 
@@ -704,6 +804,10 @@ Ukuran byte aset Fase 0 diukur 2026-09-14; aset Fase 1 pada 2026-09-15.
 |---|---|---|---:|---|
 | `crosscheck-explainer.mp4` | dossier §6 K13 / crosscheck/assets | H.264, silent English | 5002746 | case demo video |
 | `crosscheck-demo-poster.jpg` | frame detik 1 video yang sama | JPEG 960×540 | 22133 | case video poster |
+| `surgeline-explainer.mp4` / poster | `surgeline/assets/explainer.mp4` | H.264, silent English | 1812889 / 14675 | case SurgeLine |
+| `driftwatch-explainer.mp4` / poster | `driftwatch/assets/explainer.mp4` | H.264, silent English | 2227965 / 39996 | case DriftWatch |
+| `duewatch-explainer.mp4` / poster | `duewatch/assets/explainer.mp4` (poster 8 s) | H.264, silent English | 2221217 / 44319 | case DueWatch |
+| `brandwall-explainer.mp4` / poster | `brandwall/assets/explainer.mp4` | H.264, silent English | 10457918 / 37244 | case BrandWall |
 | `dome.glb` | `first-light.blend` via GUI MCP | Draco | 157308 | hero runtime |
 | `ambient.glb` | `first-light.blend` via GUI MCP | Draco | 33996 | planet ambient |
 | `surgeline.glb` | `surgeline-web.blend` via MCP | Draco | 75328 | chapter SurgeLine |
@@ -729,6 +833,12 @@ Ukuran byte aset Fase 0 diukur 2026-09-14; aset Fase 1 pada 2026-09-15.
 
 ## 6. Alur penting
 
+Fase 5:
+1. CTA chapter mana pun → `openCase(i)`: simpan home scroll/chapter, `caseView.index = i`, tween mix → push `/work/<slug>`.
+2. Next (`data-case-target`) → `chainCase(j)`: mix 1→0, chapter sapuan `from`→`j`, push; arrival layout effect terbang masuk.
+3. Return/menu dari case → `leaveCase`: scroll asal, atau `#<slug>` case aktif setelah rantai / direct URL; kamera mundur.
+4. Scene: leader tiap komponen dari `anchor(node, part)` → SVG; fallback still per slug; BrandWall tap-to-observe juga di case.
+
 Fase 4:
 1. CrossCheck CTA → simpan home scroll/chapter → hentikan Lenis → tween `CaseView.mix` + fade → router push.
 2. Root Canvas/audio/Lenis tetap hidup; trigger lama cleanup, trigger case + ResizeObserver baru.
@@ -742,7 +852,7 @@ Fase 3:
 2. Scene membaca chapter ref → kamera + group incoming/outgoing + node idle, tetap satu Canvas.
 3. Skills disclosure → ResizeObserver → refresh bounds; link → Lenis scroll + highlight + fokus heading.
 4. About portrait masuk viewport → GSAP clipping + scan line; Contact → `mailto:` + tiga link eksternal tab baru.
-5. Case CTA CrossCheck → tween kamera + fade → router push `/work/crosscheck`; empat CTA lain → selectedCase preview dialog.
+5. Arsip Fase 3–4: CTA CrossCheck → route, empat CTA lain → dialog preview. Sejak Fase 5 kelima CTA → `openCase` (lihat Fase 5 di atas).
 6. Error model baru → semua instrumen tetap tersedia sebagai still view berlabel.
 
 Fase 2:

@@ -3,11 +3,11 @@
 import { Component, Suspense, useEffect, useMemo, useRef, type ReactNode, type MutableRefObject } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Center, Environment, Lightformer, useGLTF } from '@react-three/drei';
-import { Group, MathUtils, Mesh, MeshStandardMaterial, OrthographicCamera, Vector3 } from 'three';
+import { Group, MathUtils, Mesh, MeshStandardMaterial, OrthographicCamera, Vector3, type Material, type Object3D } from 'three';
 import { instruments, type ChapterState } from '@/lib/instruments';
 import { pointScale, rigInstrument, saturn } from './instrument-motion';
 import Sky from './sky';
-import { components, type CaseView } from '@/lib/crosscheck-case';
+import { caseFiles, type CaseComponent, type CaseView } from '@/lib/cases';
 
 useGLTF.setDecoderPath('/draco/');
 
@@ -22,6 +22,20 @@ type SceneProps = {
 
 // BrandWall's detector state is shown in the chapter hint; the page owns the markup.
 const showObserver = (observed: boolean) => document.getElementById('observer-readout')?.setAttribute('data-observed', String(observed));
+
+// Leader endpoint: the node's origin, or the centre of its child mesh whose material name
+// contains `part` (a moving planet, a dish feed, the prism), so the line follows the rig.
+function anchor(view: Object3D, item: CaseComponent, target: Vector3) {
+  const node = view.getObjectByName(item.node);
+  if (!node) return false;
+  if (!item.part) { node.getWorldPosition(target); return true; }
+  let mesh: Mesh | undefined;
+  node.traverse(child => { if (!mesh && child instanceof Mesh && (child.material as Material).name.includes(item.part!)) mesh = child; });
+  if (!mesh) return false;
+  if (!mesh.geometry.boundingSphere) mesh.geometry.computeBoundingSphere();
+  mesh.localToWorld(target.copy(mesh.geometry.boundingSphere!.center));
+  return true;
+}
 
 class SceneBoundary extends Component<{ onFailure: () => void; children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
@@ -93,6 +107,7 @@ function World({ entered, progress, chapter, caseView, onReady }: SceneProps) {
   const revealed = useRef(0);
   const { size } = useThree();
   const viewport = { width: size.width / 100, height: size.height / 100 };
+  const desktop = size.width >= 1024;
   const casePosition = useRef(0);
   const projected = useMemo(() => new Vector3(), []);
   const frames = useRef(0);
@@ -109,9 +124,9 @@ function World({ entered, progress, chapter, caseView, onReady }: SceneProps) {
     const scroll = progress.current;
     const reveal = chapter.current.reveal;
     const orbit = chapter.current.orbit;
-    const { index, transition, outro } = chapter.current;
-    const mix = caseView.current.mix;
-    const baseAngle = index > 0 && transition < 1 ? MathUtils.lerp(-.95, .55, transition) : (.55 - orbit * 1.5) * reveal;
+    const { index, transition, outro, from } = chapter.current;
+    const { mix, index: caseIndex } = caseView.current;
+    const baseAngle = (index > 0 || from !== undefined) && transition < 1 ? MathUtils.lerp(-.95, .55, transition) : (.55 - orbit * 1.5) * reveal;
     const angle = MathUtils.lerp(baseAngle, .55, mix);
     const elevation = MathUtils.lerp(.25 * reveal, .25, mix);
     const distance = MathUtils.lerp(16, 10, mix);
@@ -120,34 +135,42 @@ function World({ entered, progress, chapter, caseView, onReady }: SceneProps) {
       state.camera.zoom = zoom;
       state.camera.updateProjectionMatrix();
     }
-    const stage = caseView.current.active ? document.getElementById('case-instrument') : null;
+    const stage = caseView.current.active ? document.querySelector<HTMLElement>('.case-inspection') : null;
     const stageRect = stage?.getBoundingClientRect();
-    const targetY = stageRect ? (size.height / 2 - stageRect.top - stageRect.height * .47) / zoom : -viewport.height * .03;
+    const stageLeft = stageRect ? stageRect.left - state.gl.domElement.getBoundingClientRect().left : 0;
+    const targetY = stageRect ? (size.height / 2 - stageRect.top - stageRect.height * (desktop ? .50 : .47)) / zoom : -viewport.height * .03;
+    const homeX = desktop ? viewport.width * .20 : 0;
+    const caseX = stageRect ? (stageLeft + stageRect.width / 2 - size.width / 2) / zoom : homeX * 100 / zoom;
     casePosition.current = MathUtils.damp(casePosition.current, targetY, 12, step);
     // The camera itself travels around the stationary mount; scroll backward retraces it.
     state.camera.position.set(distance * Math.sin(angle) * Math.cos(elevation), distance * Math.sin(elevation), distance * Math.cos(angle) * Math.cos(elevation));
     state.camera.lookAt(0, 0, 0);
     cameraUp.set(0, 1, 0).applyQuaternion(state.camera.quaternion);
+    cameraRight.set(1, 0, 0).applyQuaternion(state.camera.quaternion);
     views.forEach((moving, i) => {
       const group = instrumentRefs.current[i];
       if (!group) return;
       const incoming = i === index;
-      const outgoing = i === index - 1 && transition < 1;
-      group.visible = mix > .001 && i === 0 || (mix < .999 && reveal > 0 && outro < 1 && (incoming || outgoing));
+      const outgoing = i === (from ?? index - 1) && transition < 1;
+      group.visible = mix > .001 && i === caseIndex || (mix < .999 && reveal > 0 && outro < 1 && (incoming || outgoing));
       const offset = incoming ? -(1 - transition) : transition;
-      const homeScale = Math.min(viewport.width * .82, viewport.height * .37) / (i === 0 ? 4.4 : 3.5);
-      const caseScale = Math.min(viewport.width * .62, viewport.height * .33) / 4.4;
-      group.scale.setScalar(i === 0 ? MathUtils.lerp(homeScale, caseScale, mix) : homeScale);
-      group.position.copy(cameraUp).multiplyScalar(i === 0
-        ? MathUtils.lerp(viewport.height * (-.03 + offset + outro), casePosition.current, mix)
-        : viewport.height * (-.03 + offset + outro));
+      const fit = i === 0 ? 4.4 : 3.5;
+      const homeScale = Math.min(viewport.width * (desktop ? .48 : .82), viewport.height * (desktop ? .66 : .37)) / fit;
+      const caseScale = desktop
+        ? Math.min((stageRect?.width ?? size.width * .55) * .76, size.height * .60) / zoom / fit
+        : Math.min(viewport.width * .62, viewport.height * .33) / fit;
+      const inCase = i === caseIndex ? mix : 0;
+      group.scale.setScalar(MathUtils.lerp(homeScale, caseScale, inCase));
+      group.position.copy(cameraUp).multiplyScalar(MathUtils.lerp(viewport.height * (-.03 + offset + outro), casePosition.current, inCase));
+      group.position.addScaledVector(cameraRight, MathUtils.lerp(homeX, caseX, inCase));
       if (group.visible) moving.rig.update(time);
     });
     if (domeRef.current) {
       domeRef.current.visible = reveal < .7 && mix < .01;
-      const scale = viewport.width / 7.4 * (0.83 + revealed.current * 0.17 + scroll * .2);
+      const scale = (desktop ? Math.min(viewport.width * .58, viewport.height * .94) : viewport.width) / 7.4 * (0.83 + revealed.current * 0.17 + scroll * .2);
       domeRef.current.scale.setScalar(scale);
-      domeRef.current.position.y = -viewport.height * (.135 - scroll * .12) - (1 - revealed.current) * .45 + reveal * viewport.height * 1.4;
+      domeRef.current.position.copy(cameraRight).multiplyScalar(desktop ? viewport.width * .19 : 0);
+      domeRef.current.position.y = -viewport.height * ((desktop ? .035 : .135) - scroll * .12) - (1 - revealed.current) * .45 + reveal * viewport.height * 1.4;
       domeRef.current.rotation.set(.30 + scroll * .10, -.48 + scroll * .6 + Math.sin(time * .1) * .025, 0);
     }
     if (planetRef.current) {
@@ -159,20 +182,19 @@ function World({ entered, progress, chapter, caseView, onReady }: SceneProps) {
       cameraBack.set(0, 0, -1).applyQuaternion(state.camera.quaternion).multiplyScalar(4);
       planetRef.current.position.copy(cameraBack)
         .addScaledVector(cameraRight, viewport.width * MathUtils.lerp(.31, .38, moon))
-        .addScaledVector(cameraUp, viewport.height * MathUtils.lerp(.015, .31, moon) + Math.sin(time * .14) * .05);
+        .addScaledVector(cameraUp, viewport.height * MathUtils.lerp(desktop ? .30 : .015, .31, moon) + Math.sin(time * .14) * .05);
       planetRef.current.rotation.set(.4 + Math.sin(time * .21) * .05, .15 + time * .015, -.38 + Math.sin(time * .17) * .04);
-      planetRef.current.scale.setScalar(viewport.width * .072 * MathUtils.lerp(1, .78, moon));
+      planetRef.current.scale.setScalar((desktop ? Math.min(viewport.width * .45, viewport.height * .7) : viewport.width) * .072 * MathUtils.lerp(1, .78, moon));
       planet.update(time);
     }
     if (stageRect && mix > .99) {
       state.camera.updateMatrixWorld();
-      instrumentRefs.current[0]?.updateWorldMatrix(true, true);
-      components.forEach(item => {
-        const node = views[0].view.getObjectByName(item.node);
-        const line = document.querySelector<SVGLineElement>(`[data-hotspot-line="${item.node}"]`);
-        if (!node || !line) return;
-        node.getWorldPosition(projected).project(state.camera);
-        line.setAttribute('x2', String((projected.x + 1) * size.width / 2));
+      instrumentRefs.current[caseIndex]?.updateWorldMatrix(true, true);
+      caseFiles[caseIndex].components.forEach(item => {
+        const line = document.querySelector<SVGLineElement>(`[data-hotspot-line="${item.id}"]`);
+        if (!line || !anchor(views[caseIndex].view, item, projected)) return;
+        projected.project(state.camera);
+        line.setAttribute('x2', String((projected.x + 1) * size.width / 2 - stageLeft));
         line.setAttribute('y2', String((1 - projected.y) * size.height / 2 - stageRect.top));
       });
     }

@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import type { CaseView } from '@/lib/crosscheck-case';
+import { caseFiles, caseIndex, type CaseView } from '@/lib/cases';
 import { useProgress } from '@react-three/drei';
 import Lenis from 'lenis';
 import { gsap } from 'gsap';
@@ -13,12 +13,14 @@ import { instruments, type ChapterState } from '@/lib/instruments';
 
 const Scene = dynamic(() => import('./observatory-scene'), { ssr: false });
 const SOUND_KEY = 'rayin-observatory:sound';
+const caseOf = (path: string) => caseIndex(path.startsWith('/work/') ? path.slice('/work/'.length) : null);
 
 export default function ObservatoryShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const isCase = pathname === '/work/crosscheck';
-  const caseView = useRef<CaseView>({ mix: 0, active: false });
+  const current = caseOf(pathname);
+  const isCase = current >= 0;
+  const caseView = useRef<CaseView>({ mix: 0, active: false, index: 0 });
   const homeScroll = useRef<number | null>(null);
   const homeChapter = useRef<ChapterState | null>(null);
   const homeTarget = useRef<number | string | null>(null);
@@ -32,14 +34,11 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
   const [sound, setSound] = useState(false);
   const [audioError, setAudioError] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [selectedCase, setSelectedCase] = useState<(typeof instruments)[number]>(instruments[0]);
-  const [caseOpen, setCaseOpen] = useState(false);
   const [loadSlow, setLoadSlow] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const gate = useRef<HTMLDivElement>(null);
   const content = useRef<HTMLDivElement>(null);
   const menu = useRef<HTMLDialogElement>(null);
-  const caseFile = useRef<HTMLDialogElement>(null);
   const readout = useRef<HTMLOutputElement>(null);
   const progress = useRef(0);
   const chapter = useRef<ChapterState>({ reveal: 0, orbit: 0, index: 0, transition: 0, outro: 0 });
@@ -90,7 +89,8 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
   }, []);
 
   useLayoutEffect(() => {
-    const cameFromCase = previousPath.current === '/work/crosscheck' && !isCase;
+    const from = caseOf(previousPath.current);
+    const cameFromCase = from >= 0 && !isCase;
     previousPath.current = pathname;
     const scroller = lenis.current;
     let frame = 0;
@@ -98,15 +98,18 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
     const context = gsap.context(() => {}, root);
     caseView.current.active = isCase;
     if (isCase) {
-      chapter.current = { reveal: 1, orbit: 0, index: 0, transition: 1, outro: 0 };
-      root.current?.setAttribute('data-chapter', 'crosscheck');
+      // Also the landing of a case-to-case chain: its camera sweep ends with this fly-in.
+      caseView.current.index = current;
+      chapter.current = { reveal: 1, orbit: 0, index: current, transition: 1, outro: 0 };
+      root.current?.setAttribute('data-chapter', caseFiles[current].id);
       root.current?.style.setProperty('--chapter-reveal', '1');
       scroller?.scrollTo(0, { immediate: true, force: true });
       window.scrollTo(0, 0);
       context.add(() => gsap.to(caseView.current, { mix: 1, duration: .85, ease: 'power2.inOut' }));
     }
     if (cameFromCase) {
-      const destination = homeTarget.current ?? homeScroll.current ?? '#crosscheck';
+      const id = caseFiles[from].id;
+      const destination = homeTarget.current ?? homeScroll.current ?? `#${id}`;
       const element = typeof destination === 'string' ? document.querySelector<HTMLElement>(destination) : null;
       const y = typeof destination === 'number' ? destination : element ? element.getBoundingClientRect().top + window.scrollY : 0;
       scroller?.resize();
@@ -115,7 +118,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
       context.add(() => gsap.to(caseView.current, { mix: 0, duration: .9, ease: 'power2.inOut' }));
       frame = requestAnimationFrame(() => {
         ScrollTrigger.refresh();
-        focusAfterFlight = element?.querySelector<HTMLElement>('h2') ?? document.querySelector<HTMLElement>('[data-open-case="crosscheck"]');
+        focusAfterFlight = element?.querySelector<HTMLElement>('h2') ?? document.querySelector<HTMLElement>(`[data-open-case="${id}"]`);
       });
       homeTarget.current = null;
     }
@@ -129,7 +132,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
       },
     }));
     return () => { context.revert(); cancelAnimationFrame(frame); };
-  }, [pathname, isCase]);
+  }, [pathname, isCase, current]);
 
   useEffect(() => {
     // Scroll ownership stays in the root. Route-specific triggers are rebuilt per page.
@@ -213,9 +216,9 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
   }, [pathname, isCase]);
 
   useEffect(() => {
-    if (entered && !menuOpen && !caseOpen && !flying) lenis.current?.start();
+    if (entered && !menuOpen && !flying) lenis.current?.start();
     else lenis.current?.stop();
-  }, [entered, menuOpen, caseOpen, flying]);
+  }, [entered, menuOpen, flying]);
 
   useEffect(() => {
     if (!entered) return;
@@ -271,24 +274,47 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
       if (typeof target === 'string') document.querySelector<HTMLElement>(`${target} h2`)?.focus({ preventScroll: true });
     } });
   }
-  function openCrossCheck() {
+  function openCase(index: number) {
     if (flying) return;
+    const path = `/work/${caseFiles[index].id}`;
     homeScroll.current = window.scrollY;
     homeChapter.current = { ...chapter.current };
+    caseView.current.index = index;
     setFlying(true);
     lenis.current?.stop();
-    router.prefetch('/work/crosscheck');
+    router.prefetch(path);
     gsap.to(pageContent.current, { opacity: 0, duration: .55 });
     gsap.to(caseView.current, { mix: 1, duration: .85, ease: 'power2.inOut',
-      onComplete: () => router.push('/work/crosscheck', { scroll: false }),
+      onComplete: () => router.push(path, { scroll: false }),
     });
+  }
+
+  // Next instrument: the camera backs away from this instrument, sweeps to the next one as the
+  // homepage chapter change does, then the arriving route flies in. Return then goes to that chapter.
+  function chainCase(index: number) {
+    if (flying || !isCase) return;
+    const path = `/work/${caseFiles[index].id}`;
+    const from = caseView.current.index;
+    homeScroll.current = null;
+    homeChapter.current = null;
+    setFlying(true);
+    lenis.current?.stop();
+    router.prefetch(path);
+    gsap.to(pageContent.current, { opacity: 0, duration: .45 });
+    gsap.to(caseView.current, { mix: 0, duration: .75, ease: 'power2.inOut', onComplete: () => {
+      caseView.current.index = index;
+      chapter.current = { reveal: 1, orbit: 0, outro: 0, index, from, transition: 0 };
+      root.current?.setAttribute('data-chapter', caseFiles[index].id);
+      gsap.to(chapter.current, { transition: 1, duration: .9, ease: 'power2.inOut',
+        onComplete: () => router.push(path, { scroll: false }) });
+    } });
   }
 
   function leaveCase(target: number | string = 'return') {
     if (flying) return;
     menu.current?.close();
     setMenuOpen(false);
-    homeTarget.current = target === 'return' ? homeScroll.current ?? '#crosscheck' : target;
+    homeTarget.current = target === 'return' ? homeScroll.current ?? `#${caseFiles[current].id}` : target;
     if (homeChapter.current) chapter.current = { ...homeChapter.current };
     setFlying(true);
     lenis.current?.stop();
@@ -307,6 +333,11 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
       <header className="site-header">
         <button className="wordmark" onClick={returnToDome} aria-label="Rayin Observatory, return to the dome">Rayin<span>Observatory</span></button>
         <div className="header-controls">
+          <nav className="desktop-navigation" aria-label="Desktop navigation" inert={flying}>
+            <button onClick={goToWork}>Work</button>
+            <button onClick={() => scrollFromMenu('#about')}>About</button>
+            <button onClick={openContact}>Contact</button>
+          </nav>
           <button className="sound-toggle" aria-label={sound ? 'Turn sound off' : 'Turn sound on'} aria-pressed={sound}
             onClick={() => void setAudio(!sound)}><span className="sound-bars" aria-hidden="true"><i /><i /><i /><i /></span><span>{sound ? 'On' : 'Off'}</span></button>
           <button className="menu-toggle" onClick={openMenu} aria-expanded={menuOpen} aria-controls="navigation">Menu<span aria-hidden="true">+</span></button>
@@ -314,14 +345,13 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
       </header>
       <div ref={pageContent} className="page-content" inert={flying} onClick={event => {
         const target = event.target as HTMLElement;
+        const modified = event.metaKey || event.ctrlKey || event.shiftKey || event.altKey;
         const homeLink = target.closest<HTMLAnchorElement>('[data-home-target]');
-        if (homeLink && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); leaveCase(homeLink.dataset.homeTarget); return; }
+        if (homeLink && !modified) { event.preventDefault(); leaveCase(homeLink.dataset.homeTarget); return; }
+        const caseLink = target.closest<HTMLAnchorElement>('[data-case-target]');
+        if (caseLink && !modified) { event.preventDefault(); chainCase(caseIndex(caseLink.dataset.caseTarget)); return; }
         const caseButton = target.closest<HTMLElement>('[data-open-case]');
-        if (caseButton) {
-          const item = instruments.find(item => item.id === caseButton.dataset.openCase);
-          if (item?.id === 'crosscheck') { event.preventDefault(); openCrossCheck(); return; }
-          if (item) { setSelectedCase(item); setCaseOpen(true); caseFile.current?.showModal(); }
-        }
+        if (caseButton) { event.preventDefault(); openCase(caseIndex(caseButton.dataset.openCase)); return; }
         const skill = target.closest<HTMLAnchorElement>('[data-skill-project]');
         const anchor = target.closest<HTMLAnchorElement>('[data-scroll-target]');
         if (skill || anchor) {
@@ -357,13 +387,6 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
       <div className="dialog-top"><span>Rayin Observatory</span><button onClick={() => menu.current?.close()}>Close <span aria-hidden="true">×</span></button></div>
       <nav aria-label="Main navigation"><button onClick={returnToDome}>The dome <span>↗</span></button><button onClick={goToWork}>Work <span>↗</span></button><button onClick={() => scrollFromMenu('#skills')}>Skills <span>↗</span></button><button onClick={() => scrollFromMenu('#about')}>About <span>↗</span></button><button onClick={openContact}>Contact <span>↗</span></button></nav>
       <p className="dialog-footnote">Five instruments. Explore the work behind each one.</p>
-    </dialog>
-    <dialog ref={caseFile} className="control-dialog contact-dialog" aria-labelledby="case-preview-heading" onClose={() => setCaseOpen(false)} onCancel={() => setCaseOpen(false)}>
-      <div className="dialog-top"><span>Case file preview</span><button onClick={() => caseFile.current?.close()}>Close <span aria-hidden="true">×</span></button></div>
-      <h2 id="case-preview-heading">{selectedCase.name}</h2>
-      <p>The full case file is coming soon.</p>
-      <p className="dialog-footnote">{selectedCase.preview}</p>
-      <button className="case-button" onClick={() => caseFile.current?.close()}>Return to the instrument <span aria-hidden="true">↙</span></button>
     </dialog>
   </div>;
 }

@@ -145,14 +145,18 @@ async def run():
             assert abs(await page.locator('#skills').evaluate('(e)=>e.getBoundingClientRect().top')) < 2
             await scroll_to(page, '#crosscheck', 280)
             await open_case(page)
-            await home(page, '.case-next .case-button')
+            # Phase 5: Next chains to the SurgeLine case; its Return lands on the SurgeLine chapter.
+            await page.locator('.case-next .case-button').click()
+            await page.wait_for_url(URL + '/work/surgeline')
+            await idle(page)
+            await home(page)
             assert abs(await page.locator('#surgeline').evaluate('(e)=>e.getBoundingClientRect().top')) < 2
             assert await page.evaluate("window.__originalCanvas===document.querySelector('canvas')")
             assert not errors, errors
             assert not bad, bad
             REPORT['results'].append({'viewport': [width, height], 'caseAndReturn': True, 'flightFadeAndScrollLock': True, 'persistentCanvas': True,
                 'hotspots': 3, 'projectedLensPoints': line_points, 'flow': True, 'readings': True, 'countUpObserved': True, 'lazyVideoPlayback': duration,
-                'browserBackForward': True, 'toolsToSkills': True, 'nextToHomepage': True, 'errors': errors, 'badResponses': bad})
+                'browserBackForward': True, 'toolsToSkills': True, 'nextChainsToSurgeLine': True, 'errors': errors, 'badResponses': bad})
             save()
             await context.close()
         # A fresh direct URL (and reload) must never need homepage DOM or history.

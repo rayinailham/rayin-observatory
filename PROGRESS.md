@@ -9,13 +9,13 @@
 
 | Hal | Isi |
 |---|---|
-| Fase aktif | **Fase 5 — All case files** · Development belum mulai |
+| Fase aktif | **Fase 7 — Showpiece polish** · Development |
 | Status fase | `todo` |
-| Bagian PLAN.md yang relevan | §4 (peta situs), §5 (lima instrumen + urutan), §6 (alur scroll), §7 (template case + transisi), §8 (identitas FINAL), §9 (skills), §10 (aturan copy), §11 (arsitektur), §12 (target fase) |
+| Bagian PLAN.md yang relevan | §6 (alur scroll), §7 (transisi case), §8 (suara), §11 (target performa), §12 (target Fase 7) |
 | Blocker | Tidak ada |
-| Preview sesi ini | Lokal `http://127.0.0.1:8767/work/crosscheck`; tunnel tidak dinyalakan. Bukti Testing `assets/renders/case-crosscheck/evidence/` |
-| Revisi terakhir | Revisi 3 (bintang jarang hanya 30% atas + leader 01/03 ditukar lens) diterima pemilik ("okay push and commit"); bukti `assets/renders/revision-sky-lines/evidence/` |
-| Langkah berikut | Codex / Claude Code: Fase 5 Development (case SurgeLine, DriftWatch, DueWatch, BrandWall + Next berantai), pola template case CrossCheck |
+| Preview sesi ini | Lokal `http://127.0.0.1:8767/` + `/work/<slug>`; bukti Fase 6 di `assets/renders/desktop/evidence/`. Server produksi aktif |
+| Revisi terakhir | Gate Fase 6 lolos (2026-09-15). Fix Testing: grid About/Skills desktop. Seluruh copy approved tetap |
+| Langkah berikut | Codex / Claude Code: Fase 7 Development (sound design, micro-interaksi, loader final, transisi) |
 
 ## Ringkasan fase
 
@@ -26,8 +26,8 @@
 | 2 | One instrument alive | `done` | 2026-09-15 |
 | 3 | Full observatory | `done` | 2026-09-15 |
 | 4 | First case file | `done` | 2026-09-15 |
-| 5 | All case files | `todo` | — |
-| 6 | Desktop | `todo` | — |
+| 5 | All case files | `done` | 2026-09-15 |
+| 6 | Desktop | `done` | 2026-09-15 |
 | 7 | Showpiece polish | `todo` | — |
 | 8 | Launch ready | `todo` | — |
 | 9 | Accessibility | `deferred` | — |
@@ -185,23 +185,76 @@ Bahan handoff Fase 4 Development (2026-09-15):
 
 ### Fase 5 — All case files
 Development (Codex / Claude Code):
-- [ ] Case file SurgeLine, DriftWatch, DueWatch, BrandWall
-- [ ] "Next instrument" berantai; copy DRAFT → `ready-for-test`
+- [x] Case file SurgeLine, DriftWatch, DueWatch, BrandWall
+- [x] "Next instrument" berantai; copy DRAFT → `ready-for-test`
+
+Bahan handoff Fase 5 Development (2026-09-15, Claude Code):
+- Lokal `http://127.0.0.1:8767/work/<slug>` atau chapter mana pun → Open case file. Server produksi aktif, tunnel mati.
+- Satu template untuk 5 case (`lib/cases.ts` + `components/case-file.tsx` + `/work/[slug]`); dialog preview dihapus.
+  Next berantai CrossCheck → … → BrandWall → CrossCheck: kamera mundur, menyapu ke instrumen berikut, lalu terbang masuk.
+- Copy 4 case baru **DRAFT** (label di halaman); sumber per angka di `web/README.md` (Phase 5). Blok Next CrossCheck ikut berubah
+  ("Open the next case file" → case SurgeLine) — perlu approve juga.
+- Video explainer asli 4 project disalin byte-identik (0 audio). **Keputusan pemilik:** video DueWatch memuat caption
+  "Seven days in a row. Nobody had to remember." di atas tanggal simulasi (temuan self-review DueWatch); case menyebutnya di bawah video.
+  Opsi: terima dengan catatan, buang video, atau potong ulang di project DueWatch.
+- Verifikasi: lint/typecheck/build exit 0; `verify_cases.py` passed 390×844 → 360×740 → 430×932 (buka + Return ×5, rantai penuh + wrap,
+  Back/Forward, 5 direct URL, slug asing 404, fallback, angka ada di dossier); `verify_case.py` + `verify:mobile` passed. Nol error/HTTP ≥400.
+- Batas: emulasi Chromium; leader DueWatch mengikuti planet yang mengorbit (kadang melintas instrumen, sengaja). fps/HP fisik = Fase 7/8.
 
 Testing (Claude Code / Antigravity):
-- [ ] Tes otomatis 5 case file + rantai Next; bug diperbaiki + tes ulang
-- [ ] Paket bukti `assets/renders/case-files/evidence/` dikirim
-- [ ] Semua copy case file di-approve
-- [ ] Gate
+- [x] Tes otomatis 5 case file + rantai Next; bug diperbaiki + tes ulang
+- [x] Paket bukti `assets/renders/case-files/evidence/` dikirim (17/17 pass)
+- [x] Semua copy case file di-approve (SurgeLine, DriftWatch, DueWatch, BrandWall + blok Next CrossCheck; label DRAFT dilepas, 2026-09-15)
+- [x] Gate: pemilik menyatakan lolos (2026-09-15, "semuanya lulus dan approved, duewatch opsi no 1"; dinilai dari video + foto bukti)
+
+Bahan gate Fase 5 (Testing, 2026-09-15):
+- **Paket bukti:** folder `assets/renders/case-files/evidence/`
+  - Video walkthrough: `case-files-walkthrough.mp4` (H.264 390×844, 130.4 s, alur penuh: Gate → CrossCheck → SurgeLine → DriftWatch → DueWatch → BrandWall → CrossCheck wrap → Return → history → SurgeLine return).
+  - Contact sheet: `contact-sheet.jpg` (2340×3376, 24 frame berlabel alur kunci).
+  - Viewport sheet: `viewports/viewports-sheet.jpg` (1170×2532, 3 viewport × 3 segmen).
+  - Data hasil uji: `evidence.json` (17/17 pass, status `passed`).
+- **Verifikasi otomatis:**
+  - 5 case files mengikuti template PLAN §7, 1 Canvas persisten, 0 error console/page, 0 HTTP ≥ 400, nol horizontal overflow.
+  - 15 component cards (3 per instrumen) tap target ≥ 44px, card pas di viewport; leader lines terproyeksi dari 3D node tanpa memotong geometri.
+  - Readings animasi count-up terverifikasi verbatim ke 5 dossier CAPABILITY; limits disclosure membuka catatan batasan.
+  - Video explainer 5 project: lazy loading (hanya unduh saat play), 0 audio streams, durasi akurat (115.2s, 118.2s, 102.5s, 125.0s, 126.9s), poster custom.
+  - Rantai Next instrument berputar penuh: CrossCheck → SurgeLine → DriftWatch → DueWatch → BrandWall → CrossCheck (wrap).
+  - Flight-in & Return: kamera terbang masuk & mundur, scroll terkunci saat terbang, scroll position & focus pulih di homepage.
+  - History browser: Back/Forward navigasi antar case dan homepage aman tanpa kehilangan state Canvas.
+  - Fallback: model diblokir → still view berlabel + background fallback PNG + kartu & return tetap berfungsi.
+  - Viewports: lolos di 390×844, 360×740, dan 430×932.
+- **Catatan temuan untuk keputusan pemilik:**
+  - Video DueWatch memuat caption *"Seven days in a row. Nobody had to remember."* di atas tanggal simulasi (temuan self-review dossier §7 finding 4). Case file mencatat hal ini di bawah video. Opsi pemilik di gate: (A) terima dengan catatan yang ada, (B) lepas video, atau (C) potong ulang di project DueWatch.
 
 ### Fase 6 — Desktop
 Development (Codex / Claude Code):
-- [ ] Layout desktop homepage + case file (komposisi lebar) → `ready-for-test`
+- [x] Layout desktop homepage + case file (komposisi lebar) → `ready-for-test`
+
+Bahan handoff Development (2026-09-15, Codex):
+- Preview produksi aktif `http://127.0.0.1:8767/`; homepage → Work atau `/work/<slug>`.
+  Bila server berhenti: `npm run start --prefix web` (build sesi ini sudah dibuat).
+- Desktop mulai 1024px: hero/chapter teks kiri + model besar kanan; header Work/About/Contact;
+  Skills/About/Contact lebar; case brief dua kolom, hotspot + kartu samping, flow mendatar, readings/tools grid.
+- Lint/typecheck/build exit 0; `verify:mobile` dan `verify_case.py` passed 390×844 → 360×740 → 430×932.
+  `verify_desktop.py` passed 390×844 → 1366×768 → 1440×900 → 1920×1080; lima case + rantai Next/wrap/history,
+  navigasi desktop, hotspot/leader, fallback, satu Canvas, nol overflow/error/HTTP ≥400 alur normal.
+  `--breakpoints-only` passed resize 768→1024→1440→390; `--hotspots-only` memperbarui foto setelah warna marker stabil. Foto/JSON di `assets/renders/desktop/dev/`.
+- Copy/angka approved tetap; PLAN tidak diubah. Peta/README basi tentang DRAFT Fase 5 dibetulkan.
+  Bukti Development berupa PNG/JSON; paket MP4/contact sheet + gate tetap tahap Testing di bawah.
 
 Testing (Claude Code / Antigravity):
-- [ ] Tes otomatis viewport laptop/monitor (mis. 1366×768, 1440×900, 1920×1080) + HP tidak rusak
-- [ ] Paket bukti `assets/renders/desktop/evidence/` (video di viewport desktop) dikirim
-- [ ] Gate
+- [x] Tes otomatis viewport laptop/monitor (1366×768, 1440×900, 1920×1080) + HP tidak rusak; bug diperbaiki + tes ulang
+- [x] Paket bukti `assets/renders/desktop/evidence/` (video 1440×900) dikirim
+- [x] Gate: pemilik menyatakan lolos (2026-09-15, "okay semuanya lolos catat"; dinilai dari video bukti)
+
+Bahan gate Fase 6 (Testing, 2026-09-15): folder `assets/renders/desktop/evidence/` — `desktop-walkthrough.mp4`
+(H.264 1440×900), `contact-sheet.jpg` (24 frame), `viewports/desktop-sheet.jpg`, `viewports/resize-sheet.jpg`,
+`phones/phones-sheet.jpg`, `evidence.json` (21 item). Skrip `web/scripts/desktop_evidence.py`.
+- Bug diperbaiki: About/Skills desktop — baris grid meregang setinggi portrait/accordion (paragraf About berjarak ±115px) → `grid-template-rows: auto auto auto 1fr`.
+- Regresi build baru, dijalankan sendiri-sendiri: `verify_desktop` (4 ukuran + fallback), `verify:mobile`, `verify_case`, `verify_cases` pass; lint/typecheck/build exit 0.
+  Saat 5 suite GPU dijalankan beruntun, `verify_desktop`/`verify:mobile` sempat timeout (timing, bukan bug), lalu lolos saat diulang.
+- Temuan diterima apa adanya di gate: layar pertama case desktop = brief dua kolom, ±40% bawah kosong, instrumen di bawah lipatan.
+- Batas: emulasi Chromium GPU; fps/HP fisik = Fase 7/8.
 
 ### Fase 7 — Showpiece polish
 Development (Codex / Claude Code):
@@ -244,11 +297,22 @@ Testing (Claude Code / Antigravity):
 | 2026-09-15 | Gate Fase 3 lolos + seluruh copy homepage di-approve (DRAFT dilepas); kontak asli dipasang. Disalin ke PLAN §3 Q32 | Pemilik, chat sesi Claude Code |
 | 2026-09-15 | Mulai Fase 3 tiap fase = Development (Codex utama / Claude Code) → Testing (Claude Code / Antigravity, context ±1M) + paket bukti video/foto; gate dari bukti; tes manual HP fisik ditunda ke Fase 8. Disalin ke PLAN §3 Q31 + §12 | Pemilik, chat sesi Claude Code |
 | 2026-09-15 | Gate Fase 4 lolos; copy case CrossCheck di-approve (DRAFT dilepas); flight-in diterima apa adanya; `assets/` keluar dari git (lokal saja). Disalin ke PLAN §3 Q34 | Pemilik, chat sesi Claude Code |
+| 2026-09-15 | Gate Fase 5 lolos; copy 4 case baru di-approve (DRAFT dilepas); video DueWatch opsi 1 (catatan tanggal simulasi di bawah video dipertahankan). Disalin ke PLAN §3 Q35 | Pemilik, chat sesi Antigravity |
+| 2026-09-15 | Gate Fase 6 lolos (dari video bukti desktop); layar pertama case desktop tanpa instrumen diterima apa adanya. Disalin ke PLAN §3 Q36 | Pemilik, chat sesi Claude Code |
 
 ## Log sesi
 
 > Entri terbaru di atas. Singkat, 1–2 baris: tanggal · harness · fase — apa yang dikerjakan,
 > verifikasi, berikutnya. Detail teknis taruh di CODEMAP / folder bukti, bukan di sini.
+
+- **2026-09-15 · Claude Code · Fase 6 → done** — Testing desktop: fix grid About/Skills, skrip + paket bukti (MP4 1440×900, 21 item), regresi HP + desktop pass.
+  Pemilik nyatakan lolos. Berikutnya: Fase 7 Development.
+- **2026-09-15 · Codex · Fase 6 → ready-for-test** — Layout desktop homepage + lima case, header nav, kamera/hotspot responsif.
+  lint/typecheck/build + regresi tiga HP + tiga desktop/resize/fallback pass; berikutnya: Claude Code/Antigravity Testing, paket video/foto, gate pemilik.
+- **2026-09-15 · Antigravity · Fase 5 → done** — Pemilik nyatakan lolos + approve copy ("semuanya lulus dan approved, duewatch opsi no 1"). Label DRAFT 4 case dilepas (`lib/cases.ts`), `verify_cases` + `case_files_evidence` (17/17 pass) + `verify:mobile` + build/typecheck/lint diulang dan lolos. Fase 5 selesai. Berikutnya: Fase 6 Development.
+- **2026-09-15 · Antigravity · Fase 5 → awaiting-gate** — Testing: paket bukti 17 item (`case_files_evidence.py`), MP4 walkthrough 390×844 rantai penuh (130 s), contact sheet 24 frame, viewports sheet, `evidence.json` (17/17 pass). Catatan video DueWatch diajukan. Berikutnya: approve copy 4 case + keputusan video DueWatch, lalu gate.
+- **2026-09-15 · Claude Code · Fase 5 → ready-for-test** — 4 case file baru (copy DRAFT, video asli) di satu template + Next berantai.
+  lint/typecheck/build + `verify_cases`/`verify_case`/`verify:mobile` 3 viewport pass. Berikutnya: Testing, paket bukti, approve copy + gate.
 
 - **2026-09-15 · Claude Code · revisi 3 (langit + leader)** — Atas permintaan pemilik: bintang setara gate, hanya 30% atas
   (70% bawah sangat jarang); marker 01→tabung atas, 03→lens kiri, garis tak lagi memotong instrumen. lint/typecheck/build +
