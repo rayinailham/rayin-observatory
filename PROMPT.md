@@ -42,7 +42,9 @@ CARA KERJA:
   (`setsid -f ~/.local/bin/blender >/dev/null 2>&1 < /dev/null`), bridge localhost:9876.
   Simpan .blend ke assets/blender/, render review ke assets/renders/, ekspor .glb ke
   web/public/models/. Save .blend sebelum operasi destruktif.
-- Jangan git commit/push/branch kecuali pemilik minta eksplisit.
+- Git: WAJIB commit + push di setiap akhir fase (lihat WAJIB SEBELUM MENUTUP SESI no. 4).
+  Di luar itu, jangan git commit/push kecuali pemilik minta eksplisit. Jangan buat branch.
+  Repo: akun GitHub personal, remote `git@rayin-personal:rayinailham/rayin-observatory.git`, branch `main`.
 - Jangan pernah menyentuh domain/DNS (urusan pemilik).
 
 GATE:
@@ -59,6 +61,10 @@ WAJIB SEBELUM MENUTUP SESI:
    di "Log sesi" (tanggal, harness, apa yang dikerjakan, cara verifikasi, langkah berikut).
 3. Laporkan ke pemilik: apa yang berubah, bukti verifikasi, dan apa yang perlu dia lakukan
    (Development: "siap dites, buka sesi Testing"; Testing: kirim video + foto, lalu minta gate).
+4. Akhir fase = pemilik menyatakan gate lolos (fase → `done`): setelah CODEMAP/PROGRESS diupdate,
+   WAJIB git commit semua perubahan fase itu lalu push ke `origin main`. Pesan commit: "Phase N ..."
+   ringkas apa yang dibangun + hasil Testing. `assets/` tidak dilacak git (lokal saja); jangan
+   commit rahasia/.env. Laporkan hash commit ke pemilik.
 ```
 
 ---

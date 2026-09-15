@@ -72,6 +72,8 @@ observatorium. Dikerjakan **mobile-first**, desktop menyusul, dalam 10 fase bert
 | Q34 | Gate Fase 4 + copy case CrossCheck | (2026-09-15) Gate Fase 4 lolos dari paket bukti ("lolos semua ini fase 4 aman"); copy case CrossCheck di-approve, label DRAFT dilepas; transisi flight-in diterima apa adanya. Folder `assets/` tidak lagi dilacak git (lokal saja) |
 | Q35 | Gate Fase 5 + copy 4 case baru | (2026-09-15) Gate Fase 5 lolos dari paket bukti ("semuanya lulus dan approved, duewatch opsi no 1"); copy 4 case baru (SurgeLine, DriftWatch, DueWatch, BrandWall) dan blok Next CrossCheck di-approve, seluruh label DRAFT dilepas. Video DueWatch diterima dengan opsi 1 (catatan tanggal simulasi di bawah video dipertahankan) |
 | Q36 | Gate Fase 6 (Desktop) | (2026-09-15) Gate Fase 6 lolos dari video bukti desktop ("okay semuanya lolos catat"); layar pertama case file desktop (brief dua kolom, instrumen di bawah lipatan) diterima apa adanya |
+| Q37 | Enter lebih cepat | (2026-09-16) Temuan Testing Fase 7 (Enter baru aktif ±12 dtk di slow 4G): pemilik pilih opsi B — Enter aktif setelah hero siap (kubah + planet + font), lima instrumen dimuat di belakang hero. Fase 7 kembali ke Development; dikerjakan sesi berikut (spesifikasi di PROGRESS Fase 7) |
+| Q38 | Commit + push akhir fase | (2026-09-16) Setiap akhir fase (gate lolos → `done`) **wajib** git commit + push ke `origin main` (akun personal). Di luar akhir fase tetap hanya atas permintaan pemilik. Aturan di `PROMPT.md` |
 
 ---
 
@@ -271,6 +273,7 @@ berisi pass/fail per item. Direkam lewat URL preview publik bila tersedia, lokal
 
 **Gate**: pemilik menilai dari paket bukti (video + foto) dan menyatakan lolos. Pemilik **tidak**
 diminta tes manual di HP sampai Fase 8. Tanpa gate lolos, fase berikut tidak dimulai.
+Gate lolos → fase `done` → **wajib commit + push** ke `origin main` (Q38).
 Fase 0–2 selesai dengan aturan lama (pemilik membuka hasil sendiri).
 
 | Fase | Nama | Target — yang terlihat di paket bukti | Hasil nyata |

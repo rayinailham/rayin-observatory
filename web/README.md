@@ -1,11 +1,45 @@
-# Rayin Observatory · Desktop
+# Rayin Observatory · Showpiece polish
 
-Phase 6 Development: full-width homepage and five case files for laptop and monitor screens.
-Phase 0–5 gates passed. All homepage and case copy is **owner-approved**; Phase 6 changes layout only.
+Phase 7 Development: sound design, calibration feedback, micro-interactions and camera transitions.
+Phase 0–6 gates passed. All homepage and case copy remains **owner-approved**.
 The owner accepted the DueWatch video with its existing simulated-date note at the Phase 5 gate.
 Testing (Claude Code / Antigravity) follows developer verification and produces the gate evidence pack.
 
-## Phase 6 review and handoff
+## Phase 7 review and handoff
+
+The existing ambient hum now shares a mute-controlled audio bus with five instrument clicks
+(CrossCheck → BrandWall), the welcome sweep, fly-in, return and the two-part Next transition.
+Hotspot selection/close and the BrandWall detector produce quiet clicks. Silent entry creates no
+AudioContext; muted or hidden tabs create no effects. One-shot sources disconnect after playback,
+rapid clicks are rate limited and a transition replaces previous effects. No audio files are downloaded.
+
+The loader follows asset/font readiness without rewinding between model batches. Its dial settles
+green when ready; still-view readiness remains amber. Existing slow-load and error messages stay in use.
+Buttons press without disturbing their layout positions; pointer-only hover arrows, selected leader/card
+feedback and a short inspection/menu entrance complete the interaction pass. Navigation owns one
+departure timeline and cancels it on route changes so browser Back cannot trigger a stale route push.
+
+Development commands (run browser suites one at a time to avoid competing for the GPU):
+
+```sh
+npm run lint --prefix web
+npm run typecheck --prefix web
+npm run build --prefix web
+node web/scripts/verify_audio.mjs
+timeout 600 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python web/scripts/verify_showpiece.py
+timeout 420 npm run verify:mobile --prefix web
+timeout 300 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python web/scripts/verify_case.py
+```
+
+New PNGs/JSON: `assets/renders/showpiece/dev/`. The browser suite tests 390×844 → 360×740 →
+430×932: actual Web Audio signal/silence, five distinct click schedules, chain/return, persistent
+Canvas, loader monotonicity, remembered mute, hidden-tab lifecycle (simulated visibility event),
+stalled-load escape, audio-unavailable entry and Back during a departure. The separate Node test
+controls resume timing, voice limits and cleanup. These are Development checks. Testing must still
+measure PLAN §11 with CPU throttle/slow 4G and supply MP4/PNG/contact sheet/`evidence.json` under
+`assets/renders/showpiece/evidence/` before the owner gate. Physical-phone testing remains Phase 8.
+
+## Phase 6 review and handoff (gate passed 2026-09-15)
 
 Open the preview on a desktop, enter, then use Work / About / Contact in the header.
 The desktop composition begins at 1024px: a left reading rail and a large instrument on the right.
@@ -33,7 +67,7 @@ cd web/scripts && timeout 1500 /home/rayin/Projects/Testing/crosscheck/.venv/bin
 Output `assets/renders/desktop/evidence/`: 1440×900 MP4 of the main flow, one PNG per item, labeled
 contact sheet, desktop/resize/phone sheets and `evidence.json` (exit 1 on any fail). Testing fixed the
 desktop Skills/About grid (text rows no longer stretch to the portrait/accordion height).
-The phase stays open until the owner reviews that pack and grants the gate.
+The owner passed this gate on 2026-09-15 after reviewing the desktop video.
 
 ## Run
 

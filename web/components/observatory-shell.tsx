@@ -25,6 +25,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
   const homeChapter = useRef<ChapterState | null>(null);
   const homeTarget = useRef<number | string | null>(null);
   const previousPath = useRef(pathname);
+  const flight = useRef<gsap.core.Timeline | null>(null);
   const [flying, setFlying] = useState(false);
   const pageContent = useRef<HTMLDivElement>(null);
   const [entered, setEntered] = useState(false);
@@ -44,11 +45,20 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
   const chapter = useRef<ChapterState>({ reveal: 0, orbit: 0, index: 0, transition: 0, outro: 0 });
   const lenis = useRef<Lenis | null>(null);
   const audio = useRef<ObservatoryAudio | null>(null);
-  const { progress: modelProgress } = useProgress();
+  const [modelProgress, setModelProgress] = useState(0);
   const ready = fontsReady && (sceneReady || failed);
   const loaded = ready ? 100 : Math.min(99, Math.round(modelProgress * .7 + (fontsReady ? 30 : 0)));
   const onReady = useCallback(() => setSceneReady(true), []);
   const onFailure = useCallback(() => setFailed(true), []);
+  const onInstrumentTap = useCallback((index: number) => audio.current?.click(index), []);
+
+  useEffect(() => {
+    // drei starts a new progress batch when another GLB is discovered. Never rewind the dial.
+    const update = ({ progress }: { progress: number }) => setModelProgress(previous => Math.max(previous, progress));
+    const unsubscribe = useProgress.subscribe(update);
+    update(useProgress.getState());
+    return unsubscribe;
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -89,6 +99,9 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
   }, []);
 
   useLayoutEffect(() => {
+    // History can interrupt a departure. Its old onComplete must never push a stale route.
+    flight.current?.kill();
+    flight.current = null;
     const from = caseOf(previousPath.current);
     const cameFromCase = from >= 0 && !isCase;
     previousPath.current = pathname;
@@ -105,7 +118,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
       root.current?.style.setProperty('--chapter-reveal', '1');
       scroller?.scrollTo(0, { immediate: true, force: true });
       window.scrollTo(0, 0);
-      context.add(() => gsap.to(caseView.current, { mix: 1, duration: .85, ease: 'power2.inOut' }));
+      context.add(() => gsap.to(caseView.current, { mix: 1, duration: .78, ease: 'power2.inOut' }));
     }
     if (cameFromCase) {
       const id = caseFiles[from].id;
@@ -115,14 +128,14 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
       scroller?.resize();
       scroller?.scrollTo(y, { immediate: true, force: true });
       window.scrollTo(0, y);
-      context.add(() => gsap.to(caseView.current, { mix: 0, duration: .9, ease: 'power2.inOut' }));
+      context.add(() => gsap.to(caseView.current, { mix: 0, duration: .78, ease: 'power2.inOut' }));
       frame = requestAnimationFrame(() => {
         ScrollTrigger.refresh();
         focusAfterFlight = element?.querySelector<HTMLElement>('h2') ?? document.querySelector<HTMLElement>(`[data-open-case="${id}"]`);
       });
       homeTarget.current = null;
     }
-    context.add(() => gsap.fromTo(pageContent.current, { opacity: 0 }, { opacity: 1, duration: .65, delay: .3,
+    context.add(() => gsap.fromTo(pageContent.current, { opacity: 0 }, { opacity: 1, duration: .55, delay: .25, ease: 'power2.out',
       onComplete: () => {
         setFlying(false);
         frame = requestAnimationFrame(() => {
@@ -131,7 +144,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
         });
       },
     }));
-    return () => { context.revert(); cancelAnimationFrame(frame); };
+    return () => { flight.current?.kill(); flight.current = null; context.revert(); cancelAnimationFrame(frame); };
   }, [pathname, isCase, current]);
 
   useEffect(() => {
@@ -234,11 +247,12 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
     return () => { context.revert(); window.clearTimeout(timer); };
   }, [entered]);
 
-  async function setAudio(enabled: boolean) {
+  async function setAudio(enabled: boolean, welcome = false) {
     try {
       const playing = await audio.current?.setEnabled(enabled) ?? false;
       setSound(playing);
       setAudioError(enabled && !playing);
+      if (playing && welcome) audio.current?.transition('in');
       try { localStorage.setItem(SOUND_KEY, playing ? 'on' : 'off'); } catch { /* Private storage can be unavailable. */ }
     } catch {
       setSound(false);
@@ -251,7 +265,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
     let remembered = true;
     try { remembered = localStorage.getItem(SOUND_KEY) !== 'off'; } catch { /* Use the default. */ }
     // AudioContext is created/resumed synchronously inside this user gesture.
-    void setAudio(!silent && remembered);
+    void setAudio(!silent && remembered, true);
     lenis.current?.scrollTo(0, { immediate: true, force: true });
     setEntered(true);
   }
@@ -275,7 +289,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
     } });
   }
   function openCase(index: number) {
-    if (flying) return;
+    if (flying || flight.current) return;
     const path = `/work/${caseFiles[index].id}`;
     homeScroll.current = window.scrollY;
     homeChapter.current = { ...chapter.current };
@@ -283,16 +297,16 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
     setFlying(true);
     lenis.current?.stop();
     router.prefetch(path);
-    gsap.to(pageContent.current, { opacity: 0, duration: .55 });
-    gsap.to(caseView.current, { mix: 1, duration: .85, ease: 'power2.inOut',
-      onComplete: () => router.push(path, { scroll: false }),
-    });
+    audio.current?.transition('in');
+    flight.current = gsap.timeline({ onComplete: () => router.push(path, { scroll: false }) })
+      .to(pageContent.current, { opacity: 0, duration: .48, ease: 'power2.out' }, 0)
+      .to(caseView.current, { mix: 1, duration: .78, ease: 'power2.inOut' }, 0);
   }
 
   // Next instrument: the camera backs away from this instrument, sweeps to the next one as the
   // homepage chapter change does, then the arriving route flies in. Return then goes to that chapter.
   function chainCase(index: number) {
-    if (flying || !isCase) return;
+    if (flying || flight.current || !isCase) return;
     const path = `/work/${caseFiles[index].id}`;
     const from = caseView.current.index;
     homeScroll.current = null;
@@ -300,25 +314,31 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
     setFlying(true);
     lenis.current?.stop();
     router.prefetch(path);
-    gsap.to(pageContent.current, { opacity: 0, duration: .45 });
-    gsap.to(caseView.current, { mix: 0, duration: .75, ease: 'power2.inOut', onComplete: () => {
-      caseView.current.index = index;
-      chapter.current = { reveal: 1, orbit: 0, outro: 0, index, from, transition: 0 };
-      root.current?.setAttribute('data-chapter', caseFiles[index].id);
-      gsap.to(chapter.current, { transition: 1, duration: .9, ease: 'power2.inOut',
-        onComplete: () => router.push(path, { scroll: false }) });
-    } });
+    audio.current?.transition('out');
+    const sweep = { reveal: 1, orbit: 0, outro: 0, index, from, transition: 0 };
+    flight.current = gsap.timeline({ onComplete: () => router.push(path, { scroll: false }) })
+      .to(pageContent.current, { opacity: 0, duration: .4, ease: 'power2.out' }, 0)
+      .to(caseView.current, { mix: 0, duration: .65, ease: 'power2.inOut' }, 0)
+      .call(() => {
+        caseView.current.index = index;
+        chapter.current = sweep;
+        root.current?.setAttribute('data-chapter', caseFiles[index].id);
+        audio.current?.transition('in');
+      })
+      .to(sweep, { transition: 1, duration: .78, ease: 'power2.inOut' });
   }
 
   function leaveCase(target: number | string = 'return') {
-    if (flying) return;
+    if (flying || flight.current) return;
     menu.current?.close();
     setMenuOpen(false);
     homeTarget.current = target === 'return' ? homeScroll.current ?? `#${caseFiles[current].id}` : target;
     if (homeChapter.current) chapter.current = { ...homeChapter.current };
     setFlying(true);
     lenis.current?.stop();
-    gsap.to(pageContent.current, { opacity: 0, duration: .3, onComplete: () => router.push('/', { scroll: false }) });
+    audio.current?.transition('out');
+    flight.current = gsap.timeline({ onComplete: () => router.push('/', { scroll: false }) })
+      .to(pageContent.current, { opacity: 0, duration: .28, ease: 'power2.out' });
   }
 
   function returnToDome() { scrollFromMenu(0); }
@@ -326,10 +346,15 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
 
   return <div ref={root} className={`observatory ${entered ? 'has-entered' : ''}`} data-route={isCase ? 'case' : 'home'} data-flight={flying ? 'moving' : 'idle'} data-scene={failed ? 'fallback' : sceneReady ? 'ready' : 'loading'}>
     <div className="scene-layer" aria-hidden="true">
-      {!failed && <Scene entered={entered} progress={progress} chapter={chapter} caseView={caseView} onReady={onReady} onFailure={onFailure} />}
+      {!failed && <Scene entered={entered} progress={progress} chapter={chapter} caseView={caseView} onReady={onReady} onFailure={onFailure} onInstrumentTap={onInstrumentTap} />}
       {failed && !isCase && <><div className="scene-fallback" />{instruments.map((item, i) => <div key={item.id} className={`instrument-fallback ${item.id}-fallback`} style={{ backgroundImage: `url('/images/${item.id}-fallback.png')`, transform: `translateY(calc(var(--instrument-${i}-offset, 2) * 100svh))` }} />)}</>}
     </div>
-    <div ref={content} inert={!entered} className="site-content">
+    <div ref={content} inert={!entered} className="site-content" onClickCapture={event => {
+      if (!entered || flying) return;
+      const target = event.target as HTMLElement;
+      if (target.closest('[data-hotspot], .component-card button')) audio.current?.click(current);
+      else if (target.closest('summary, .menu-toggle, .dialog-top button')) audio.current?.click();
+    }}>
       <header className="site-header">
         <button className="wordmark" onClick={returnToDome} aria-label="Rayin Observatory, return to the dome">Rayin<span>Observatory</span></button>
         <div className="header-controls">
@@ -368,10 +393,10 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
       {failed && <p className="fallback-notice" role="status">Still view. Live 3D is unavailable on this device.</p>}
     </div>
 
-    <div ref={gate} className="entry-gate" inert={entered} aria-label="Enter Rayin Observatory">
+    <div ref={gate} className="entry-gate" data-ready={ready} data-fallback={failed} inert={entered} aria-label="Enter Rayin Observatory">
       <p className="gate-byline">A portfolio by Rayina Ilham</p>
       <div className="gate-main">
-        <div className="calibration-orbit" aria-hidden="true"><span /><i /></div>
+        <div className="calibration-orbit" aria-hidden="true"><span /><i /><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" pathLength="100" strokeDasharray="100" strokeDashoffset={100 - loaded} /></svg></div>
         <p className="gate-kicker">First light</p>
         <h1>Rayin<br />Observatory</h1>
         <div className="calibration-status" role="status"><span>{failed ? 'Still view ready' : ready ? 'Instruments calibrated' : 'Calibrating instruments…'}</span><output>{loaded}%</output></div>

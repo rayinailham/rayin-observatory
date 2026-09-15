@@ -18,6 +18,7 @@ type SceneProps = {
   caseView: MutableRefObject<CaseView>;
   onReady: () => void;
   onFailure: () => void;
+  onInstrumentTap: (index: number) => void;
 };
 
 // BrandWall's detector state is shown in the chapter hint; the page owns the markup.
@@ -44,7 +45,7 @@ class SceneBoundary extends Component<{ onFailure: () => void; children: ReactNo
   render() { return this.state.failed ? null : this.props.children; }
 }
 
-function World({ entered, progress, chapter, caseView, onReady }: SceneProps) {
+function World({ entered, progress, chapter, caseView, onReady, onInstrumentTap }: SceneProps) {
   const dome = useGLTF('/models/dome.glb');
   const ambient = useGLTF('/models/ambient.glb');
   const models = useGLTF(instruments.map(item => `/models/${item.id}.glb`));
@@ -72,13 +73,16 @@ function World({ entered, progress, chapter, caseView, onReady }: SceneProps) {
   useEffect(() => {
     const brandwall = views[instruments.findIndex(item => item.id === 'brandwall')];
     const tap = (event: MouseEvent) => {
-      if (document.querySelector('.observatory')?.getAttribute('data-chapter') !== 'brandwall') return;
-      if ((event.target as HTMLElement).closest('button, a, summary, dialog')) return;
+      const shell = document.querySelector('.observatory.has-entered[data-flight=idle]');
+      if (shell?.getAttribute('data-chapter') !== 'brandwall') return;
+      const target = event.target as HTMLElement;
+      if (target.closest('button, a, summary, dialog') || !target.closest('#brandwall .instrument-stage, .case-inspection')) return;
       brandwall?.rig.observe?.();
+      onInstrumentTap(4);
     };
     window.addEventListener('click', tap);
     return () => window.removeEventListener('click', tap);
-  }, [views]);
+  }, [views, onInstrumentTap]);
   const planet = useMemo(() => saturn(ambient.scene), [ambient.scene]);
   useEffect(() => () => planet.dispose(), [planet]);
   const domeView = useMemo(() => {

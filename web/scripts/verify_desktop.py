@@ -16,8 +16,14 @@ GPU = ['--enable-gpu', '--use-gl=angle', '--use-angle=gl-egl', '--ignore-gpu-blo
 
 
 async def position(page, selector, offset=0):
+    # A header-nav Lenis scroll can still be easing its last pixels after the < 3 px arrival check;
+    # a native scrollTo issued then is overwritten by Lenis. Re-issue until it lands, then assert.
     y = await page.locator(selector).evaluate('(el) => el.getBoundingClientRect().top + scrollY') + offset
-    await page.evaluate('(y) => window.scrollTo(0, y)', y)
+    for _ in range(12):
+        await page.evaluate('(y) => window.scrollTo(0, y)', y)
+        await page.wait_for_timeout(300)
+        if await page.evaluate('(y) => Math.abs(scrollY - Math.min(y, document.documentElement.scrollHeight - innerHeight)) < 3', y):
+            break
     await page.wait_for_function('(y) => Math.abs(scrollY - Math.min(y, document.documentElement.scrollHeight - innerHeight)) < 3', arg=y)
     await page.wait_for_timeout(550)
 

@@ -8,10 +8,12 @@ body { overscroll-behavior: none; }
 button, a { -webkit-tap-highlight-color: transparent; }
 button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; border-radius: 0; }
 button:disabled { cursor: wait; opacity: .45; }
-button:active:not(:disabled) { transform: translateY(1px); }
+button:active:not(:disabled) { scale: .97; }
 button:focus-visible, a:focus-visible { outline: 2px solid var(--amber); outline-offset: 5px; }
-button { transition: color .2s, background-color .2s; }
-button:hover:not(:disabled) { color: var(--amber); }
+button { transition: color .18s, background-color .18s, scale .12s ease-out; }
+@media (hover: hover) and (pointer: fine) {
+  button:hover:not(:disabled) { color: var(--amber); }
+}
 .observatory { --journey: 0; --hero-journey: 0; --chapter-reveal: 0; --copy-opacity: 1; min-height: 100svh; }
 .scene-layer { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: linear-gradient(180deg, #010207 0%, #050916 15%, var(--ink) 30%, #10172D); }
 .scene-layer::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 80%, var(--ink)); }
@@ -67,7 +69,9 @@ button:hover:not(:disabled) { color: var(--amber); }
 .calibration-track { width: 100%; height: 1px; background: var(--line); margin-bottom: 25px; }
 .calibration-track i { display: block; height: 1px; background: var(--amber); transform-origin: left; }
 .enter-button { height: 56px; width: 100%; background: var(--amber); color: var(--ink); font-size: 13px; display: flex; justify-content: space-between; align-items: center; padding: 0 18px; }
-.enter-button:hover:not(:disabled) { background: var(--ivory); color: var(--ink); }
+@media (hover: hover) and (pointer: fine) {
+  .enter-button:hover:not(:disabled) { background: var(--ivory); color: var(--ink); }
+}
 .enter-button span { font-size: 21px; }
 .silent-button { min-height: 48px; display: block; margin: 7px auto 0; font-size: 11px; color: var(--muted); padding: 0 15px; }
 .gate-note { color: var(--muted); font-size: 10px; line-height: 1.7; margin: 0; }
@@ -376,3 +380,32 @@ button:hover:not(:disabled) { color: var(--amber); }
   .observatory[data-route=case][data-scene=fallback] .case-page { padding-top: 120px; }
 }
 @keyframes case-signal-wide { from { left: 0; opacity: 0; } 20%, 75% { opacity: 1; } to { left: 100%; opacity: 0; } }
+
+/* Phase 7: calibration, short tactile responses and inspection feedback. */
+.calibration-orbit svg { position: absolute; inset: -1px; width: calc(100% + 2px); height: calc(100% + 2px); overflow: visible; transform: rotate(-90deg); }
+.calibration-orbit circle { fill: none; stroke: var(--amber); stroke-width: 1; transition: stroke-dashoffset .35s ease-out, stroke .2s; }
+.calibration-orbit i { animation: calibration-beacon 1.4s ease-in-out infinite alternate; }
+@keyframes calibration-beacon { to { opacity: .3; transform: scale(.7); } }
+.entry-gate[data-ready=true] .calibration-orbit i { animation: none; background: var(--signal-ok); }
+.entry-gate[data-ready=true] .calibration-orbit circle { stroke: var(--signal-ok); }
+.entry-gate[data-fallback=true] .calibration-orbit circle, .entry-gate[data-fallback=true] .calibration-orbit i { stroke: var(--amber); }
+.entry-gate[data-fallback=true] .calibration-orbit i { background: var(--amber); }
+.calibration-status output { font-variant-numeric: tabular-nums; min-width: 4ch; text-align: right; }
+.calibration-track i { transition: transform .35s ease-out; }
+.enter-button { transition: opacity .2s, background-color .18s, scale .12s ease-out; }
+.case-button, .email-cta { transition: color .18s, background-color .18s, scale .12s ease-out; }
+.case-button:active, .email-cta:active { scale: .98; }
+.case-button span, .enter-button span, .case-tools a span, .hero-contact span { transition: transform .18s cubic-bezier(.23, 1, .32, 1); }
+@media (hover: hover) and (pointer: fine) {
+  .case-button:hover span, .enter-button:hover:not(:disabled) span, .case-tools a:hover span, .hero-contact:hover span { transform: translate(2px, -2px); }
+}
+.instrument-hotspot { transition: background-color .18s, color .18s, box-shadow .18s, scale .12s ease-out; }
+.hotspot-leaders line { transition: opacity .18s; }
+.hotspot-leaders line[data-active=true] { opacity: 1; stroke-width: 1.5; }
+.component-card { transition: border-color .18s; }
+.component-card[data-selected=true] { border-color: var(--amber); }
+.case-limits summary span { transition: transform .18s ease-out; }
+.navigation-dialog[open] .dialog-top, .navigation-dialog[open] nav, .navigation-dialog[open] .dialog-footnote { animation: control-arrival .22s cubic-bezier(.23, 1, .32, 1) both; }
+.navigation-dialog[open] nav { animation-delay: .035s; }
+.navigation-dialog[open] .dialog-footnote { animation-delay: .07s; }
+@keyframes control-arrival { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }

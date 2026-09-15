@@ -9,13 +9,13 @@
 
 | Hal | Isi |
 |---|---|
-| Fase aktif | **Fase 7 — Showpiece polish** · Development |
-| Status fase | `todo` |
-| Bagian PLAN.md yang relevan | §6 (alur scroll), §7 (transisi case), §8 (suara), §11 (target performa), §12 (target Fase 7) |
+| Fase aktif | **Fase 7 — Showpiece polish** · Development (kembali dari Testing) |
+| Status fase | `in-dev` |
+| Bagian PLAN.md yang relevan | §3 Q37 (Enter lebih cepat), §6 (alur scroll), §11 (target performa), §12 (target Fase 7) |
 | Blocker | Tidak ada |
-| Preview sesi ini | Lokal `http://127.0.0.1:8767/` + `/work/<slug>`; bukti Fase 6 di `assets/renders/desktop/evidence/`. Server produksi aktif |
-| Revisi terakhir | Gate Fase 6 lolos (2026-09-15). Fix Testing: grid About/Skills desktop. Seluruh copy approved tetap |
-| Langkah berikut | Codex / Claude Code: Fase 7 Development (sound design, micro-interaksi, loader final, transisi) |
+| Preview sesi ini | Lokal `http://127.0.0.1:8767/`; paket bukti Testing 2026-09-15 (arsip) di `assets/renders/showpiece/evidence/` |
+| Revisi terakhir | Testing 13/13 pass; pemilik pilih opsi B (2026-09-16): Enter harus aktif lebih cepat (kini ±12 dtk di slow 4G) |
+| Langkah berikut | Sesi berikut (Codex / Claude Code): kerjakan KHUSUS item "Enter aktif lebih cepat" di checklist Fase 7 Development → `ready-for-test` → Testing ulang + gate |
 
 ## Ringkasan fase
 
@@ -28,7 +28,7 @@
 | 4 | First case file | `done` | 2026-09-15 |
 | 5 | All case files | `done` | 2026-09-15 |
 | 6 | Desktop | `done` | 2026-09-15 |
-| 7 | Showpiece polish | `todo` | — |
+| 7 | Showpiece polish | `in-dev` | — |
 | 8 | Launch ready | `todo` | — |
 | 9 | Accessibility | `deferred` | — |
 
@@ -258,13 +258,54 @@ Bahan gate Fase 6 (Testing, 2026-09-15): folder `assets/renders/desktop/evidence
 
 ### Fase 7 — Showpiece polish
 Development (Codex / Claude Code):
-- [ ] Sound design lengkap (klik instrumen, transisi)
-- [ ] Micro-interaksi, loader final, transisi dihaluskan → `ready-for-test`
+- [x] Sound design lengkap (klik instrumen, transisi)
+- [x] Micro-interaksi, loader final, transisi dihaluskan → `ready-for-test`
+- [ ] **Enter aktif lebih cepat** (keputusan pemilik 2026-09-16, opsi B, PLAN §3 Q37): Enter aktif setelah hero siap
+  (kubah + Saturnus + font); lima instrumen dimuat di belakang hero → `ready-for-test`
+
+Spesifikasi item "Enter aktif lebih cepat" (untuk sesi berikut; belum ada kode yang diubah):
+- Data ukur Testing 2026-09-15 (DevTools Slow 4G + CPU 4×, 390×844): gate tampil 1.4 dtk, **Enter aktif 12.2 dtk**
+  (profil 150 ms: 8.6 dtk). Transfer sebelum Enter 1,370,869 B = 3D 523 KB, JS 514 KB, font 253 KB, Draco 64 KB, HTML/CSS 17 KB.
+  Lima GLB instrumen = 546 KB mentah dari 737 KB; kubah + planet 191 KB.
+- Penyebab: `World` di `observatory-scene.tsx` memanggil `useGLTF` untuk ketujuh GLB dalam satu `<Suspense>`; `onReady` (frame ke-2)
+  baru jalan setelah semuanya termuat. Shell: `ready = fontsReady && (sceneReady || failed)`.
+- Arah: pisahkan muat hero (dome + ambient) dari lima instrumen. Instrumen di Suspense sendiri dan baru diminta setelah hero tampil
+  (tidak berebut bandwidth). `views`, tap BrandWall, `anchor`/leader dan visibilitas group harus aman selama instrumen belum ada
+  (chapter/case sementara tanpa model), termasuk direct URL `/work/<slug>`.
+- Model instrumen gagal kini bisa terjadi **sesudah** Enter → tetap jatuh ke still view (`failed`) + notice, seperti sekarang.
+- Tes yang mengecek fallback langsung setelah Enter perlu menunggu `data-scene=fallback`: `verify_mobile.py:59`, `verify_case.py:170`,
+  `verify_cases.py:191` (`verify_desktop.py:169` sudah menunggu). Label gate "Instruments calibrated" = copy approved, jangan diubah
+  tanpa izin pemilik (cek `showpiece_evidence.py` item loader).
+- Opsional bila masih kurang cepat, ukur dulu: font TTF → WOFF2 (253 KB), chunk JS three terbesar 710 KB mentah / 193 KB gzip.
+- Ukur sebelum/sesudah dengan `showpiece_evidence.py` (item `perfGate`, `enterEnabledMs`); jangan klaim angka tanpa ukur.
+- Selesai: lint/typecheck/build + suite regresi (CODEMAP §2; GPU satu per satu, foreground ≤10 menit) → `ready-for-test`.
+
+Bahan handoff Fase 7 Development (2026-09-15, Codex + Claude Code):
+- Preview produksi `http://127.0.0.1:8767/` (build ulang sesi ini). Bila mati: `npm run start --prefix web`.
+- Suara sintetis (tanpa berkas audio): hum + klik 5 nada per instrumen (hotspot/close/menu/summary/BrandWall tap),
+  sweep welcome/fly-in/Return/Next dua bagian. Silent entry = tanpa AudioContext; mute/tab tersembunyi = tanpa efek.
+- Loader: dial SVG + beacon, progres tak mundur antar batch GLB, hijau saat siap / amber saat still view.
+  Tombol press `scale`, hover hanya pointer fine, leader/kartu aktif, menu entrance, satu timeline departure yang batal saat Back.
+- Verifikasi: lint/typecheck/build exit 0; `verify_audio.mjs` 9/9; `verify_showpiece.py` passed 390×844 → 360×740 → 430×932;
+  regresi `verify:mobile`, `verify_case.py`, `verify_desktop.py` (HP + 1366/1440/1920) passed. Foto/JSON `assets/renders/showpiece/dev/`.
+- Copy/angka tidak berubah. Batas: emulasi Chromium GPU; belum ukur fps/4G/CPU throttle (tugas Testing) dan belum dengar di speaker HP.
 
 Testing (Claude Code / Antigravity):
-- [ ] Performa sesuai target PLAN §11 lewat emulasi (CPU throttle + 4G lambat, fps, ukuran aset)
-- [ ] Paket bukti `assets/renders/showpiece/evidence/` dikirim
+- [x] Performa sesuai target PLAN §11 lewat emulasi (CPU throttle + 4G lambat, fps, ukuran aset)
+- [x] Paket bukti `assets/renders/showpiece/evidence/` dikirim (13/13 pass)
+- [ ] Tes ulang setelah fix "Enter aktif lebih cepat" (perfGate + regresi), paket bukti diperbarui
 - [ ] Gate
+
+Bahan gate Fase 7 (Testing, 2026-09-15 — arsip; diulang setelah fix Enter): folder `assets/renders/showpiece/evidence/` — `showpiece-walkthrough.mp4`
+(H.264 390×844 **dengan suara asli situs**), `contact-sheet.jpg` (24 frame), `01-loader.png`, `05-flight-in.png`,
+`11-perf-gate.png`, `12-perf-fps.png` (grafik frame), `13-micro.png`, `14-sound-control.png`, `phones/phones-sheet.jpg`, `evidence.json`.
+- Performa (emulasi HP, CPU 4×): gate tampil 1.4 dtk di slow 4G (target < 2.5); fps 56–60 di semua segmen (min 45);
+  3D total 737 KB (batas 8 MB), GLB terbesar 317 KB (batas 1.5 MB); pixel ratio 3D maks 1.5×. Stres CPU 6×: 52–60 fps.
+- Suara: nada klik beda per instrumen (660/520/440/780/880 Hz), sweep fly-in/Next/Return, mute langsung sunyi + diingat.
+- **Temuan untuk pemilik (bukan fail otomatis):** tombol Enter baru bisa ditekan ±12 dtk di slow 4G (menunggu 7 model + font,
+  1.37 MB). Opsi: terima, atau kembali ke Development agar Enter aktif lebih cepat. → **Pemilik pilih B (2026-09-16).**
+- Bug tes diperbaiki (bukan bug situs): `verify_desktop` timeout 1440×900 karena ekor animasi Lenis menimpa `scrollTo`.
+- Batas: emulasi Chromium; GPU laptop tidak di-throttle (beban GPU HP belum terwakili); HP fisik = Fase 8.
 
 ### Fase 8 — Launch ready
 Development (Codex / Claude Code):
@@ -299,12 +340,21 @@ Testing (Claude Code / Antigravity):
 | 2026-09-15 | Gate Fase 4 lolos; copy case CrossCheck di-approve (DRAFT dilepas); flight-in diterima apa adanya; `assets/` keluar dari git (lokal saja). Disalin ke PLAN §3 Q34 | Pemilik, chat sesi Claude Code |
 | 2026-09-15 | Gate Fase 5 lolos; copy 4 case baru di-approve (DRAFT dilepas); video DueWatch opsi 1 (catatan tanggal simulasi di bawah video dipertahankan). Disalin ke PLAN §3 Q35 | Pemilik, chat sesi Antigravity |
 | 2026-09-15 | Gate Fase 6 lolos (dari video bukti desktop); layar pertama case desktop tanpa instrumen diterima apa adanya. Disalin ke PLAN §3 Q36 | Pemilik, chat sesi Claude Code |
+| 2026-09-16 | Temuan Testing Fase 7: pemilik pilih opsi B ("B dong buat lebih cepat") — Enter aktif setelah hero siap, instrumen dimuat di belakang. Fase 7 kembali ke Development; dikerjakan sesi berikut, bukan sesi ini. Disalin ke PLAN §3 Q37 | Pemilik, chat sesi Claude Code |
+| 2026-09-16 | Setiap akhir fase (gate lolos) wajib git commit + push ke `origin main`; ditulis di `PROMPT.md` (langkah tutup sesi no. 4). Disalin ke PLAN §3 Q38 | Pemilik, chat sesi Claude Code |
 
 ## Log sesi
 
 > Entri terbaru di atas. Singkat, 1–2 baris: tanggal · harness · fase — apa yang dikerjakan,
 > verifikasi, berikutnya. Detail teknis taruh di CODEMAP / folder bukti, bukan di sini.
 
+- **2026-09-16 · Claude Code · Fase 7 → in-dev** — Pemilik pilih opsi B (Enter lebih cepat). Belum dikerjakan atas permintaan pemilik;
+  spesifikasi + data ukur ditulis di checklist Fase 7 Development. Aturan baru: commit + push wajib tiap akhir fase (PROMPT).
+  Commit + push kerja Fase 7 atas permintaan pemilik. Berikutnya: sesi Development khusus item itu.
+- **2026-09-15 · Claude Code · Fase 7 → awaiting-gate** — Testing: paket bukti 13/13 pass (MP4 bersuara, performa §11 lewat emulasi),
+  fix tes `verify_desktop`; 6 suite regresi pass. Temuan Enter ±12 dtk di slow 4G diajukan. Berikutnya: gate pemilik.
+- **2026-09-15 · Codex + Claude Code · Fase 7 → ready-for-test** — Codex: suara klik/sweep, loader dial, micro-interaksi, timeline transisi + 2 tes fokus.
+  Claude Code menutup: build ulang, lint/typecheck/build + `verify_audio` 9/9 + `verify_showpiece`/`verify:mobile`/`verify_case`/`verify_desktop` pass. Berikutnya: Testing (performa §11, paket bukti), gate.
 - **2026-09-15 · Claude Code · Fase 6 → done** — Testing desktop: fix grid About/Skills, skrip + paket bukti (MP4 1440×900, 21 item), regresi HP + desktop pass.
   Pemilik nyatakan lolos. Berikutnya: Fase 7 Development.
 - **2026-09-15 · Codex · Fase 6 → ready-for-test** — Layout desktop homepage + lima case, header nav, kamera/hotspot responsif.

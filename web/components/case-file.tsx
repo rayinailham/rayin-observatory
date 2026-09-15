@@ -15,6 +15,16 @@ export default function CaseFile({ id }: { id: InstrumentId }) {
   const next = instruments.find(item => item.id === caseFiles[(index + 1) % caseFiles.length].id)!;
   const [selected, setSelected] = useState<number | null>(null);
   const root = useRef<HTMLElement>(null);
+  const card = useRef<HTMLDivElement>(null);
+  const cardMotion = useRef<Animation | null>(null);
+  function inspect(next: number | null, pointer: boolean) {
+    setSelected(next);
+    cardMotion.current?.cancel();
+    if (pointer) cardMotion.current = card.current?.animate([
+      { opacity: .55, transform: 'translateY(5px)' },
+      { opacity: 1, transform: 'translateY(0)' },
+    ], { duration: 180, easing: 'cubic-bezier(.23, 1, .32, 1)' }) ?? null;
+  }
   useEffect(() => {
     const context = gsap.context(() => {}, root);
     const observer = new IntersectionObserver(entries => entries.forEach(entry => {
@@ -28,7 +38,7 @@ export default function CaseFile({ id }: { id: InstrumentId }) {
       observer.unobserve(entry.target);
     }), { threshold: .55 });
     root.current?.querySelectorAll('.case-reading').forEach(item => observer.observe(item));
-    return () => { observer.disconnect(); context.revert(); };
+    return () => { cardMotion.current?.cancel(); observer.disconnect(); context.revert(); };
   }, []);
 
   return <main ref={root} className="case-page" data-case={id}>
@@ -51,16 +61,16 @@ export default function CaseFile({ id }: { id: InstrumentId }) {
       <div className="case-inspection">
       <div className="case-instrument-still" aria-hidden="true" style={{ backgroundImage: `url('/images/${id}-fallback.png')` }} />
       <svg className="hotspot-leaders" aria-hidden="true">
-        {file.components.map(item => <line key={item.id} data-hotspot-line={item.id} x1={`${item.marker[0]}%`} y1={`${item.marker[1]}%`} x2="50%" y2="45%" />)}
+        {file.components.map((item, i) => <line key={item.id} data-hotspot-line={item.id} data-active={selected === i} x1={`${item.marker[0]}%`} y1={`${item.marker[1]}%`} x2="50%" y2="45%" />)}
       </svg>
       {file.components.map((item, i) => <button key={item.id} className={`instrument-hotspot hotspot-${i}`} data-hotspot={item.id}
         style={{ left: `${item.marker[0]}%`, top: `${item.marker[1]}%` }}
         aria-label={`Inspect ${item.title}`} aria-expanded={selected === i} aria-controls="component-card"
-        onClick={() => setSelected(selected === i ? null : i)}>{String(i + 1).padStart(2, '0')}</button>)}
+        onClick={event => inspect(selected === i ? null : i, event.detail > 0)}>{String(i + 1).padStart(2, '0')}</button>)}
       </div>
-      <div id="component-card" className="component-card" aria-live="polite">
+      <div ref={card} id="component-card" className="component-card" data-selected={selected !== null} aria-live="polite">
         {selected === null ? <><p className="section-kicker">Inspection controls</p><p>{lines(file.components.map((item, i) => `${String(i + 1).padStart(2, '0')} / ${item.title}`))}</p></> : <>
-          <div className="component-card-top"><h3>{file.components[selected].title}</h3><button aria-label="Close component card" onClick={() => setSelected(null)}>×</button></div>
+          <div className="component-card-top"><h3>{file.components[selected].title}</h3><button aria-label="Close component card" onClick={event => inspect(null, event.detail > 0)}>×</button></div>
           <p className="component-label">{file.components[selected].label}</p><p>{file.components[selected].body}</p>
         </>}
       </div>

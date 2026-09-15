@@ -4,7 +4,7 @@
 > menunjuknya dan berkas akan diubah. Update setiap berkas dibuat/diubah/dipindah/dihapus.
 > Entri tidak cocok dengan kode = bug; perbaiki saat ditemukan.
 
-**Terakhir diperbarui:** 2026-09-15 · Claude Code · Fase 6 Desktop Testing: `desktop_evidence.py` + paket bukti `assets/renders/desktop/evidence/`; fix grid About/Skills desktop (baris terakhir `1fr`). Gate Fase 6 lolos 2026-09-15 → `done`; Fase 7 `todo`.
+**Terakhir diperbarui:** 2026-09-15 · Claude Code · Fase 7 Testing: `showpiece_evidence.py` + paket `assets/renders/showpiece/evidence/` (13/13 pass, MP4 bersuara, performa PLAN §11); fix tes `verify_desktop.position` → `awaiting-gate`. Kode situs tidak diubah. 2026-09-16: pemilik pilih opsi B (Enter lebih cepat) → Fase 7 `in-dev`; spesifikasi di PROGRESS, belum dikerjakan.
 
 ## 1. Ringkasan arsitektur
 
@@ -41,6 +41,9 @@ Semua dari root project kecuali disebut lain.
 
 | Perintah | Fungsi |
 |---|---|
+| `cd web/scripts && timeout 1500 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python showpiece_evidence.py` | Paket bukti Testing Fase 7 → `assets/renders/showpiece/evidence/`: 13 item, MP4 390×844 **dengan audio asli situs**, performa PLAN §11 (gate slow 4G + CPU 4×, fps 4×/6×, GLB, DPR), contact sheet, `evidence.json`; exit 1 bila ada fail. Jalankan setelah 6 suite regresi (item `phones` membaca JSON-nya). Server :8767 aktif. |
+| `node web/scripts/verify_audio.mjs` | Fase 7: 9 tes lifecycle audio (resume race, batas voice, hidden, mute, cleanup) → `showpiece/dev/audio-verification.json`. |
+| `timeout 600 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python web/scripts/verify_showpiece.py` | Fase 7 Development: tiga HP, Web Audio nyata, loader, lima pitch, chain/return/history/fallback → `showpiece/dev/`. Server :8767 aktif; suite GPU dijalankan bergantian. |
 | `npm ci --prefix web` | Instal versi terkunci dari package-lock. |
 | `npm run build --prefix web` | Build produksi + TypeScript + prerender statis. |
 | `npm run start --prefix web` | Preview produksi `0.0.0.0:8767`. |
@@ -82,7 +85,7 @@ Preview arsip Fase 0: `http://127.0.0.1:8766/style-lock/` bila server Python din
 ```text
 Rayin Observatory/
 ├── PLAN.md                         rencana terkunci; §3 Q32 ditambah 2026-09-15 (gate Fase 3)
-├── PROMPT.md                       prompt sesi; tidak diubah
+├── PROMPT.md                       prompt sesi; 2026-09-16 + aturan commit/push wajib tiap akhir fase
 ├── PROGRESS.md                     status fase + checklist + log
 ├── CODEMAP.md                      peta ini
 ├── .gitignore                      root: assets/, *.blend1, Python cache/venv, env, OS files
@@ -106,11 +109,14 @@ Rayin Observatory/
 │   │   ├── instrument-motion.ts   per-instrument idle rigs + Saturn rig (moons, ring dust)
 │   │   └── sky.tsx                full-screen sky shader: gradient, stars, nebula
 │   ├── lib/cases.ts                five approved case files + CaseView
-│   ├── lib/ambient.ts             original oscillator hum / fade / lifecycle
+│   ├── lib/ambient.ts             original hum + five clicks + camera sweeps / mute / lifecycle
 │   ├── lib/instruments.ts         ordered chapter copy, readings, dialog context + types
 │   ├── lib/skills.ts              grouped skills and evidence-project IDs
 │   ├── scripts/case_files_evidence.py  Phase 5 Testing evidence pack (all 5 cases + chain)
 │   ├── scripts/desktop_evidence.py  Phase 6 Testing evidence pack (desktop MP4 + 21 items)
+│   ├── scripts/verify_audio.mjs    Phase 7 controlled audio lifecycle checks
+│   ├── scripts/verify_showpiece.py  Phase 7 real audio + loader + transitions, three phones
+│   ├── scripts/showpiece_evidence.py  Phase 7 Testing evidence pack (MP4 + real audio, PLAN §11 perf)
 │   ├── scripts/verify_desktop.py  Phase 6 Development: HP → desktop, 5-case chain + layout checks
 │   ├── scripts/verify_cases.py    focused Phase 5 checks: five cases + Next chain
 │   ├── scripts/verify_case.py     focused Phase 4 development checks (CrossCheck detail)
@@ -148,6 +154,8 @@ Rayin Observatory/
     │   ├── rayina-crop.png         crop + edit latar tanpa logo
     │   └── rayina-duotone.png      treatment navy + scan
     ├── renders/
+    │   ├── showpiece/evidence/   Phase 7 Testing: MP4 390×844 + real audio, contact sheet, perf PNG/chart, phones/ + edges/, evidence.json
+│   ├── showpiece/dev/        Phase 7 PNGs, verification.json, audio-verification.json, env-check.md
     │   ├── desktop/evidence/     Phase 6 Testing: PNG per item, MP4 1440×900, contact sheet, viewports/ + phones/ sheets, evidence.json
     │   ├── desktop/dev/          Phase 6 before/review/final PNGs, verification.json, env-check.md
     │   ├── case-files/evidence/   Phase 5 Testing evidence: 17 items, MP4 walkthrough, contact sheet, viewports sheet, evidence.json
@@ -199,7 +207,7 @@ Rayin Observatory/
 - **Dipakai oleh:** route `[slug]`, shell navigasi (delegasi klik), scene proyeksi leader, verify_case / verify_cases.
 - **Bergantung pada:** `lib/cases.ts`, `lib/instruments.ts` (nama/kategori), GSAP, Next Link; `/images/<slug>-fallback.png`,
   `/images/<slug>-demo-poster.jpg`, `/videos/<slug>-explainer.mp4`.
-- **State / efek samping:** selected card; IntersectionObserver count-up sekali per reading; cleanup tween/observer.
+- **State / efek samping:** selected card; `inspect(next, pointer)` mengubah selection + WAAPI opacity/translate 180ms untuk pointer; animasi lama dibatalkan saat tap berikut/cleanup. `data-active` pada leader, `data-selected` pada kartu. IntersectionObserver count-up sekali per reading; cleanup tween/observer.
   Video native controls, muted, playsInline, preload none.
 - **Catatan:** pengganti `crosscheck-case.tsx`; teks CrossCheck identik kecuali blok Next (kini "Open the next case file" → case SurgeLine, approved di gate Fase 5).
   Fase 6: wrapper `.case-title` + `.case-brief-copy` untuk brief desktop; `.case-inspection` berisi still/SVG/marker dengan koordinat lokal, terpisah dari heading/kartu. Mobile tetap satu stage.
@@ -278,13 +286,56 @@ Rayin Observatory/
 - **State / efek samping:** generated; jangan edit tangan.
 - **Catatan:** emulasi Chromium GPU; bukan klaim fps/HP fisik (Fase 7/8).
 
+### `web/scripts/verify_audio.mjs`
+- **Peran:** tes lifecycle deterministik kelas audio produksi, dengan AudioContext/clock terkendali.
+- **Ekspor utama:** script Node; transpile `lib/ambient.ts` in-memory lewat TypeScript lokal, lalu 9 assertion groups.
+- **Dipakai oleh:** Development / Testing Fase 7; tidak memerlukan server.
+- **Bergantung pada:** Node built-ins, TypeScript dari `web/node_modules`.
+- **State / efek samping:** tulis `audio-verification.json` hanya sesudah semua assert lulus; gagal → exit 1.
+- **Catatan:** membuktikan silent entry, resume-vs-mute/dispose race, rate limit/batas voice, penggantian sweep, hidden tab, disconnect dan close; browser suite menguji sinyal audio nyata.
+
+### `web/scripts/verify_showpiece.py`
+- **Peran:** verifikasi fokus Fase 7 Development pada 390×844 → 360×740 → 430×932.
+- **Ekspor utama:** `run`, `phone`, `edges`, `AUDIO` (instrumentasi AudioContext asli), `enter`, `idle`, `position`; `OBSERVATORY_URL` override.
+- **Dipakai oleh:** Development; tidak menghasilkan paket gate.
+- **Bergantung pada:** venv CrossCheck Python Playwright; Chromium GPU ANGLE gl-egl; preview produksi :8767.
+- **State / efek samping:** PNG dan `verification.json` running/passed/failed ke `showpiece/dev/`.
+- **Catatan:** monotonic loader, silent entry tanpa AudioContext, RMS On/Off nyata, lima frekuensi terjadwal (bukan AudioParam.value awal quantum), hotspot/card/leader + press scale, bounded/disconnected voices, Next/Return, Canvas sama, nol overflow/error/HTTP ≥400. Edge: default welcome, visibility simulasi + master nyata, scroll/focus return, history interrupt, model sengaja ditahan sampai still-view escape 15s, AudioContext sengaja gagal. Bukan uji FPS/4G atau speaker HP.
+
+### `web/scripts/showpiece_evidence.py`
+- **Peran:** generator paket bukti Testing Fase 7 (gate pemilik), bukan tes Development.
+- **Ekspor utama:** async `run()`, `main_flow`, `perf_gate`, `perf_fps`, `dpr_cap`, `assets_check`, `hover_check`, `phones_check`, `edges_check`, `mux`, `sheets`; `ITEMS` (13), `FINDINGS`, `REGRESSIONS`, `SLOW_4G` (preset DevTools), `LIGHT_4G` (profil Fase 1), `TAP`/`STOP_REC`, `TIMING`, `FRAMES`.
+- **Dipakai oleh:** agen Testing; jalankan dari `web/scripts/` (impor `verify_showpiece` sebagai `vs` + `case_files_evidence.CASES/flight/overflow/tile/top`).
+- **Bergantung pada:** server :8767, Chromium GPU ANGLE, matplotlib + Pillow + ffmpeg/ffprobe (venv CrossCheck); JSON status 6 suite regresi.
+- **State / efek samping:** hapus lalu tulis ulang `assets/renders/showpiece/evidence/`; mengalihkan `vs.OUT` ke `evidence/edges` dan `evidence/phones` agar screenshot `vs.edges`/`vs.phone` masuk paket.
+- **Catatan:** audio MP4 = output Web Audio situs sendiri (gain → destination disadap ke `MediaStreamDestination` + `MediaRecorder`), dihentikan sebelum reload lalu di-mux dengan `adelay` = selisih mulai rekaman vs mulai video. Scroll HP = touch swipe CDP `Input.dispatchTouchEvent` (`synthesizeScrollGesture` tidak menggulir halaman ini). FPS = interval rAF (beban main thread); GPU host tidak di-throttle → bukan klaim GPU HP. Jebakan: Lenis (`syncTouch`, nav header/menu) masih mengayun setelah cek jarak < 3 px; `scrollTo` native saat itu ditimpa → `settle_to` mengulang sampai mendarat (jangan menunggu kelas `lenis-scrolling`, bisa bertahan). Setelah rantai, Return ke `#<slug>` memfokus `h2` chapter (bukan tombol Open case file; itu hanya bila kembali ke posisi scroll tersimpan).
+
+### `assets/renders/showpiece/dev/`
+- **Peran:** foto dan hasil uji Development Fase 7; terpisah dari paket Testing.
+- **Ekspor utama:** `gate-`, `menu-`, `flight-`, `<slug>-inspection-`, `return-` × `390x844|360x740|430x932`; `loader-pending-390x844.png`, `loader-fallback-390x844.png`, `audio-unavailable-390x844.png`; `verification.json`, `audio-verification.json`, `env-check.md`.
+- **Dipakai oleh:** developer review, handoff Testing.
+- **Bergantung pada:** verify_showpiece.py, verify_audio.mjs, real engine launch check.
+- **State / efek samping:** PNG/JSON generated dan dapat ditimpa saat rerun; jangan edit tangan.
+- **Catatan:** paket gate Testing ada di `showpiece/evidence/` (lihat entri berikut); `verification.json` di sini ditulis ulang tiap rerun `verify_showpiece`.
+
+### `assets/renders/showpiece/evidence/`
+- **Peran:** paket bukti gate Fase 7 untuk penilaian pemilik.
+- **Ekspor utama:** `showpiece-walkthrough.mp4` (H.264 + AAC, 390×844, ±112 dtk, audio asli situs mulai ±13.4 dtk saat Enter); `contact-sheet.jpg` (24 frame);
+  `01-loader.png`, `05-flight-in.png`, `11-perf-gate.png`, `12-perf-fps.png` (grafik frame 4×/6×), `13-micro.png`, `14-sound-control.png` + PNG sumber `01a`…`11b`;
+  `phones/` (`vs.phone` 360×740/430×932 + `phones-sheet.jpg`), `edges/` (loader stall/fallback, audio unavailable); `evidence.json` (13 item + `measurements`).
+- **Dipakai oleh:** pemilik saat gate; PROGRESS.
+- **Bergantung pada:** `showpiece_evidence.py`.
+- **State / efek samping:** generated; jangan edit tangan.
+- **Catatan:** hasil 2026-09-15: gate FCP 1.43 s (DevTools Slow 4G + CPU 4×), Enter aktif 12.2 s (temuan pemilik), transfer 1,370,869 B; fps 4× 56.3–60; GLB 737,440 B; canvas 1.5× di DPR 2/3. Status `verify_desktop` di JSON = rerun 1440×900 + 1920×1080 saja (390/1366 lolos dua run sebelumnya hari itu; suite penuh >10 menit, run background dibunuh saat memori rendah).
+
 ### `web/scripts/verify_desktop.py`
 - **Peran:** verifikasi Development Fase 6, HP 390×844 dahulu lalu 1366×768, 1440×900, 1920×1080.
 - **Ekspor utama:** `main`, `viewport`, `check_case`, `position`, `capture`, `fallback`; `--sizes` untuk rerun fokus, `--breakpoints-only` untuk resize, `--hotspots-only` untuk bukti marker stabil; `OBSERVATORY_URL` opsional.
 - **Dipakai oleh:** Codex Development; Testing dapat memakai ulang, tetapi paket gate dibuat tahap Testing.
 - **Bergantung pada:** Python Playwright dari venv CrossCheck, Chromium ANGLE GPU, preview produksi.
 - **State / efek samping:** tulis PNG dan `verification.json` ke `assets/renders/desktop/dev/`; failed check menghasilkan exit 1. Capture hotspot/fallback/resize menunggu warna aktif selesai bertransisi; data hasil terpisah dari suite penuh.
-- **Catatan:** verifikasi rail tidak tumpang tindih, header nav, 3 hotspot/case + endpoint nyata, alur horizontal, readings, rantai Next penuh/wrap, history, case→About, satu Canvas, nol overflow/error/HTTP ≥400 alur normal; fallback diblok sengaja. Resize 768→1024→1440→390 memeriksa pane, proyeksi, dan identitas Canvas.
+- **Catatan:** Testing Fase 7: `position()` mengulang `scrollTo` (≤12 × 300 ms) sampai mendarat, lalu assert — dulu 1440×900 timeout konsisten setelah nav Contact (ekor animasi Lenis menimpa lompatan; tes saja, bukan bug situs). Menunggu kelas `lenis-scrolling` hilang tidak dipakai: kelas itu bisa bertahan setelah scroll native.
+  Verifikasi rail tidak tumpang tindih, header nav, 3 hotspot/case + endpoint nyata, alur horizontal, readings, rantai Next penuh/wrap, history, case→About, satu Canvas, nol overflow/error/HTTP ≥400 alur normal; fallback diblok sengaja. Resize 768→1024→1440→390 memeriksa pane, proyeksi, dan identitas Canvas.
 
 ### `assets/renders/desktop/dev/`
 - **Peran:** baseline dan bukti verifikasi Development Fase 6; bukan paket gate.
@@ -378,6 +429,7 @@ Rayin Observatory/
   Fase 5: posisi `.hotspot-<i>` inline dari data (aturan `.hotspot-0..2` dihapus); `.case-instrument-still` tanpa url (gambar inline per slug);
   `.contact-dialog` dihapus bersama dialog preview.
   Fase 6: `--page-gutter`, breakpoint 1024px; hero/chapter rail kiri, gate dua kolom, Skills/About/Contact grid; case brief dua kolom, `.case-inspection` kanan, kartu kiri, flow horizontal, readings dua kolom dan tools tiga kolom. Fallback mengikuti area objek.
+  Fase 7: dial SVG progres dan beacon loader; status ready hijau / fallback amber; press memakai `scale` terpisah (transform posisi tetap), hover arrow hanya pointer fine; border/leader kartu aktif, menu entrance singkat.
   Testing Fase 6: `#skills` + `.about-section` `grid-template-rows: auto auto auto 1fr` — accordion/portrait yang span semua baris dulu meregangkan baris teks (paragraf About berjarak ±115px).
   `.email-cta` sekarang `<a>`; `.contact-links a` baris 58px, nilai mono amber.
   Revisi langit: `.scene-layer` gradient (fallback bila WebGL gagal), overlay tinggal fade bawah ke ink;
@@ -395,7 +447,7 @@ Rayin Observatory/
   berubah. Menu menghentikan Lenis; menu scroll memulai Lenis sebelum scrollTo, fokus heading
   saat selesai. Skill links menambah `.skill-highlight`. Delegasi klik: `[data-home-target]` → leaveCase,
   `[data-case-target]` → chainCase, `[data-open-case]` → openCase (dialog preview dihapus Fase 5).
-- **Catatan:** Enter menunggu tujuh model + font settle; error → lima still view berlabel.
+- **Catatan:** Fase 7: subscribe progress drei dengan high-water mark antar batch; Enter tetap menunggu tujuh model + font settle, tanpa minimum loading delay. Dial `data-ready` / `data-fallback`; error → lima still view berlabel. Audio gesture entry/welcome, hotspot/close/menu/summary click, fly-in/out/Next sweep. Satu `flight` timeline mencakup departure + sweep; dibatalkan saat pathname berubah/unmount (Back saat terbang tidak boleh push route lama).
   Contact sekarang section, bukan dialog placeholder Fase 1–2. Fase 4 memisahkan lifecycle Lenis root dari trigger per pathname; homeScroll/homeChapter/homeTarget, `CaseView` mix, `data-route` / `data-flight`, root `pageContent` fade + inert. Focus dipulihkan sesudah inert dilepas. Cleanup trigger/ticker/observer/audio.
   Fase 5: `isCase` = `/work/<slug>` dikenal; layout effect set `caseView.index` + chapter case. `chainCase`: mix 1→0 (mundur), chapter
   `{index: next, from: prev, transition 0→1}` (sapuan), lalu push → arrival terbang masuk; homeScroll/homeChapter di-null supaya Return → `#<slug>` case aktif.
@@ -415,7 +467,7 @@ Rayin Observatory/
 - **State / efek samping:** clone material + disposal; useFrame membaca ref, tidak state React scroll.
   Aktif dan pendahulunya terlihat saat transisi; kamera interpolasi orbit. Idle per instrumen di
   `instrument-motion.ts` (`rig.update` hanya saat group terlihat). Klik di chapter BrandWall (bukan
-  tombol/link/dialog) → `rig.observe()`; status detektor → `#observer-readout[data-observed]`.
+  tombol/link/dialog; hanya `#brandwall .instrument-stage` / `.case-inspection`, sudah entered, flight idle) → `rig.observe()` + prop `onInstrumentTap(4)`; status detektor → `#observer-readout[data-observed]`.
   `pointScale` = DPR tiap frame. Satu environment lokal, DPR 1–1.5.
 - **Catatan:** langit = `<Sky>` (titik bintang lama dihapus); Saturnus (`saturn()` rig) tetap ditambat ke kamera, wobble + skala .072. Kubah approved tetap utuh.
   SceneBoundary gagal satu model → still view menyeluruh; semua chapter tetap dapat dibaca. `CaseView` mix menginterpolasi sudut, jarak, zoom ortografis; model `caseView.index` mengikuti bounds `#case-instrument` (skala case = min(w·.62, h·.33)/fit, fit 4.4 CrossCheck / 3.5 lain). Canvas tetap root.
@@ -448,12 +500,11 @@ Rayin Observatory/
 - **Catatan:** semua geometri/material buatan rig di-dispose lewat `rig.dispose()`; `frustumCulled=false` untuk objek dinamis.
 
 ### `web/lib/ambient.ts`
-- **Peran:** hum observatorium sintetis original tanpa sample eksternal.
-- **Ekspor utama:** `ObservatoryAudio.setEnabled`, `visibilityChanged`, `dispose`.
+- **Peran:** sound design sintetis original: hum, lima klik instrumen, sweep kamera; tanpa sample/aset audio eksternal.
+- **Ekspor utama:** `ObservatoryAudio.setEnabled`, `click(index)`, `transition(in|out)`, `visibilityChanged`, `dispose`.
 - **Dipakai oleh:** shell; AudioContext dibuat hanya dari gesture Enter/toggle.
 - **Bergantung pada:** Web Audio API, document visibility.
-- **State / efek samping:** oscillator/gain, resume/fade, mute tab tersembunyi, close pada cleanup;
-  request generation menjaga hasil resume lama tidak membalik intent terbaru.
+- **State / efek samping:** oscillator/gain di satu master; pitch klik 660/520/440/780/880 Hz, envelope 120ms; sweep dua sine 780/660ms. Rate limit klik 75ms, maksimum enam voice transien, transition mengganti voice lama. `onended` disconnect; mute/hidden langsung stop/disconnect transien + fade hum; dispose stop/close. Request generation menjaga hasil resume lama tidak membalik intent terbaru.
 - **Catatan:** kualitas/volume pada speaker HP fisik tetap bahan gate pemilik.
 
 ### `web/scripts/verify_mobile.py`
@@ -521,13 +572,14 @@ Rayin Observatory/
 - **Catatan:** `.gitignore` dibuat sebagai konfigurasi; tidak ada operasi git sesi ini.
 
 ### `web/README.md`
-- **Peran:** run/preview, handoff Fase 3–6, tabel sumber semua copy bisnis/angka dan skill-project; seluruh copy approved Fase 5, istilah DRAFT dalam tabel adalah riwayat provenance.
+- **Peran:** run/preview, handoff Fase 3–7, tabel sumber semua copy bisnis/angka dan skill-project; seluruh copy approved Fase 5, istilah DRAFT dalam tabel adalah riwayat provenance.
 - **Ekspor utama:** commands build/start/verify/tunnel; status copy dan kontak; Blender node contracts.
 - **Dipakai oleh:** pemilik dan harness Testing.
 - **Bergantung pada:** PLAN §4–§12 relevan, lima dossier §1/§3/§5 dan batas demonstrasi masing-masing.
 - **State / efek samping:** tidak ada.
 - **Catatan:** fokus Automation Engineer dari klarifikasi pemilik; copy approved Fase 3; skill harian terpasang
   dinyatakan; kontak asli tercatat. Perintah paket bukti Testing ada di Verification.
+  Fase 7 menambah kontrak suara/loader/transisi, perintah dua tes fokus, batas Development vs pengukuran performa Testing. Fase 6 gate sudah passed.
   Script bukti Fase 1–2 diarsipkan, bukan acceptance Fase 3.
 
 ### `web/lib/instruments.ts`
@@ -794,7 +846,7 @@ Rayin Observatory/
   tahap Development (Codex/Claude Code) lalu Testing (Claude Code/Antigravity, paket bukti di
   `assets/renders/<slug-fase>/evidence/`); lihat PLAN §12 dan `PROMPT.md`.
 - **State / efek samping:** diperbarui setiap sesi; tidak menandai fase done tanpa gate pemilik.
-- **Catatan:** Fase 0 `done` 2026-09-14; Fase 1 `done` 2026-09-15; Fase 2 `done` 2026-09-15; Fase 3 `done` 2026-09-15. Fase 4 `done` 2026-09-15 (copy case approved). Fase 5 `done` 2026-09-15 (gate lolos, seluruh copy approved, DRAFT dilepas, opsi 1 DueWatch). Fase 6 (Desktop) `done` 2026-09-15 (gate dari video bukti desktop). Fase 7 `todo`. `assets/` tidak dilacak git sejak 2026-09-15 (tetap lokal; riwayat commit lama masih memuatnya). Log sesi dijaga ringkas.
+- **Catatan:** Fase 0 `done` 2026-09-14; Fase 1 `done` 2026-09-15; Fase 2 `done` 2026-09-15; Fase 3 `done` 2026-09-15. Fase 4 `done` 2026-09-15 (copy case approved). Fase 5 `done` 2026-09-15 (gate lolos, seluruh copy approved, DRAFT dilepas, opsi 1 DueWatch). Fase 6 (Desktop) `done` 2026-09-15 (gate dari video bukti desktop). Fase 7 `in-dev` (Testing 13/13; pemilik pilih opsi B "Enter lebih cepat" 2026-09-16, dikerjakan sesi berikut). `assets/` tidak dilacak git sejak 2026-09-15 (tetap lokal; riwayat commit lama masih memuatnya). Log sesi dijaga ringkas.
 
 ## 5. Aset
 
@@ -832,6 +884,12 @@ Ukuran byte aset Fase 0 diukur 2026-09-14; aset Fase 1 pada 2026-09-15.
 | `jetbrains-mono.ttf` | Google Fonts | — | 112172 | readout |
 
 ## 6. Alur penting
+
+Fase 7:
+1. Loader subscribe tiga.js/drei → progres tidak mundur; tujuh GLB + font settle → dial ready, tombol aktif.
+2. Enter gesture → resume hum + welcome sweep bila sound on; silent/remembered off tidak membuat AudioContext.
+3. Hotspot/close/BrandWall tap → klik instrumen; open/return/Next → sweep; semua lewat master dan guard visibility/mute.
+4. Departure timeline → route arrival; cleanup pathname membatalkan callback navigasi basi; kartu pointer WAAPI 180ms dapat diinterupsi.
 
 Fase 5:
 1. CTA chapter mana pun → `openCase(i)`: simpan home scroll/chapter, `caseView.index = i`, tween mix → push `/work/<slug>`.
