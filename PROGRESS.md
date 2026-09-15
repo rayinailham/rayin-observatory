@@ -9,12 +9,12 @@
 
 | Hal | Isi |
 |---|---|
-| Fase aktif | **Fase 4 — First case file** · tahap **Development** (belum mulai) |
-| Status fase | `todo` |
-| Bagian PLAN.md yang relevan | §4 (peta situs), §5 (lima instrumen + urutan), §6 (alur scroll), §8 (identitas FINAL), §9 (skills), §10 (aturan copy), §11 (arsitektur), §12 (target fase) |
+| Fase aktif | **Fase 4 — First case file** · Testing selesai; menunggu approval copy + gate |
+| Status fase | `awaiting-gate` |
+| Bagian PLAN.md yang relevan | §4 (peta situs), §5 (lima instrumen + urutan), §6 (alur scroll), §7 (template case + transisi), §8 (identitas FINAL), §9 (skills), §10 (aturan copy), §11 (arsitektur), §12 (target fase) |
 | Blocker | Tidak ada |
-| Preview sesi ini | Lokal `http://127.0.0.1:8767/`; tunnel tidak dinyalakan. Arsip bukti Fase 3 `assets/renders/full-observatory/evidence/` |
-| Langkah berikut | Fase 4 Development: route `/work/crosscheck` + transisi kamera (PLAN §7) |
+| Preview sesi ini | Lokal `http://127.0.0.1:8767/work/crosscheck`; tunnel tidak dinyalakan. Bukti Testing `assets/renders/case-crosscheck/evidence/` |
+| Langkah berikut | Pemilik: lihat MP4 + contact sheet, putuskan temuan flight-in (terima / kembali ke Development), approve copy case, gate |
 
 ## Ringkasan fase
 
@@ -24,7 +24,7 @@
 | 1 | First light | `done` | 2026-09-15 |
 | 2 | One instrument alive | `done` | 2026-09-15 |
 | 3 | Full observatory | `done` | 2026-09-15 |
-| 4 | First case file | `todo` | — |
+| 4 | First case file | `awaiting-gate` | — |
 | 5 | All case files | `todo` | — |
 | 6 | Desktop | `todo` | — |
 | 7 | Showpiece polish | `todo` | — |
@@ -144,16 +144,43 @@ Bahan gate Fase 3: `full-observatory-walkthrough.mp4` + `contact-sheet.jpg` (24 
 
 ### Fase 4 — First case file
 Development (Codex / Claude Code):
-- [ ] Route `/work/crosscheck` dengan template PLAN §7
-- [ ] Transisi kamera terbang masuk / mundur
-- [ ] Hotspot instrumen + kartu komponen
-- [ ] Readings teranimasi, Tools used, demo video; copy DRAFT → `ready-for-test`
+- [x] Route `/work/crosscheck` dengan template PLAN §7
+- [x] Transisi kamera terbang masuk / mundur
+- [x] Hotspot instrumen + kartu komponen
+- [x] Readings teranimasi, Tools used, demo video; copy DRAFT → `ready-for-test`
 
 Testing (Claude Code / Antigravity):
-- [ ] Tes otomatis item di atas + transisi masuk/kembali; bug diperbaiki + tes ulang
-- [ ] Paket bukti `assets/renders/case-crosscheck/evidence/` dikirim
+- [x] Tes otomatis item di atas + transisi masuk/kembali; bug diperbaiki + tes ulang
+- [x] Paket bukti `assets/renders/case-crosscheck/evidence/` dikirim (14/14 pass)
 - [ ] Copy case file CrossCheck di-approve
 - [ ] Gate
+
+Bahan gate Fase 4 (Testing, 2026-09-15): folder `assets/renders/case-crosscheck/evidence/` —
+`case-crosscheck-walkthrough.mp4` (390×844, ±62 dtk), `contact-sheet.jpg` (17 frame berlabel),
+`02-flight-in.png`, `05-hotspots.png`, `11-return-flight.png`, `viewports/viewports-sheet.jpg`, `evidence.json`.
+- Bug diperbaiki: tiap home → case melempar `TypeError … getBoundingClientRect` (ResizeObserver homepage lama
+  refresh setelah DOM case masuk → `#skills` null). Fix guard `live()` di `observatory-shell.tsx`; lint/typecheck/build,
+  `verify_case.py` + `verify:mobile` 3 viewport pass, 0 error.
+- **Temuan untuk pemilik (bukan fail otomatis):** flight-in terbaca lemah — teks memudar, teleskop sedikit berputar
+  tapi tidak tampak mendekat, lalu turun keluar layar; case terbuka di Brief tanpa instrumen. PLAN §7 minta kamera
+  terbang masuk + instrumen jadi objek utama. Pilihan: terima, atau kembali ke Development (zoom masuk terlihat +
+  instrumen tetap di layar pertama case). Return terasa baik (instrumen turun kembali ke tempatnya).
+- Batas: emulasi Chromium GPU; kilatan frame kecil di MP4 = artefak screenshot rekaman Playwright. fps/HP fisik = Fase 7/8.
+
+Bahan handoff Fase 4 Development (2026-09-15):
+- Lokal: `http://127.0.0.1:8767/work/crosscheck` atau homepage → CrossCheck → Open case file.
+  Server produksi aktif, tunnel tidak dinyalakan. Jalankan ulang: `npm run start --prefix web`.
+- Copy case seluruhnya **DRAFT**; sumber/tabel angka di `web/README.md` (CrossCheck dossier §3–§7/§9).
+  Readings: 1,080 kombinasi; 216 cek akses; 18 issue dari 881 sinyal; 12/12 bug tanam, konteks demo eksplisit.
+- Verifikasi Development: lint/typecheck/build exit 0; `verify_case.py` + `verify:mobile` passed
+  390×844 → 360×740 → 430×932; Canvas identik, scroll/fokus pulih, Back/Forward, direct/reload,
+  kartu + endpoint lensa, count-up, lazy video/playback, Skills/Next. Nol error/HTTP ≥400 alur normal.
+- Fix terakhir khusus fallback: notice tidak menutup label; `verify_case.py --fallback-only` passed
+  (390×844), screenshot diperbarui. Video asli English byte-identik, H.264, 0 audio streams.
+- Foto/JSON Development: `assets/renders/case-crosscheck/dev/` (`brief-`, `flight-`, `hotspot-1/2/3-`,
+  `flow-`, `readings-`, `demo-`, `return-`, `fallback-`; `verification.json`, `fallback-verification.json`).
+  Ini belum paket gate Testing; copy belum di-approve. Next menuju chapter SurgeLine homepage;
+  rantai case-to-case Fase 5. Tes HP fisik/performa tetap fase yang sudah dijadwalkan.
 
 ### Fase 5 — All case files
 Development (Codex / Claude Code):
@@ -221,6 +248,10 @@ Testing (Claude Code / Antigravity):
 > Entri terbaru di atas. Singkat, 1–2 baris: tanggal · harness · fase — apa yang dikerjakan,
 > verifikasi, berikutnya. Detail teknis taruh di CODEMAP / folder bukti, bukan di sini.
 
+- **2026-09-15 · Claude Code · Fase 4 → awaiting-gate** — Testing: fix TypeError home→case (guard trigger homepage basi),
+  `case_crosscheck_evidence.py` 14/14 pass + MP4/contact sheet; temuan flight-in lemah diajukan ke pemilik. Berikutnya: approve copy + gate.
+- **2026-09-15 · Codex · Fase 4 → ready-for-test** — Route CrossCheck, kamera persisten, 3 hotspot, alur, Readings, tools, video English; copy DRAFT.
+  lint/typecheck/build + case/homepage 3 viewport + fallback fix pass. Berikutnya: Claude Code/Antigravity Testing, paket bukti, approval copy + gate.
 - **2026-09-15 · Claude Code · revisi langit (2)** — Atas permintaan pemilik: gelap hanya 30% atas, bintang dikurangi.
   Bukti 8/8 pass diperbarui. Berikutnya: approve label BrandWall, lalu Fase 4.
 - **2026-09-15 · Claude Code · revisi langit + animasi** — Langit berbintang, Saturnus hidup, animasi baru 5 instrumen.

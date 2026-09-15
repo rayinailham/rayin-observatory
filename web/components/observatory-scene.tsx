@@ -3,10 +3,11 @@
 import { Component, Suspense, useEffect, useMemo, useRef, type ReactNode, type MutableRefObject } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Center, Environment, Lightformer, useGLTF } from '@react-three/drei';
-import { Group, MathUtils, Mesh, MeshStandardMaterial, Vector3 } from 'three';
+import { Group, MathUtils, Mesh, MeshStandardMaterial, OrthographicCamera, Vector3 } from 'three';
 import { instruments, type ChapterState } from '@/lib/instruments';
 import { pointScale, rigInstrument, saturn } from './instrument-motion';
 import Sky from './sky';
+import { components, type CaseView } from '@/lib/crosscheck-case';
 
 useGLTF.setDecoderPath('/draco/');
 
@@ -14,6 +15,7 @@ type SceneProps = {
   entered: boolean;
   progress: MutableRefObject<number>;
   chapter: MutableRefObject<ChapterState>;
+  caseView: MutableRefObject<CaseView>;
   onReady: () => void;
   onFailure: () => void;
 };
@@ -28,7 +30,7 @@ class SceneBoundary extends Component<{ onFailure: () => void; children: ReactNo
   render() { return this.state.failed ? null : this.props.children; }
 }
 
-function World({ entered, progress, chapter, onReady }: SceneProps) {
+function World({ entered, progress, chapter, caseView, onReady }: SceneProps) {
   const dome = useGLTF('/models/dome.glb');
   const ambient = useGLTF('/models/ambient.glb');
   const models = useGLTF(instruments.map(item => `/models/${item.id}.glb`));
@@ -89,7 +91,10 @@ function World({ entered, progress, chapter, onReady }: SceneProps) {
   const instrumentRefs = useRef<(Group | null)[]>([]);
   const planetRef = useRef<Group>(null);
   const revealed = useRef(0);
-  const { viewport } = useThree();
+  const { size } = useThree();
+  const viewport = { width: size.width / 100, height: size.height / 100 };
+  const casePosition = useRef(0);
+  const projected = useMemo(() => new Vector3(), []);
   const frames = useRef(0);
   const cameraUp = useMemo(() => new Vector3(), []);
   const cameraRight = useMemo(() => new Vector3(), []);
@@ -105,10 +110,22 @@ function World({ entered, progress, chapter, onReady }: SceneProps) {
     const reveal = chapter.current.reveal;
     const orbit = chapter.current.orbit;
     const { index, transition, outro } = chapter.current;
-    const angle = index > 0 && transition < 1 ? MathUtils.lerp(-.95, .55, transition) : (.55 - orbit * 1.5) * reveal;
-    const elevation = .25 * reveal;
+    const mix = caseView.current.mix;
+    const baseAngle = index > 0 && transition < 1 ? MathUtils.lerp(-.95, .55, transition) : (.55 - orbit * 1.5) * reveal;
+    const angle = MathUtils.lerp(baseAngle, .55, mix);
+    const elevation = MathUtils.lerp(.25 * reveal, .25, mix);
+    const distance = MathUtils.lerp(16, 10, mix);
+    const zoom = MathUtils.lerp(100, 130, mix);
+    if (state.camera instanceof OrthographicCamera && state.camera.zoom !== zoom) {
+      state.camera.zoom = zoom;
+      state.camera.updateProjectionMatrix();
+    }
+    const stage = caseView.current.active ? document.getElementById('case-instrument') : null;
+    const stageRect = stage?.getBoundingClientRect();
+    const targetY = stageRect ? (size.height / 2 - stageRect.top - stageRect.height * .47) / zoom : -viewport.height * .03;
+    casePosition.current = MathUtils.damp(casePosition.current, targetY, 12, step);
     // The camera itself travels around the stationary mount; scroll backward retraces it.
-    state.camera.position.set(16 * Math.sin(angle) * Math.cos(elevation), 16 * Math.sin(elevation), 16 * Math.cos(angle) * Math.cos(elevation));
+    state.camera.position.set(distance * Math.sin(angle) * Math.cos(elevation), distance * Math.sin(elevation), distance * Math.cos(angle) * Math.cos(elevation));
     state.camera.lookAt(0, 0, 0);
     cameraUp.set(0, 1, 0).applyQuaternion(state.camera.quaternion);
     views.forEach((moving, i) => {
@@ -116,20 +133,25 @@ function World({ entered, progress, chapter, onReady }: SceneProps) {
       if (!group) return;
       const incoming = i === index;
       const outgoing = i === index - 1 && transition < 1;
-      group.visible = reveal > 0 && outro < 1 && (incoming || outgoing);
+      group.visible = mix > .001 && i === 0 || (mix < .999 && reveal > 0 && outro < 1 && (incoming || outgoing));
       const offset = incoming ? -(1 - transition) : transition;
-      group.scale.setScalar(Math.min(viewport.width * .82, viewport.height * .37) / (i === 0 ? 4.4 : 3.5));
-      group.position.copy(cameraUp).multiplyScalar(viewport.height * (-.03 + offset + outro));
+      const homeScale = Math.min(viewport.width * .82, viewport.height * .37) / (i === 0 ? 4.4 : 3.5);
+      const caseScale = Math.min(viewport.width * .62, viewport.height * .33) / 4.4;
+      group.scale.setScalar(i === 0 ? MathUtils.lerp(homeScale, caseScale, mix) : homeScale);
+      group.position.copy(cameraUp).multiplyScalar(i === 0
+        ? MathUtils.lerp(viewport.height * (-.03 + offset + outro), casePosition.current, mix)
+        : viewport.height * (-.03 + offset + outro));
       if (group.visible) moving.rig.update(time);
     });
     if (domeRef.current) {
-      domeRef.current.visible = reveal < .7;
+      domeRef.current.visible = reveal < .7 && mix < .01;
       const scale = viewport.width / 7.4 * (0.83 + revealed.current * 0.17 + scroll * .2);
       domeRef.current.scale.setScalar(scale);
       domeRef.current.position.y = -viewport.height * (.135 - scroll * .12) - (1 - revealed.current) * .45 + reveal * viewport.height * 1.4;
       domeRef.current.rotation.set(.30 + scroll * .10, -.48 + scroll * .6 + Math.sin(time * .1) * .025, 0);
     }
     if (planetRef.current) {
+      planetRef.current.visible = mix < .9;
       // Screen-anchored so the orbiting camera never sweeps it across the instrument;
       // in the chapter it settles beside the heading as a small moon.
       const moon = MathUtils.smoothstep(reveal, .35, .9);
@@ -141,6 +163,18 @@ function World({ entered, progress, chapter, onReady }: SceneProps) {
       planetRef.current.rotation.set(.4 + Math.sin(time * .21) * .05, .15 + time * .015, -.38 + Math.sin(time * .17) * .04);
       planetRef.current.scale.setScalar(viewport.width * .072 * MathUtils.lerp(1, .78, moon));
       planet.update(time);
+    }
+    if (stageRect && mix > .99) {
+      state.camera.updateMatrixWorld();
+      instrumentRefs.current[0]?.updateWorldMatrix(true, true);
+      components.forEach(item => {
+        const node = views[0].view.getObjectByName(item.node);
+        const line = document.querySelector<SVGLineElement>(`[data-hotspot-line="${item.node}"]`);
+        if (!node || !line) return;
+        node.getWorldPosition(projected).project(state.camera);
+        line.setAttribute('x2', String((projected.x + 1) * size.width / 2));
+        line.setAttribute('y2', String((1 - projected.y) * size.height / 2 - stageRect.top));
+      });
     }
   });
 

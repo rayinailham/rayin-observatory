@@ -1,6 +1,6 @@
-# Rayin Observatory · Full observatory
+# Rayin Observatory · First case file
 
-Phase 3 Development: five mobile instrument chapters, project-linked skills, About and Contact.
+Phase 4 Development: CrossCheck case route, persistent camera transition, component hotspots, animated readings and the original English demo video.
 Phase 0–3 gates passed (Phase 3 on 2026-09-15). All homepage copy is **owner-approved**; DRAFT labels removed.
 The owner clarified the job focus as **Automation Engineer** on 2026-09-15.
 Testing (Claude Code / Antigravity) follows developer verification and produces the gate evidence pack.
@@ -37,7 +37,7 @@ This is a temporary development preview. Deployment belongs to Phase 8.
 
 Enter → scroll past the dome → CrossCheck → SurgeLine → DriftWatch → DueWatch → BrandWall.
 Each chapter pins, the camera orbits, and the instrument has its own idle movement.
-Open case file opens a project-specific **preview dialog**. Full routes remain Phase 4–5.
+CrossCheck opens `/work/crosscheck`; the other four chapters retain their preview dialogs until Phase 5.
 
 Menu → Skills. Expand a group and choose a project beside a skill: the page returns to that
 instrument, highlights its title and focuses the heading after the scroll finishes.
@@ -165,9 +165,8 @@ timeout 420 npm run verify:mobile --prefix web
 
 The existing CrossCheck Playwright Python environment runs Chromium at 390×844 first, then
 360×740 and 430×932. Checks: entry, audio on/off/memory, one Canvas, all five sticky chapters,
-visible idle/orbit pixel differences, readings, per-project dialogs, paused scroll/focus return,
-reverse navigation, every skill href, real skill navigation to all projects, portrait, contact
-placeholder, readout, 390px touch swipe, and a deliberately blocked new model → five still views.
+visible idle/orbit pixel differences, readings, CrossCheck route/return, four preview dialogs, paused scroll/focus return,
+reverse navigation, every skill href, real skill navigation to all projects, portrait, real contact links, readout, 390px touch swipe, and a deliberately blocked new model → five still views.
 `verification.json` records running/passed/failed and timestamps; screenshots go to the dev folder.
 These checks do not replace the separate Testing stage or prove physical-device FPS/4G targets.
 
@@ -190,3 +189,75 @@ reference earlier copy/selectors and must not be used as current Phase 3 accepta
 Browser focus/accordion scrolling can update window.scrollY before Lenis animatedScroll catches up.
 Anchor destinations now use actual document coordinates before calling Lenis. The focused test
 forces native scrolling and clicks a skill in the same task to reproduce that timing gap.
+
+
+## Phase 4 review and handoff
+
+Local: `http://127.0.0.1:8767/work/crosscheck`. Or enter the homepage, scroll to CrossCheck and
+choose **Open case file**. The camera approaches the instrument while the homepage fades;
+the root Canvas and audio engine survive route changes. **Return to the instrument** restores
+the originating scroll position. A fresh case URL returns to the CrossCheck chapter.
+
+The case follows PLAN §7: Brief, The instrument (tap three lens markers), How it works,
+Readings, Tools used, Demo video, Next instrument. Tools return to homepage Skills. The Next
+instrument link returns to the SurgeLine homepage chapter; case-to-case chaining belongs to
+Phase 5. No route for another case was added.
+
+All new case copy is **DRAFT**, including labels, descriptions and the qualified readings.
+Homepage copy remains owner-approved. The instrument is the existing approved Blender export;
+this phase adds camera motion and DOM markers, with leaders projected from the actual lens
+nodes. A labeled still view preserves the component controls when a model/WebGL fails.
+
+The English demo is copied unchanged from `crosscheck/assets/explainer.mp4` to
+`public/videos/crosscheck-explainer.mp4` (5,002,746 bytes; H.264, 1920×1080, 126.866667 seconds,
+no audio stream, verified using ffprobe). Poster: frame at 1 second, scaled to 960×540.
+`preload="none"` keeps video download behind playback; native controls and a full-size link
+allow viewing the burned-in captions. The original footage contains a clearly labeled replay.
+
+### Case copy provenance — DRAFT
+
+Source: `/home/rayin/Projects/Testing/portfolio/CAPABILITY_CROSSCHECK.md`.
+
+| Visible copy / data | Dossier source |
+|---|---|
+| Find the gaps. Bring back proof.; Brief problem/approach paragraphs | §1–2, DRAFT synthesis |
+| Owned WordPress + CRM demo; deliberately planted bugs | §3.2, §9 |
+| Browser matrix card: selected pages, engines, sizes, roles, layout/content/error checks | §3.1, §3.3 |
+| Access card: intended permissions, browser recheck before reporting | §6 K5 |
+| Flow card: create/search/update, saved-data checks after reload | §6 K6 |
+| How it works: map → check → verify/sort → spreadsheet and screenshot gallery | §4, §6 K1 / K5 / K7 / K8 |
+| 1,080 combinations; 40 × 3 × 3 × 3 | §3.1, §7 |
+| 216 permission checks; 72 × 3; Chromium desktop verification qualification | §6 K5, §9 |
+| 18 unique issues from 881 signals; documented suppression; clean-copy raw-count change | §6 K7–K11, §7, §9 (881 includes permissions + flow, unlike sweep-only 877) |
+| 12/12 planted bugs caught; controlled target, no universal guarantee | §3.2, §6 K10, §7, §9 |
+| Emulated screens; scope excludes penetration/load testing and business-rule judgment | §6 K16, §9 |
+| Every tool listed in `lib/crosscheck-case.ts` | §5 (ordinary tools, no internal harness skill names) |
+| Silent English demo, recorded footage and labeled replay | §6 K13, §9 |
+| Case file 01, three lenses, component labels, inspection controls, section/navigation labels | PLAN §5 / §7; DRAFT interface text, ordinal labels rather than performance claims |
+| SurgeLine next instrument | PLAN §5 sequence; destination remains existing homepage chapter |
+
+### Developer verification
+
+```sh
+npm run lint --prefix web
+npm run typecheck --prefix web
+npm run build --prefix web
+# Start/restart the production server after the build.
+timeout 300 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python web/scripts/verify_case.py
+timeout 420 npm run verify:mobile --prefix web
+```
+
+`verify_case.py` checks 390×844 first, then 360×740 and 430×932: persistent Canvas identity,
+route/scroll/focus restoration, three component cards and projected lens endpoints, selected-marker colors settled before capture, signal flow,
+animated count-up (intermediate and final values), flight fade/scroll lock, video deferred download/playback, browser Back/Forward, tools/next destinations,
+direct URL/reload and deliberately blocked model fallback. Outputs: `assets/renders/case-crosscheck/dev/`.
+Developer screenshots are separate from the Testing harness's future `case-crosscheck/evidence/`
+pack. Testing and owner copy approval/gate remain pending. No physical-device FPS claim.
+
+Testing evidence pack (owner gate), server running:
+`timeout 600 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python web/scripts/case_crosscheck_evidence.py`
+→ `assets/renders/case-crosscheck/evidence/` (PNG per item, MP4, contact sheet, `evidence.json`; exit 1 on any fail).
+
+After the fallback-only spacing fix, `verify_case.py --fallback-only` writes
+`fallback-verification.json` and refreshes its screenshot, checking that the fixed notice clears
+the instrument heading and that cards/return still work. Normal-route results remain in `verification.json`.

@@ -1,6 +1,6 @@
 {
   "status": "passed",
-  "startedAt": "2026-09-15T05:24:18.359363+00:00",
+  "startedAt": "2026-09-15T09:02:42.348803+00:00",
   "url": "http://127.0.0.1:8767",
   "scope": "Phase 3 Development; Chromium mobile emulation, no physical-device performance claim",
   "results": [
@@ -14,40 +14,45 @@
           "id": "crosscheck",
           "pinned": true,
           "reading": "1,080",
-          "idlePixelDifference": 7.907197233763698,
-          "orbitPixelDifference": 49.705817833672604,
-          "dialog": true
+          "idlePixelDifference": 36.42035451697759,
+          "orbitPixelDifference": 39.91759850534007,
+          "caseRoute": true,
+          "dialog": false
         },
         {
           "id": "surgeline",
           "pinned": true,
           "reading": "50,000",
-          "idlePixelDifference": 16.433581513807944,
-          "orbitPixelDifference": 82.20881551918055,
+          "idlePixelDifference": 20.92284096929812,
+          "orbitPixelDifference": 72.58854094048316,
+          "caseRoute": false,
           "dialog": true
         },
         {
           "id": "driftwatch",
           "pinned": true,
           "reading": "11/11",
-          "idlePixelDifference": 6.248199064908024,
-          "orbitPixelDifference": 49.17646840114145,
+          "idlePixelDifference": 3.5707779110082445,
+          "orbitPixelDifference": 43.56032086853871,
+          "caseRoute": false,
           "dialog": true
         },
         {
           "id": "duewatch",
           "pinned": true,
           "reading": "200",
-          "idlePixelDifference": 16.471877527118597,
-          "orbitPixelDifference": 50.79970813232574,
+          "idlePixelDifference": 14.661991206789176,
+          "orbitPixelDifference": 44.42327319372019,
+          "caseRoute": false,
           "dialog": true
         },
         {
           "id": "brandwall",
           "pinned": true,
           "reading": "300",
-          "idlePixelDifference": 5.974215257057342,
-          "orbitPixelDifference": 57.68623295502078,
+          "idlePixelDifference": 4.847178457562998,
+          "orbitPixelDifference": 50.80802729055706,
+          "caseRoute": false,
           "dialog": true
         }
       ],
@@ -89,40 +94,45 @@
           "id": "crosscheck",
           "pinned": true,
           "reading": "1,080",
-          "idlePixelDifference": 33.57061718175129,
-          "orbitPixelDifference": 53.982385945548195,
-          "dialog": true
+          "idlePixelDifference": 30.696031089036055,
+          "orbitPixelDifference": 41.33878311258278,
+          "caseRoute": true,
+          "dialog": false
         },
         {
           "id": "surgeline",
           "pinned": true,
           "reading": "50,000",
-          "idlePixelDifference": 17.185786883738043,
-          "orbitPixelDifference": 80.43779893303899,
+          "idlePixelDifference": 17.711426140544518,
+          "orbitPixelDifference": 70.1210678807947,
+          "caseRoute": false,
           "dialog": true
         },
         {
           "id": "driftwatch",
           "pinned": true,
           "reading": "11/11",
-          "idlePixelDifference": 7.488916482707873,
-          "orbitPixelDifference": 47.176450974981606,
+          "idlePixelDifference": 4.481236203090508,
+          "orbitPixelDifference": 42.12996688741722,
+          "caseRoute": false,
           "dialog": true
         },
         {
           "id": "duewatch",
           "pinned": true,
           "reading": "200",
-          "idlePixelDifference": 15.537998988226636,
-          "orbitPixelDifference": 50.67835954746137,
+          "idlePixelDifference": 13.774868929359823,
+          "orbitPixelDifference": 44.71066731052244,
+          "caseRoute": false,
           "dialog": true
         },
         {
           "id": "brandwall",
           "pinned": true,
           "reading": "300",
-          "idlePixelDifference": 11.473096026490067,
-          "orbitPixelDifference": 55.00232247976453,
+          "idlePixelDifference": 5.817236938925681,
+          "orbitPixelDifference": 48.31648960632818,
+          "caseRoute": false,
           "dialog": true
         }
       ],
@@ -164,40 +174,45 @@
           "id": "crosscheck",
           "pinned": true,
           "reading": "1,080",
-          "idlePixelDifference": 31.293430400708164,
-          "orbitPixelDifference": 58.377494410231755,
-          "dialog": true
+          "idlePixelDifference": 30.766733057088132,
+          "orbitPixelDifference": 43.95885320085773,
+          "caseRoute": true,
+          "dialog": false
         },
         {
           "id": "surgeline",
           "pinned": true,
           "reading": "50,000",
-          "idlePixelDifference": 17.73322497195577,
-          "orbitPixelDifference": 86.39769388673946,
+          "idlePixelDifference": 18.76838137100036,
+          "orbitPixelDifference": 74.94210297383302,
+          "caseRoute": false,
           "dialog": true
         },
         {
           "id": "driftwatch",
           "pinned": true,
           "reading": "11/11",
-          "idlePixelDifference": 7.08507894355288,
-          "orbitPixelDifference": 51.06761902581595,
+          "idlePixelDifference": 4.782178368932335,
+          "orbitPixelDifference": 44.69171188083301,
+          "caseRoute": false,
           "dialog": true
         },
         {
           "id": "duewatch",
           "pinned": true,
           "reading": "200",
-          "idlePixelDifference": 17.0968231801775,
-          "orbitPixelDifference": 54.312096029547554,
+          "idlePixelDifference": 14.725738879604403,
+          "orbitPixelDifference": 46.128972932548855,
+          "caseRoute": false,
           "dialog": true
         },
         {
           "id": "brandwall",
           "pinned": true,
           "reading": "300",
-          "idlePixelDifference": 6.566264508596415,
-          "orbitPixelDifference": 56.79800523492288,
+          "idlePixelDifference": 5.434132307715788,
+          "orbitPixelDifference": 51.04744244255703,
+          "caseRoute": false,
           "dialog": true
         }
       ],
@@ -272,5 +287,5 @@
       "noticeClearOfCopy": true
     }
   ],
-  "finishedAt": "2026-09-15T05:27:43.025910+00:00"
+  "finishedAt": "2026-09-15T09:06:00.162123+00:00"
 }

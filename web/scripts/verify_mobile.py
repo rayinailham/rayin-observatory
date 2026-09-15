@@ -139,16 +139,25 @@ async def run():
                 assert orbit_diff > 2, (slug, 'frozen orbit', orbit_diff)
                 assert abs((await section.locator('.instrument-stage').bounding_box())['y']) < 2
                 await cta.click()
-                dialog = page.get_by_role('dialog', name=name, exact=True)
-                assert await dialog.is_visible()
-                y = await page.evaluate('scrollY')
-                await page.mouse.wheel(0, 300)
-                await page.wait_for_timeout(350)
-                assert abs(await page.evaluate('scrollY')-y) < 2
-                await page.screenshot(path=str(OUT / f'{slug}-dialog-{width}x{height}.png'))
-                await dialog.get_by_role('button', name='Return to the instrument').click()
-                assert await cta.evaluate('(e)=>e===document.activeElement')
-                chapters.append({'id': slug, 'pinned': True, 'reading': reading, 'idlePixelDifference': idle_diff, 'orbitPixelDifference': orbit_diff, 'dialog': True})
+                if slug == 'crosscheck':
+                    await page.wait_for_url(URL.rstrip('/') + '/work/crosscheck')
+                    await page.wait_for_function("document.querySelector('.observatory').dataset.flight==='idle'")
+                    await page.locator('.case-brief .case-back').click()
+                    await page.wait_for_url(URL.rstrip('/') + '/')
+                    await page.wait_for_function("document.querySelector('.observatory').dataset.flight==='idle'")
+                    await page.wait_for_timeout(100)
+                    assert await cta.evaluate('(e)=>e===document.activeElement')
+                else:
+                    dialog = page.get_by_role('dialog', name=name, exact=True)
+                    assert await dialog.is_visible()
+                    y = await page.evaluate('scrollY')
+                    await page.mouse.wheel(0, 300)
+                    await page.wait_for_timeout(350)
+                    assert abs(await page.evaluate('scrollY')-y) < 2
+                    await page.screenshot(path=str(OUT / f'{slug}-dialog-{width}x{height}.png'))
+                    await dialog.get_by_role('button', name='Return to the instrument').click()
+                    assert await cta.evaluate('(e)=>e===document.activeElement')
+                chapters.append({'id': slug, 'pinned': True, 'reading': reading, 'idlePixelDifference': idle_diff, 'orbitPixelDifference': orbit_diff, 'caseRoute': slug == 'crosscheck', 'dialog': slug != 'crosscheck'})
                 print(f'  {slug} PASS', flush=True)
             # Later chapters -> earlier chapter: camera, sticky pin and active label recover.
             for slug in reversed(SLUGS):

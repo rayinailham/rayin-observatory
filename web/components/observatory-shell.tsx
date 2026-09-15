@@ -1,7 +1,9 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import type { CaseView } from '@/lib/crosscheck-case';
 import { useProgress } from '@react-three/drei';
 import Lenis from 'lenis';
 import { gsap } from 'gsap';
@@ -13,6 +15,16 @@ const Scene = dynamic(() => import('./observatory-scene'), { ssr: false });
 const SOUND_KEY = 'rayin-observatory:sound';
 
 export default function ObservatoryShell({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const isCase = pathname === '/work/crosscheck';
+  const caseView = useRef<CaseView>({ mix: 0, active: false });
+  const homeScroll = useRef<number | null>(null);
+  const homeChapter = useRef<ChapterState | null>(null);
+  const homeTarget = useRef<number | string | null>(null);
+  const previousPath = useRef(pathname);
+  const [flying, setFlying] = useState(false);
+  const pageContent = useRef<HTMLDivElement>(null);
   const [entered, setEntered] = useState(false);
   const [sceneReady, setSceneReady] = useState(false);
   const [fontsReady, setFontsReady] = useState(false);
@@ -69,17 +81,85 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
     const tick = (time: number) => scroller.raf(time * 1000);
     gsap.ticker.add(tick);
     gsap.ticker.lagSmoothing(0);
-    const sections = instruments.map(item => document.getElementById(item.id)!);
+    return () => {
+      scroller.off('scroll', ScrollTrigger.update);
+      gsap.ticker.remove(tick);
+      scroller.destroy();
+      lenis.current = null;
+    };
+  }, []);
+
+  useLayoutEffect(() => {
+    const cameFromCase = previousPath.current === '/work/crosscheck' && !isCase;
+    previousPath.current = pathname;
+    const scroller = lenis.current;
+    let frame = 0;
+    let focusAfterFlight: HTMLElement | null = null;
+    const context = gsap.context(() => {}, root);
+    caseView.current.active = isCase;
+    if (isCase) {
+      chapter.current = { reveal: 1, orbit: 0, index: 0, transition: 1, outro: 0 };
+      root.current?.setAttribute('data-chapter', 'crosscheck');
+      root.current?.style.setProperty('--chapter-reveal', '1');
+      scroller?.scrollTo(0, { immediate: true, force: true });
+      window.scrollTo(0, 0);
+      context.add(() => gsap.to(caseView.current, { mix: 1, duration: .85, ease: 'power2.inOut' }));
+    }
+    if (cameFromCase) {
+      const destination = homeTarget.current ?? homeScroll.current ?? '#crosscheck';
+      const element = typeof destination === 'string' ? document.querySelector<HTMLElement>(destination) : null;
+      const y = typeof destination === 'number' ? destination : element ? element.getBoundingClientRect().top + window.scrollY : 0;
+      scroller?.resize();
+      scroller?.scrollTo(y, { immediate: true, force: true });
+      window.scrollTo(0, y);
+      context.add(() => gsap.to(caseView.current, { mix: 0, duration: .9, ease: 'power2.inOut' }));
+      frame = requestAnimationFrame(() => {
+        ScrollTrigger.refresh();
+        focusAfterFlight = element?.querySelector<HTMLElement>('h2') ?? document.querySelector<HTMLElement>('[data-open-case="crosscheck"]');
+      });
+      homeTarget.current = null;
+    }
+    context.add(() => gsap.fromTo(pageContent.current, { opacity: 0 }, { opacity: 1, duration: .65, delay: .3,
+      onComplete: () => {
+        setFlying(false);
+        frame = requestAnimationFrame(() => {
+          // React must release inert before focus can move into the arriving page.
+          (isCase ? document.getElementById('case-heading') : focusAfterFlight)?.focus({ preventScroll: true });
+        });
+      },
+    }));
+    return () => { context.revert(); cancelAnimationFrame(frame); };
+  }, [pathname, isCase]);
+
+  useEffect(() => {
+    // Scroll ownership stays in the root. Route-specific triggers are rebuilt per page.
+    const sections = instruments.map(item => document.getElementById(item.id));
+    if (isCase || sections.some(section => !section)) {
+      const trigger = ScrollTrigger.create({ trigger: 'main', start: 'top top', end: 'bottom bottom',
+        onUpdate: self => {
+          if (readout.current) readout.current.textContent = `${Math.round(self.progress * 100).toString().padStart(3, '0')}%`;
+          root.current?.style.setProperty('--journey', String(self.progress));
+        },
+      });
+      const observer = new ResizeObserver(() => ScrollTrigger.refresh());
+      const main = document.querySelector('main');
+      if (main) observer.observe(main);
+      return () => { trigger.kill(); observer.disconnect(); };
+    }
+    const homeSections = sections as HTMLElement[];
     let positions: { top: number; height: number }[] = [];
     let skillsTop = 0;
+    // A route change can refresh or scroll before React cleans up this trigger; the homepage
+    // DOM is already gone then, so its stale sections must not measure or rewrite chapter state.
+    const live = () => homeSections[0].isConnected;
     const measure = () => {
-      positions = sections.map(section => ({ top: section.getBoundingClientRect().top + window.scrollY, height: section.offsetHeight }));
+      positions = homeSections.map(section => ({ top: section.getBoundingClientRect().top + window.scrollY, height: section.offsetHeight }));
       skillsTop = document.getElementById('skills')!.getBoundingClientRect().top + window.scrollY;
     };
     const clamp = (n: number) => Math.max(0, Math.min(1, n));
     const syncChapters = () => {
       const y = window.scrollY;
-      const height = sections[0].querySelector<HTMLElement>('.instrument-stage')!.offsetHeight;
+      const height = homeSections[0].querySelector<HTMLElement>('.instrument-stage')!.offsetHeight;
       let index = 0;
       positions.forEach((pos, i) => { if (y >= pos.top - height) index = i; });
       const pos = positions[index];
@@ -89,7 +169,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
       chapter.current = { index, reveal, transition, outro, orbit: clamp((y - pos.top) / Math.max(1, pos.height - height)) };
       root.current?.style.setProperty('--chapter-reveal', String(reveal));
       root.current?.setAttribute('data-chapter', outro >= 1 ? 'outro' : reveal > .4 ? instruments[index].id : 'dome');
-      sections.forEach((_, i) => {
+      homeSections.forEach((_, i) => {
         const offset = i === index ? 1 - transition : i === index - 1 ? -transition : 2;
         root.current?.style.setProperty(`--instrument-${i}-offset`, String(offset - (i === index ? outro : 0)));
       });
@@ -98,8 +178,9 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
     syncChapters();
     const trigger = ScrollTrigger.create({
       trigger: 'main', start: 'top top', end: 'bottom bottom',
-      onRefresh: () => { measure(); syncChapters(); },
+      onRefresh: () => { if (live()) { measure(); syncChapters(); } },
       onUpdate: self => {
+        if (!live()) return;
         syncChapters();
         if (readout.current) readout.current.textContent = `${Math.round(self.progress * 100).toString().padStart(3, '0')}%`;
         root.current?.style.setProperty('--journey', String(self.progress));
@@ -128,27 +209,23 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
       observer.disconnect();
       scan.scrollTrigger?.kill(); scan.kill();
       scanLine.scrollTrigger?.kill(); scanLine.kill();
-      scroller.off('scroll', ScrollTrigger.update);
-      gsap.ticker.remove(tick);
-      scroller.destroy();
-      lenis.current = null;
     };
-  }, []);
+  }, [pathname, isCase]);
 
   useEffect(() => {
-    if (entered && !menuOpen && !caseOpen) lenis.current?.start();
+    if (entered && !menuOpen && !caseOpen && !flying) lenis.current?.start();
     else lenis.current?.stop();
-  }, [entered, menuOpen, caseOpen]);
+  }, [entered, menuOpen, caseOpen, flying]);
 
   useEffect(() => {
     if (!entered) return;
     const context = gsap.context(() => {
       gsap.to(gate.current, { opacity: 0, yPercent: -4, duration: .7, ease: 'power2.inOut',
         onComplete: () => { if (gate.current) gate.current.hidden = true; } });
-      gsap.fromTo('.hero-copy', { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 1.1, delay: .3, ease: 'power3.out' });
+      if (document.querySelector('.hero-copy')) gsap.fromTo('.hero-copy', { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 1.1, delay: .3, ease: 'power3.out' });
     }, root);
     const timer = window.setTimeout(() => {
-      document.getElementById('hero-heading')?.focus({ preventScroll: true });
+      (document.getElementById('case-heading') ?? document.getElementById('hero-heading'))?.focus({ preventScroll: true });
       ScrollTrigger.refresh();
     }, 750);
     return () => { context.revert(); window.clearTimeout(timer); };
@@ -181,6 +258,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
   // Lenis start() resets and cancels any running scrollTo, so restart before scrolling;
   // the menu-close effect's later start() is then a no-op.
   function scrollFromMenu(target: number | string) {
+    if (isCase) { leaveCase(target); return; }
     menu.current?.close();
     setMenuOpen(false);
     lenis.current?.start();
@@ -193,13 +271,37 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
       if (typeof target === 'string') document.querySelector<HTMLElement>(`${target} h2`)?.focus({ preventScroll: true });
     } });
   }
+  function openCrossCheck() {
+    if (flying) return;
+    homeScroll.current = window.scrollY;
+    homeChapter.current = { ...chapter.current };
+    setFlying(true);
+    lenis.current?.stop();
+    router.prefetch('/work/crosscheck');
+    gsap.to(pageContent.current, { opacity: 0, duration: .55 });
+    gsap.to(caseView.current, { mix: 1, duration: .85, ease: 'power2.inOut',
+      onComplete: () => router.push('/work/crosscheck', { scroll: false }),
+    });
+  }
+
+  function leaveCase(target: number | string = 'return') {
+    if (flying) return;
+    menu.current?.close();
+    setMenuOpen(false);
+    homeTarget.current = target === 'return' ? homeScroll.current ?? '#crosscheck' : target;
+    if (homeChapter.current) chapter.current = { ...homeChapter.current };
+    setFlying(true);
+    lenis.current?.stop();
+    gsap.to(pageContent.current, { opacity: 0, duration: .3, onComplete: () => router.push('/', { scroll: false }) });
+  }
+
   function returnToDome() { scrollFromMenu(0); }
   function goToWork() { scrollFromMenu('#crosscheck'); }
 
-  return <div ref={root} className={`observatory ${entered ? 'has-entered' : ''}`} data-scene={failed ? 'fallback' : sceneReady ? 'ready' : 'loading'}>
+  return <div ref={root} className={`observatory ${entered ? 'has-entered' : ''}`} data-route={isCase ? 'case' : 'home'} data-flight={flying ? 'moving' : 'idle'} data-scene={failed ? 'fallback' : sceneReady ? 'ready' : 'loading'}>
     <div className="scene-layer" aria-hidden="true">
-      {!failed && <Scene entered={entered} progress={progress} chapter={chapter} onReady={onReady} onFailure={onFailure} />}
-      {failed && <><div className="scene-fallback" />{instruments.map((item, i) => <div key={item.id} className={`instrument-fallback ${item.id}-fallback`} style={{ backgroundImage: `url('/images/${item.id}-fallback.png')`, transform: `translateY(calc(var(--instrument-${i}-offset, 2) * 100svh))` }} />)}</>}
+      {!failed && <Scene entered={entered} progress={progress} chapter={chapter} caseView={caseView} onReady={onReady} onFailure={onFailure} />}
+      {failed && !isCase && <><div className="scene-fallback" />{instruments.map((item, i) => <div key={item.id} className={`instrument-fallback ${item.id}-fallback`} style={{ backgroundImage: `url('/images/${item.id}-fallback.png')`, transform: `translateY(calc(var(--instrument-${i}-offset, 2) * 100svh))` }} />)}</>}
     </div>
     <div ref={content} inert={!entered} className="site-content">
       <header className="site-header">
@@ -210,11 +312,14 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
           <button className="menu-toggle" onClick={openMenu} aria-expanded={menuOpen} aria-controls="navigation">Menu<span aria-hidden="true">+</span></button>
         </div>
       </header>
-      <div onClick={event => {
+      <div ref={pageContent} className="page-content" inert={flying} onClick={event => {
         const target = event.target as HTMLElement;
+        const homeLink = target.closest<HTMLAnchorElement>('[data-home-target]');
+        if (homeLink && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); leaveCase(homeLink.dataset.homeTarget); return; }
         const caseButton = target.closest<HTMLElement>('[data-open-case]');
         if (caseButton) {
           const item = instruments.find(item => item.id === caseButton.dataset.openCase);
+          if (item?.id === 'crosscheck') { event.preventDefault(); openCrossCheck(); return; }
           if (item) { setSelectedCase(item); setCaseOpen(true); caseFile.current?.showModal(); }
         }
         const skill = target.closest<HTMLAnchorElement>('[data-skill-project]');
