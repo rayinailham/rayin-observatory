@@ -4,7 +4,7 @@
 > menunjuknya dan berkas akan diubah. Update setiap berkas dibuat/diubah/dipindah/dihapus.
 > Entri tidak cocok dengan kode = bug; perbaiki saat ditemukan.
 
-**Terakhir diperbarui:** 2026-09-15 · Claude Code · revisi langit + animasi instrumen pasca Fase 3 (menunggu review pemilik). Fase 4 berikutnya.
+**Terakhir diperbarui:** 2026-09-15 · Claude Code · revisi langit + animasi instrumen pasca Fase 3 (approved pemilik). Fase 4 berikutnya.
 
 ## 1. Ringkasan arsitektur
 
@@ -173,7 +173,7 @@ Rayin Observatory/
 - **Catatan:** English, Automation Engineer sesuai arahan pemilik; copy approved di gate Fase 3 (tanpa label DRAFT). `EMAIL` +
   `contactLinks` = tujuan asli dari pemilik; label link "Rayina Ilham" (bukan handle). Eksternal
   `target=_blank rel=noopener noreferrer`. Skill `projects` kosong → tanpa div link. Case routes Fase 4–5.
-  BrandWall: `orbit-hint` diganti `#observer-readout[data-observed]` (label DRAFT revisi 2026-09-15).
+  BrandWall: `orbit-hint` diganti `#observer-readout[data-observed]` (label revisi, approved pemilik 2026-09-15).
 
 ### `web/app/globals.css`
 - **Peran:** token FINAL §8, font lokal, komposisi HP, lima chapter, gate/menu/dialog, Skills/About/Contact.

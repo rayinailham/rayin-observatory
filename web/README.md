@@ -96,7 +96,7 @@ source column records how the wording was produced, not its current status.
 | Daily work (Skills group) | PLAN §9 "Kerja harian"; owner confirmation 2026-09-15 |
 | rayinailham9@gmail.com; LinkedIn / GitHub / Upwork links labeled "Rayina Ilham" | Owner-supplied destinations, chat 2026-09-15 |
 | Open case file; Case file preview; The full case file is coming soon.; Return to the instrument; Scroll to orbit the instrument; menu/readout/error text; Back to the dome | DRAFT interface copy, PLAN §6; case routes deferred to Phase 4–5 |
-| Tap to observe · detector off, wave pattern / detector on, particle pattern | **DRAFT, not yet approved** (2026-09-15 revision): BrandWall observer readout replaces its orbit hint; double-slit metaphor, no project claim |
+| Tap to observe · detector off, wave pattern / detector on, particle pattern | Owner-approved 2026-09-15 (revision): BrandWall observer readout replaces its orbit hint; double-slit metaphor, no project claim |
 
 ### Skill-to-project source map
 

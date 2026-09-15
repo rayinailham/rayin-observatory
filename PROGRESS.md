@@ -14,7 +14,7 @@
 | Bagian PLAN.md yang relevan | §4 (peta situs), §5 (lima instrumen + urutan), §6 (alur scroll), §8 (identitas FINAL), §9 (skills), §10 (aturan copy), §11 (arsitektur), §12 (target fase) |
 | Blocker | Tidak ada |
 | Preview sesi ini | Lokal `http://127.0.0.1:8767/`; tunnel tidak dinyalakan. Arsip bukti Fase 3 `assets/renders/full-observatory/evidence/` |
-| Langkah berikut | Pemilik review revisi langit + animasi (bukti `assets/renders/revision-sky-motion/evidence/`); lalu Fase 4 Development: route `/work/crosscheck` + transisi kamera (PLAN §7) |
+| Langkah berikut | Fase 4 Development: route `/work/crosscheck` + transisi kamera (PLAN §7) |
 
 ## Ringkasan fase
 
@@ -139,8 +139,8 @@ Bahan gate Fase 3: `full-observatory-walkthrough.mp4` + `contact-sheet.jpg` (24 
 - [x] DueWatch: planet di jalurnya, kecepatan Kepler (makin jauh makin lambat), cincin presesi
 - [x] BrandWall: foton + detektor; off = pola gelombang, tap = dua pita partikel (celah ganda)
 - [x] lint/typecheck/build + `verify:mobile` 3 viewport pass; bukti 8/8 pass (MP4 + contact sheet)
-- [ ] Label BrandWall "Tap to observe · detector off/on …" (DRAFT) di-approve
-- [ ] Pemilik menyatakan revisi oke (atau revert commit revisi)
+- [x] Label BrandWall "Tap to observe · detector off/on …" di-approve (2026-09-15)
+- [x] Pemilik menyatakan revisi oke (2026-09-15, "setuju"; langit 30% gelap di revisi 2)
 
 ### Fase 4 — First case file
 Development (Codex / Claude Code):
@@ -212,6 +212,7 @@ Testing (Claude Code / Antigravity):
 | 2026-09-15 | Gate Fase 1 lolos (dinilai dari foto + video bukti emulasi). Log sesi PROGRESS dibuat ringkas | Pemilik, chat sesi Claude Code |
 | 2026-09-15 | Gate Fase 2 lolos (dinilai dari foto + video bukti emulasi); copy CrossCheck (pitch + 1,080 "On an owned demo app") diterima tanpa revisi | Pemilik, chat sesi Claude Code |
 | 2026-09-15 | Skill kerja harian Go, MySQL/TiDB, Redis dikonfirmasi → grup Skills "Daily work". Disalin ke PLAN §3 Q33 | Pemilik, chat sesi Claude Code |
+| 2026-09-15 | Revisi pasca Fase 3 disetujui: langit gelap hanya 30% atas + bintang lebih jarang, animasi baru 5 instrumen + Saturnus, label BrandWall observer. Repo GitHub personal public | Pemilik, chat sesi Claude Code |
 | 2026-09-15 | Gate Fase 3 lolos + seluruh copy homepage di-approve (DRAFT dilepas); kontak asli dipasang. Disalin ke PLAN §3 Q32 | Pemilik, chat sesi Claude Code |
 | 2026-09-15 | Mulai Fase 3 tiap fase = Development (Codex utama / Claude Code) → Testing (Claude Code / Antigravity, context ±1M) + paket bukti video/foto; gate dari bukti; tes manual HP fisik ditunda ke Fase 8. Disalin ke PLAN §3 Q31 + §12 | Pemilik, chat sesi Claude Code |
 
