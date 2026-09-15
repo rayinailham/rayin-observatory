@@ -14,7 +14,7 @@
 | Bagian PLAN.md yang relevan | §4 (peta situs), §5 (lima instrumen + urutan), §6 (alur scroll), §8 (identitas FINAL), §9 (skills), §10 (aturan copy), §11 (arsitektur), §12 (target fase) |
 | Blocker | Tidak ada |
 | Preview sesi ini | Lokal `http://127.0.0.1:8767/`; tunnel tidak dinyalakan. Arsip bukti Fase 3 `assets/renders/full-observatory/evidence/` |
-| Langkah berikut | Fase 4 Development (Codex / Claude Code): route `/work/crosscheck` + transisi kamera (PLAN §7) |
+| Langkah berikut | Pemilik review revisi langit + animasi (bukti `assets/renders/revision-sky-motion/evidence/`); lalu Fase 4 Development: route `/work/crosscheck` + transisi kamera (PLAN §7) |
 
 ## Ringkasan fase
 
@@ -130,6 +130,18 @@ Testing (Claude Code / Antigravity):
 Bahan gate Fase 3: `full-observatory-walkthrough.mp4` + `contact-sheet.jpg` (24 frame berlabel) +
 `viewports/viewports-sheet.jpg` + `evidence.json` di folder bukti. Emulasi Chromium; fps/HP fisik = Fase 8.
 
+### Revisi desain pasca Fase 3 (2026-09-15, permintaan pemilik)
+- [x] Langit: gradasi hitam pekat (atas) → biru (horizon), bintang berkelip, nebula tipis; gate ikut
+- [x] Saturnus: pita + rotasi, debu cincin, dua bulan, goyang sumbu
+- [x] CrossCheck: lensa bergiliran → ketiganya nyala hijau bersama
+- [x] SurgeLine: tiap piringan sudut/ritme sendiri + cincin pulsa sendiri
+- [x] DriftWatch: kertas bergulir, trace hidup, lonjakan merah + jarum tersentak
+- [x] DueWatch: planet di jalurnya, kecepatan Kepler (makin jauh makin lambat), cincin presesi
+- [x] BrandWall: foton + detektor; off = pola gelombang, tap = dua pita partikel (celah ganda)
+- [x] lint/typecheck/build + `verify:mobile` 3 viewport pass; bukti 8/8 pass (MP4 + contact sheet)
+- [ ] Label BrandWall "Tap to observe · detector off/on …" (DRAFT) di-approve
+- [ ] Pemilik menyatakan revisi oke (atau revert commit revisi)
+
 ### Fase 4 — First case file
 Development (Codex / Claude Code):
 - [ ] Route `/work/crosscheck` dengan template PLAN §7
@@ -208,6 +220,10 @@ Testing (Claude Code / Antigravity):
 > Entri terbaru di atas. Singkat, 1–2 baris: tanggal · harness · fase — apa yang dikerjakan,
 > verifikasi, berikutnya. Detail teknis taruh di CODEMAP / folder bukti, bukan di sini.
 
+- **2026-09-15 · Claude Code · revisi langit + animasi** — Langit berbintang, Saturnus hidup, animasi baru 5 instrumen.
+  `verify:mobile` + bukti 8/8 pass. Berikutnya: review pemilik, lalu Fase 4.
+- **2026-09-15 · Claude Code · repo git** — Repo `main` dibuat + snapshot Fase 3 (`ad65a06`), push ke
+  github.com/rayinailham/rayin-observatory (public, akun personal). Berikutnya: revisi langit/planet/animasi instrumen.
 - **2026-09-15 · Claude Code · Fase 3 susulan** — Go, MySQL/TiDB, Redis dipasang (grup "Daily work").
   Build + `verify:mobile` diulang. Berikutnya: Fase 4 Development.
 - **2026-09-15 · Claude Code · Fase 3 → done** — Pemilik nyatakan lolos + approve copy. Label DRAFT dilepas,

@@ -4,7 +4,7 @@
 > menunjuknya dan berkas akan diubah. Update setiap berkas dibuat/diubah/dipindah/dihapus.
 > Entri tidak cocok dengan kode = bug; perbaiki saat ditemukan.
 
-**Terakhir diperbarui:** 2026-09-15 · Claude Code · Fase 3 `done` (gate + copy approve pemilik). Fase 4 berikutnya.
+**Terakhir diperbarui:** 2026-09-15 · Claude Code · revisi langit + animasi instrumen pasca Fase 3 (menunggu review pemilik). Fase 4 berikutnya.
 
 ## 1. Ringkasan arsitektur
 
@@ -46,6 +46,7 @@ Semua dari root project kecuali disebut lain.
 | `npm run lint --prefix web` / `npm run typecheck --prefix web` | ESLint / TypeScript terpisah. |
 | `timeout 420 npm run verify:mobile --prefix web` | Tes Development Fase 3: entry + lima chapter + skills/about/contact; 390×844 → 360×740 → 430×932. JSON/PNG ke `assets/renders/full-observatory/dev/`; server :8767 aktif. |
 | `timeout 600 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python web/scripts/full_observatory_evidence.py` | Arsip bukti gate Fase 3 (lolos) → `assets/renders/full-observatory/evidence/`; cek copy lama mengharapkan label DRAFT. |
+| `timeout 400 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python web/scripts/revision_evidence.py` | Bukti revisi langit + animasi → `assets/renders/revision-sky-motion/evidence/`: MP4 390×844, PNG per item, contact sheet, `evidence.json`; server :8767 aktif. |
 | `OBSERVATORY_URL=<url> timeout 200 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python web/scripts/chapter_walkthrough.py` | Bukti gate Fase 2: MP4 390×844 + 6 PNG ke `assets/renders/crosscheck/walkthrough/`. |
 | Blender MCP: jalankan `assets/blender/build_full_observatory.py` dengan `__file__` dan `__name__='__main__'` | Buat empat scene baru, checkpoint, convert/join, ekspor Draco; menolak overwrite `<slug>-web.blend`. Render tiap scene terpisah lewat MCP. |
 | Blender MCP: jalankan `assets/blender/export_crosscheck.py` dengan `__file__` dan `__name__='__main__'` | Salin scene teleskop, checkpoint, gabung mount/optik, ekspor Draco `crosscheck.glb`. Menolak overwrite `crosscheck-web.blend`. |
@@ -89,7 +90,9 @@ Rayin Observatory/
 │   │   └── globals.css            locked tokens, mobile composition, gates/dialogs
 │   ├── components/
 │   │   ├── observatory-shell.tsx  entry/loading/audio/menu/scroll ownership
-│   │   └── observatory-scene.tsx  one Canvas, dome/planet + five instrument groups
+│   │   ├── observatory-scene.tsx  one Canvas, dome/Saturn + five instrument groups
+│   │   ├── instrument-motion.ts   per-instrument idle rigs + Saturn rig (moons, ring dust)
+│   │   └── sky.tsx                full-screen sky shader: gradient, stars, nebula
 │   ├── lib/ambient.ts             original oscillator hum / fade / lifecycle
 │   ├── lib/instruments.ts         ordered chapter copy, readings, dialog context + types
 │   ├── lib/skills.ts              grouped skills and evidence-project IDs
@@ -97,6 +100,7 @@ Rayin Observatory/
 │   ├── scripts/full_observatory_evidence.py  arsip bukti gate Fase 3
 │   ├── scripts/gate_evidence.py   gate evidence Fase 1: 3 engines, screenshots, videos, slow 4G
 │   ├── scripts/chapter_walkthrough.py  gate evidence Fase 2: video + 6 frames 390×844
+│   ├── scripts/revision_evidence.py  bukti revisi langit/animasi: MP4 + PNG + contact sheet
 │   └── public/
 │       ├── models/                dome/ambient + five instrument GLBs, Draco
 │       ├── fonts/                 approved 3 TTF + 3 OFL copies
@@ -123,6 +127,7 @@ Rayin Observatory/
     │   ├── rayina-crop.png         crop + edit latar tanpa logo
     │   └── rayina-duotone.png      treatment navy + scan
     ├── renders/
+    │   ├── revision-sky-motion/    evidence/ revisi langit + animasi instrumen (2026-09-15)
     │   ├── full-observatory/       four Blender reviews + dev/ PNG/JSON/env-check + evidence/ (Testing)
     │   ├── crosscheck/             Phase 2 review render, verify_mobile PNG/JSON, walkthrough/
     │   ├── first-light/            arsip Phase 1: render, screenshots, evidence JSON, env-check.md
@@ -168,6 +173,7 @@ Rayin Observatory/
 - **Catatan:** English, Automation Engineer sesuai arahan pemilik; copy approved di gate Fase 3 (tanpa label DRAFT). `EMAIL` +
   `contactLinks` = tujuan asli dari pemilik; label link "Rayina Ilham" (bukan handle). Eksternal
   `target=_blank rel=noopener noreferrer`. Skill `projects` kosong → tanpa div link. Case routes Fase 4–5.
+  BrandWall: `orbit-hint` diganti `#observer-readout[data-observed]` (label DRAFT revisi 2026-09-15).
 
 ### `web/app/globals.css`
 - **Peran:** token FINAL §8, font lokal, komposisi HP, lima chapter, gate/menu/dialog, Skills/About/Contact.
@@ -181,6 +187,8 @@ Rayin Observatory/
 - **Catatan:** >430px tetap batas komposisi HP; desktop Fase 6. Accordion native tetap keyboard-usable.
   `.fallback-notice` `margin:0` (default `<p>` 9px dulu menimpa copy chapter); di chapter `top:82px`.
   `.email-cta` sekarang `<a>`; `.contact-links a` baris 58px, nilai mono amber.
+  Revisi langit: `.scene-layer` gradient (fallback bila WebGL gagal), overlay tinggal fade bawah ke ink;
+  header gradient hitam transparan; gate gradient + bintang CSS `::before`; `#observer-readout` `.when-on/.when-off`.
 
 ### `web/components/observatory-shell.tsx`
 - **Peran:** client shell persisten: loading, entry/audio, menu/dialog, scroll dan chapter state.
@@ -205,11 +213,35 @@ Rayin Observatory/
   `OpticsPivot`, `Lens1Glow..Lens3Glow`; `DishPivot0..3`; `NeedlePivot`, `PaperFeed`,
   `RollerPivot0..1`; `OrbitPivot0..2`; `PrismPivot`, `SpectrumPivot`.
 - **State / efek samping:** clone material + disposal; useFrame membaca ref, tidak state React scroll.
-  Aktif dan pendahulunya terlihat saat transisi; kamera interpolasi orbit. Idle: lensa bergiliran,
-  ayun antena + signal pulse, needle/trace + roller marks + red spike, rings beda kecepatan,
-  prisma rotasi + spektrum bergeser. Satu environment lokal, DPR 1–1.5.
-- **Catatan:** sky dekoratif; planet tetap ditambat ke kamera. Kubah approved tetap utuh.
+  Aktif dan pendahulunya terlihat saat transisi; kamera interpolasi orbit. Idle per instrumen di
+  `instrument-motion.ts` (`rig.update` hanya saat group terlihat). Klik di chapter BrandWall (bukan
+  tombol/link/dialog) → `rig.observe()`; status detektor → `#observer-readout[data-observed]`.
+  `pointScale` = DPR tiap frame. Satu environment lokal, DPR 1–1.5.
+- **Catatan:** langit = `<Sky>` (titik bintang lama dihapus); Saturnus (`saturn()` rig) tetap ditambat ke kamera, wobble + skala .072. Kubah approved tetap utuh.
   SceneBoundary gagal satu model → still view menyeluruh; semua chapter tetap dapat dibaca.
+
+### `web/components/sky.tsx`
+- **Peran:** mesh layar penuh (renderOrder -10, tanpa depth) dengan shader langit: zenith hitam → ink → horizon biru,
+  bintang prosedural 3 lapis (kelip, warna, parallax), jalur nebula tipis, dither.
+- **Ekspor utama:** default `Sky({ progress })`.
+- **Dipakai oleh:** `World` di scene.
+- **State / efek samping:** uniform `uOffset` dari sudut kamera + progres hero + tinggi kamera; resolusi/DPR tiap frame.
+- **Catatan:** dekorasi, bukan data astronomi. Warna shader ditulis langsung sebagai sRGB (tanpa colorspace chunk).
+
+### `web/components/instrument-motion.ts`
+- **Peran:** rig gerak idle per instrumen + Saturnus; objek tambahan dibuat runtime (tanpa ubah GLB/Blender).
+- **Ekspor utama:** `rigInstrument(id, view, materials, onObserve)`, `saturn(source)`, `pointScale`, tipe `Rig`.
+- **Dipakai oleh:** `observatory-scene.tsx`.
+- **Bergantung pada:** node/material kontrak GLB (lihat scene) + nama material `surgeline signal`, `driftwatch alarm`,
+  `duewatch signal/alarm/brass`, `Spectrum0..3`, `Amber light`, `First light / planet mineral`, `dusty rings`.
+- **State / efek samping:** CrossCheck siklus 6.6 dtk (lensa 1→2→3, lalu ketiganya hijau). SurgeLine: parameter
+  yaw/pitch/periode per piringan + 2 cincin pulsa additive per piringan. DriftWatch: `PaperFeed` lama disembunyikan,
+  ribbon trace 150 titik dari `reading(t)` (sumbu waktu = z kertas), tick kertas bergerak, burst merah tiap 5.2 dtk.
+  DueWatch: geometri planet di-clone lalu didudukkan ke bidang cincin; `rotation.y` planet = kecepatan Kepler
+  `1.1·(0.65/r)^1.5`, cincin presesi pelan; planet merah berkedip di tanda "due". BrandWall: 64 foton/dtk
+  collimator → prisma → layar; detektor off = pola interferensi cos², on (siklus 13 dtk atau tap 5 dtk) = dua pita.
+  Saturnus: clone scene + shader onBeforeCompile (pita, badai, celah Cassini), 520 debu cincin (Kepler), dua bulan.
+- **Catatan:** semua geometri/material buatan rig di-dispose lewat `rig.dispose()`; `frustumCulled=false` untuk objek dinamis.
 
 ### `web/lib/ambient.ts`
 - **Peran:** hum observatorium sintetis original tanpa sample eksternal.

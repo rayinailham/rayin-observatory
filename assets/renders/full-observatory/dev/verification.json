@@ -1,6 +1,6 @@
 {
   "status": "passed",
-  "startedAt": "2026-09-15T04:29:36.933895+00:00",
+  "startedAt": "2026-09-15T05:24:18.359363+00:00",
   "url": "http://127.0.0.1:8767",
   "scope": "Phase 3 Development; Chromium mobile emulation, no physical-device performance claim",
   "results": [
@@ -14,40 +14,40 @@
           "id": "crosscheck",
           "pinned": true,
           "reading": "1,080",
-          "idlePixelDifference": 11.333956108307074,
-          "orbitPixelDifference": 47.9473801622933,
+          "idlePixelDifference": 7.907197233763698,
+          "orbitPixelDifference": 49.705817833672604,
           "dialog": true
         },
         {
           "id": "surgeline",
           "pinned": true,
           "reading": "50,000",
-          "idlePixelDifference": 9.550784045806493,
-          "orbitPixelDifference": 72.42525306042776,
+          "idlePixelDifference": 16.433581513807944,
+          "orbitPixelDifference": 82.20881551918055,
           "dialog": true
         },
         {
           "id": "driftwatch",
           "pinned": true,
           "reading": "11/11",
-          "idlePixelDifference": 2.9302399077921235,
-          "orbitPixelDifference": 42.32713346904251,
+          "idlePixelDifference": 6.248199064908024,
+          "orbitPixelDifference": 49.17646840114145,
           "dialog": true
         },
         {
           "id": "duewatch",
           "pinned": true,
           "reading": "200",
-          "idlePixelDifference": 16.531887008170436,
-          "orbitPixelDifference": 41.80036808789493,
+          "idlePixelDifference": 16.471877527118597,
+          "orbitPixelDifference": 50.79970813232574,
           "dialog": true
         },
         {
           "id": "brandwall",
           "pinned": true,
           "reading": "300",
-          "idlePixelDifference": 7.605011944266288,
-          "orbitPixelDifference": 51.37115529405203,
+          "idlePixelDifference": 5.974215257057342,
+          "orbitPixelDifference": 57.68623295502078,
           "dialog": true
         }
       ],
@@ -89,40 +89,40 @@
           "id": "crosscheck",
           "pinned": true,
           "reading": "1,080",
-          "idlePixelDifference": 11.790850349521707,
-          "orbitPixelDifference": 47.974579194260485,
+          "idlePixelDifference": 33.57061718175129,
+          "orbitPixelDifference": 53.982385945548195,
           "dialog": true
         },
         {
           "id": "surgeline",
           "pinned": true,
           "reading": "50,000",
-          "idlePixelDifference": 9.10197065857248,
-          "orbitPixelDifference": 70.28928669977925,
+          "idlePixelDifference": 17.185786883738043,
+          "orbitPixelDifference": 80.43779893303899,
           "dialog": true
         },
         {
           "id": "driftwatch",
           "pinned": true,
           "reading": "11/11",
-          "idlePixelDifference": 2.8102350073583517,
-          "orbitPixelDifference": 40.815006438557766,
+          "idlePixelDifference": 7.488916482707873,
+          "orbitPixelDifference": 47.176450974981606,
           "dialog": true
         },
         {
           "id": "duewatch",
           "pinned": true,
           "reading": "200",
-          "idlePixelDifference": 15.412527593818986,
-          "orbitPixelDifference": 41.63992365710081,
+          "idlePixelDifference": 15.537998988226636,
+          "orbitPixelDifference": 50.67835954746137,
           "dialog": true
         },
         {
           "id": "brandwall",
           "pinned": true,
           "reading": "300",
-          "idlePixelDifference": 7.320318248712288,
-          "orbitPixelDifference": 49.52947939661516,
+          "idlePixelDifference": 11.473096026490067,
+          "orbitPixelDifference": 55.00232247976453,
           "dialog": true
         }
       ],
@@ -164,40 +164,40 @@
           "id": "crosscheck",
           "pinned": true,
           "reading": "1,080",
-          "idlePixelDifference": 13.042596704898392,
-          "orbitPixelDifference": 49.039712155551996,
+          "idlePixelDifference": 31.293430400708164,
+          "orbitPixelDifference": 58.377494410231755,
           "dialog": true
         },
         {
           "id": "surgeline",
           "pinned": true,
           "reading": "50,000",
-          "idlePixelDifference": 9.828514304464946,
-          "orbitPixelDifference": 72.81469441328419,
+          "idlePixelDifference": 17.73322497195577,
+          "orbitPixelDifference": 86.39769388673946,
           "dialog": true
         },
         {
           "id": "driftwatch",
           "pinned": true,
           "reading": "11/11",
-          "idlePixelDifference": 2.907091565364041,
-          "orbitPixelDifference": 42.68053997542791,
+          "idlePixelDifference": 7.08507894355288,
+          "orbitPixelDifference": 51.06761902581595,
           "dialog": true
         },
         {
           "id": "duewatch",
           "pinned": true,
           "reading": "200",
-          "idlePixelDifference": 16.729676518394726,
-          "orbitPixelDifference": 42.10048609998245,
+          "idlePixelDifference": 17.0968231801775,
+          "orbitPixelDifference": 54.312096029547554,
           "dialog": true
         },
         {
           "id": "brandwall",
           "pinned": true,
           "reading": "300",
-          "idlePixelDifference": 7.703379806628359,
-          "orbitPixelDifference": 51.4691513472677,
+          "idlePixelDifference": 6.566264508596415,
+          "orbitPixelDifference": 56.79800523492288,
           "dialog": true
         }
       ],
@@ -272,5 +272,5 @@
       "noticeClearOfCopy": true
     }
   ],
-  "finishedAt": "2026-09-15T04:32:44.397703+00:00"
+  "finishedAt": "2026-09-15T05:27:43.025910+00:00"
 }

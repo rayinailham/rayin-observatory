@@ -33,7 +33,9 @@ export default function Home() {
         <div className="instrument-reading">
           <div className="proof-reading"><strong>{instrument.reading}</strong><span>{instrument.unit}<br /><small>{instrument.context}</small></span></div>
           <button className="case-button" data-open-case={instrument.id} aria-haspopup="dialog">Open case file <span aria-hidden="true">↗</span></button>
-          <p className="orbit-hint">Scroll to orbit the instrument</p>
+          {instrument.id === 'brandwall'
+            ? <p className="orbit-hint" id="observer-readout" data-observed="false">Tap to observe · <b className="when-off">detector off, wave pattern</b><b className="when-on">detector on, particle pattern</b></p>
+            : <p className="orbit-hint">Scroll to orbit the instrument</p>}
         </div>
       </div>
     </section>)}
