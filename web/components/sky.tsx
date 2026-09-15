@@ -49,8 +49,10 @@ void main() {
   float cloud = noise(q) * .55 + noise(q * 2.2) * .3 + noise(q * 4.7) * .15;
   float lane = exp(-pow((px.y - screen.y * .8 + (px.x - screen.x * .5) * .55) / (screen.y * .19), 2.));
   color += mix(vec3(.05, .045, .12), vec3(.1, .06, .05), noise(q * .6)) * lane * smoothstep(.35, .9, cloud) * .9;
-  float reach = mix(.35, 1., smoothstep(.55, .85, y));
-  color += (stars(px, 11., .07, .22, .7) * .7 + stars(px, 27., .13, .5, 1.) + stars(px, 74., .22, 1., 1.45) * 1.4) * reach * (1. + lane * .5);
+  // Owner revision 3: gate-like density, only in the black top 30%; the blue 70% keeps a rare faint few.
+  float reach = smoothstep(.62, .74, y);
+  color += (stars(px, 29., .12, .5, .8) + stars(px, 74., .2, 1., 1.15) * 1.2) * reach * (1. + lane * .3);
+  color += stars(px, 96., .14, .7, .75) * .45 * (1. - reach);
   color += (hash(gl_FragCoord.xy) - .5) / 255.;
   gl_FragColor = vec4(color, 1.);
 }`;

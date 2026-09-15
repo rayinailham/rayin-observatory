@@ -14,6 +14,7 @@
 | Bagian PLAN.md yang relevan | §4 (peta situs), §5 (lima instrumen + urutan), §6 (alur scroll), §7 (template case + transisi), §8 (identitas FINAL), §9 (skills), §10 (aturan copy), §11 (arsitektur), §12 (target fase) |
 | Blocker | Tidak ada |
 | Preview sesi ini | Lokal `http://127.0.0.1:8767/work/crosscheck`; tunnel tidak dinyalakan. Bukti Testing `assets/renders/case-crosscheck/evidence/` |
+| Revisi terakhir | Revisi 3 (bintang jarang hanya 30% atas + leader 01/03 ditukar lens) diterima pemilik ("okay push and commit"); bukti `assets/renders/revision-sky-lines/evidence/` |
 | Langkah berikut | Codex / Claude Code: Fase 5 Development (case SurgeLine, DriftWatch, DueWatch, BrandWall + Next berantai), pola template case CrossCheck |
 
 ## Ringkasan fase
@@ -249,6 +250,9 @@ Testing (Claude Code / Antigravity):
 > Entri terbaru di atas. Singkat, 1–2 baris: tanggal · harness · fase — apa yang dikerjakan,
 > verifikasi, berikutnya. Detail teknis taruh di CODEMAP / folder bukti, bukan di sini.
 
+- **2026-09-15 · Claude Code · revisi 3 (langit + leader)** — Atas permintaan pemilik: bintang setara gate, hanya 30% atas
+  (70% bawah sangat jarang); marker 01→tabung atas, 03→lens kiri, garis tak lagi memotong instrumen. lint/typecheck/build +
+  `verify_case` 3 viewport + bukti 3/3 pass (jarak ≥58px) + video walkthrough. Pemilik oke → commit + push. Berikutnya: Fase 5 Development.
 - **2026-09-15 · Claude Code · Fase 4 → done** — Pemilik nyatakan lolos + approve copy. Label DRAFT case dilepas, `verify_case` disesuaikan;
   `assets/` di-ignore + untrack (file lokal utuh). Build + `verify_case` diulang; commit + push. Berikutnya: Fase 5 Development.
 - **2026-09-15 · Claude Code · Fase 4 → awaiting-gate** — Testing: fix TypeError home→case (guard trigger homepage basi),

@@ -4,7 +4,7 @@
 > menunjuknya dan berkas akan diubah. Update setiap berkas dibuat/diubah/dipindah/dihapus.
 > Entri tidak cocok dengan kode = bug; perbaiki saat ditemukan.
 
-**Terakhir diperbarui:** 2026-09-15 · Claude Code · Fase 4 `done` (gate + copy case approved, DRAFT dilepas); `assets/` di-ignore git (lokal saja). Fase 5 `todo`.
+**Terakhir diperbarui:** 2026-09-15 · Claude Code · revisi 3 pasca gate Fase 4 (bintang jarang hanya 30% atas; leader 01/03 ditukar lens), diterima pemilik. Fase 5 `todo`.
 
 ## 1. Ringkasan arsitektur
 
@@ -49,6 +49,7 @@ Semua dari root project kecuali disebut lain.
 | `timeout 420 npm run verify:mobile --prefix web` | Regresi homepage setelah Fase 4: CrossCheck route/return + entry + lima chapter + skills/about/contact; 390×844 → 360×740 → 430×932. JSON/PNG ke `assets/renders/full-observatory/dev/`; server :8767 aktif. |
 | `timeout 600 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python web/scripts/full_observatory_evidence.py` | Arsip bukti gate Fase 3 (lolos) → `assets/renders/full-observatory/evidence/`; cek copy lama mengharapkan label DRAFT. |
 | `timeout 400 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python web/scripts/revision_evidence.py` | Bukti revisi langit + animasi → `assets/renders/revision-sky-motion/evidence/`: MP4 390×844, PNG per item, contact sheet, `evidence.json`; server :8767 aktif. |
+| `cd web/scripts && timeout 400 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python revision_sky_lines_evidence.py` | Bukti revisi 3 (bintang + leader line) → `assets/renders/revision-sky-lines/evidence/`: PNG langit home/chapter/case + 3 hotspot × 3 viewport, contact sheet, `evidence.json` (jarak leader ke lens lain ≥30px); exit 1 bila gagal. Server :8767 aktif. |
 | `OBSERVATORY_URL=<url> timeout 200 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python web/scripts/chapter_walkthrough.py` | Bukti gate Fase 2: MP4 390×844 + 6 PNG ke `assets/renders/crosscheck/walkthrough/`. |
 | Blender MCP: jalankan `assets/blender/build_full_observatory.py` dengan `__file__` dan `__name__='__main__'` | Buat empat scene baru, checkpoint, convert/join, ekspor Draco; menolak overwrite `<slug>-web.blend`. Render tiap scene terpisah lewat MCP. |
 | Blender MCP: jalankan `assets/blender/export_crosscheck.py` dengan `__file__` dan `__name__='__main__'` | Salin scene teleskop, checkpoint, gabung mount/optik, ekspor Draco `crosscheck.glb`. Menolak overwrite `crosscheck-web.blend`. |
@@ -109,6 +110,7 @@ Rayin Observatory/
 │   ├── scripts/gate_evidence.py   gate evidence Fase 1: 3 engines, screenshots, videos, slow 4G
 │   ├── scripts/chapter_walkthrough.py  gate evidence Fase 2: video + 6 frames 390×844
 │   ├── scripts/revision_evidence.py  bukti revisi langit/animasi: MP4 + PNG + contact sheet
+│   ├── scripts/revision_sky_lines_evidence.py  bukti revisi 3: bintang + jarak leader line
 │   └── public/
 │       ├── videos/crosscheck-explainer.mp4  original silent English demo
 │       ├── models/                dome/ambient + five instrument GLBs, Draco
@@ -139,6 +141,7 @@ Rayin Observatory/
     │   ├── case-crosscheck/dev/   Phase 4 screenshots, verification.json, env-check.md
     │   ├── case-crosscheck/evidence/  Phase 4 Testing: PNG per item, MP4, contact sheet, evidence.json
     │   ├── revision-sky-motion/    evidence/ revisi langit + animasi instrumen (2026-09-15)
+    │   ├── revision-sky-lines/     evidence/ revisi 3: bintang jarang + leader line CrossCheck
     │   ├── full-observatory/       four Blender reviews + dev/ PNG/JSON/env-check + evidence/ (Testing)
     │   ├── crosscheck/             Phase 2 review render, verify_mobile PNG/JSON, walkthrough/
     │   ├── first-light/            arsip Phase 1: render, screenshots, evidence JSON, env-check.md
@@ -193,6 +196,8 @@ Rayin Observatory/
 - **Bergantung pada:** CAPABILITY_CROSSCHECK §3–§7/§9; tabel provenance README.
 - **State / efek samping:** readonly data; mix runtime disimpan sebagai ref oleh shell.
 - **Catatan:** 1,080 / 216 / 18 dari 881 / 12/12; hasil controlled demo, bukan live counter.
+  Node lens (revisi 3): 01 Browser matrix → `Lens3` (tabung atas), 02 → `Lens2`, 03 End-to-end → `Lens1`,
+  supaya leader kiri atas/kiri bawah tidak memotong lens lain.
 
 ### `web/public/videos/crosscheck-explainer.mp4`, `web/public/images/crosscheck-demo-poster.jpg`
 - **Peran:** demo English asli + poster sebelum playback.
@@ -212,6 +217,14 @@ Rayin Observatory/
 - **Catatan:** HP 390×844 → 360×740 → 430×932; Canvas identity, route/scroll/focus, 3 cards,
   projected endpoints, warna marker aktif selesai sebelum screenshot, flight fade/scroll lock, flow, reading count-up, lazy video/playback, Back/Forward, Skills/Next, direct/reload,
   model diblok → fallback + return tanpa history; `--fallback-only` menguji ulang cabang fallback dan notice/heading tanpa mengulang alur normal. Nol error/HTTP ≥400 pada alur normal.
+
+### `web/scripts/revision_sky_lines_evidence.py`
+- **Peran:** bukti revisi 3 pasca gate Fase 4 (bintang jarang + leader line CrossCheck).
+- **Ekspor utama:** async `run()`, `gap()` (jarak titik ke segmen), `CLEARANCE` = 30 px CSS.
+- **Dipakai oleh:** agen Testing; jalankan dari `web/scripts/` (impor `verify_case`).
+- **Bergantung pada:** `verify_case.URL/enter/scroll_to`; server :8767; Pillow + font DejaVu.
+- **State / efek samping:** tulis PNG, `00-contact-sheet.jpg`, `evidence.json` ke `assets/renders/revision-sky-lines/evidence/`.
+- **Catatan:** 3 viewport DPR 2; tiap leader harus berjarak ≥30px dari dua lens lain + nol console error.
 
 ### `web/scripts/case_crosscheck_evidence.py`
 - **Peran:** paket bukti tahap Testing Fase 4 (gate pemilik), bukan tes Development.
@@ -312,7 +325,8 @@ Rayin Observatory/
 
 ### `web/components/sky.tsx`
 - **Peran:** mesh layar penuh (renderOrder -10, tanpa depth) dengan shader langit: zenith hitam → ink → horizon biru,
-  bintang prosedural 3 lapis (kelip, warna, parallax), jalur nebula tipis, dither.
+  bintang prosedural (kelip, warna, parallax), jalur nebula tipis, dither. Revisi 3 pemilik: kepadatan setara
+  bintang gate, 2 lapis penuh hanya di 30% atas layar (`reach` smoothstep .62–.74); 70% bawah 1 lapis sangat jarang + redup.
 - **Ekspor utama:** default `Sky({ progress })`.
 - **Dipakai oleh:** `World` di scene.
 - **State / efek samping:** uniform `uOffset` dari sudut kamera + progres hero + tinggi kamera; resolusi/DPR tiap frame.

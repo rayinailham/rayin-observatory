@@ -1,10 +1,10 @@
 // Owner-approved at the Phase 4 gate. Source: CAPABILITY_CROSSCHECK.md; section-level provenance in web/README.md.
 export const components = [
-  { id: 'matrix', node: 'Lens1', title: 'Browser matrix', label: 'Pages, screens & roles',
+  { id: 'matrix', node: 'Lens3', title: 'Browser matrix', label: 'Pages, screens & roles',
     body: 'I open the selected pages in Chromium, Firefox and WebKit, across screen sizes and user roles. Each visit checks for broken layouts, missing content and browser errors.' },
   { id: 'access', node: 'Lens2', title: 'Access checks', label: 'Who can see what',
     body: 'I check each page against the intended permissions for each role. Suspected access leaks are reopened in a real browser before they enter the report.' },
-  { id: 'flows', node: 'Lens3', title: 'End-to-end flows', label: 'Check what was saved',
+  { id: 'flows', node: 'Lens1', title: 'End-to-end flows', label: 'Check what was saved',
     body: 'I run tasks such as creating, searching and updating a record. After saving, I reload and check the stored data, so a success message cannot hide missing changes.' },
 ] as const;
 
