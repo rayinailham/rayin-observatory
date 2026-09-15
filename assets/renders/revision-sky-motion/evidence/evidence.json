@@ -1,6 +1,6 @@
 {
   "status": "passed",
-  "finishedAt": "2026-09-15T05:29:44.169089+00:00",
+  "finishedAt": "2026-09-15T05:39:42.817819+00:00",
   "url": "http://127.0.0.1:8767",
   "viewport": [
     390,
@@ -11,37 +11,37 @@
     "sky": {
       "label": "Sky: pitch-black zenith easing into the blue horizon, twinkling stars, faint nebula",
       "pass": true,
-      "detail": "zenith px (1, 1, 7) darker than horizon px (13, 18, 36)",
+      "detail": "zenith px (2, 2, 9) darker than horizon px (13, 19, 37)",
       "screenshot": "02-sky-hero.png"
     },
     "saturn": {
       "label": "Saturn: banded globe spins, ring dust orbits, two moons circle it",
       "pass": true,
-      "detail": "min frame difference 8.73 over 1.5 s steps",
+      "detail": "min frame difference 6.45 over 1.5 s steps",
       "screenshot": "03-saturn.png"
     },
     "crosscheck": {
       "label": "CrossCheck: lenses light in turn, then all three together in green",
       "pass": true,
-      "detail": "min difference between consecutive frames 11.53",
+      "detail": "min difference between consecutive frames 6.5",
       "screenshot": "04-crosscheck-motion.png"
     },
     "surgeline": {
       "label": "SurgeLine: every dish moves on its own rhythm and fires its own pulse ring",
       "pass": true,
-      "detail": "min difference between consecutive frames 14.24",
+      "detail": "min difference between consecutive frames 9.29",
       "screenshot": "05-surgeline-motion.png"
     },
     "driftwatch": {
       "label": "DriftWatch: paper feeds, live trace, red spike when drift is detected",
       "pass": true,
-      "detail": "min difference between consecutive frames 3.28",
+      "detail": "min difference between consecutive frames 2.66",
       "screenshot": "06-driftwatch-motion.png"
     },
     "duewatch": {
       "label": "DueWatch: planets ride their rings at Kepler speeds (outer slower), rings precess",
       "pass": true,
-      "detail": "min difference between consecutive frames 11.72",
+      "detail": "min difference between consecutive frames 9.02",
       "screenshot": "07-duewatch-motion.png"
     },
     "brandwall": {

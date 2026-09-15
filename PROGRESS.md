@@ -220,6 +220,8 @@ Testing (Claude Code / Antigravity):
 > Entri terbaru di atas. Singkat, 1–2 baris: tanggal · harness · fase — apa yang dikerjakan,
 > verifikasi, berikutnya. Detail teknis taruh di CODEMAP / folder bukti, bukan di sini.
 
+- **2026-09-15 · Claude Code · revisi langit (2)** — Atas permintaan pemilik: gelap hanya 30% atas, bintang dikurangi.
+  Bukti 8/8 pass diperbarui. Berikutnya: approve label BrandWall, lalu Fase 4.
 - **2026-09-15 · Claude Code · revisi langit + animasi** — Langit berbintang, Saturnus hidup, animasi baru 5 instrumen.
   `verify:mobile` + bukti 8/8 pass. Berikutnya: review pemilik, lalu Fase 4.
 - **2026-09-15 · Claude Code · repo git** — Repo `main` dibuat + snapshot Fase 3 (`ad65a06`), push ke

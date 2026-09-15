@@ -42,14 +42,15 @@ void main() {
   vec3 horizon = vec3(.063, .09, .176);
   vec3 ink = vec3(.043, .063, .125);
   vec3 zenith = vec3(.004, .006, .016);
-  vec3 color = mix(horizon, ink, smoothstep(0., .3, y));
-  color = mix(color, zenith, smoothstep(.28, .92, y));
+  // Owner revision: blue holds the lower 70%; only the top 30% deepens to black.
+  vec3 color = mix(horizon, ink, smoothstep(0., .35, y));
+  color = mix(color, zenith, smoothstep(.7, .97, y));
   vec2 q = (px + uOffset * .4) / 210.;
   float cloud = noise(q) * .55 + noise(q * 2.2) * .3 + noise(q * 4.7) * .15;
-  float lane = exp(-pow((px.y - screen.y * .64 + (px.x - screen.x * .5) * .55) / (screen.y * .19), 2.));
+  float lane = exp(-pow((px.y - screen.y * .8 + (px.x - screen.x * .5) * .55) / (screen.y * .19), 2.));
   color += mix(vec3(.05, .045, .12), vec3(.1, .06, .05), noise(q * .6)) * lane * smoothstep(.35, .9, cloud) * .9;
-  float reach = mix(.3, 1., smoothstep(.04, .5, y));
-  color += (stars(px, 11., .24, .22, .7) * .75 + stars(px, 27., .3, .5, 1.) + stars(px, 74., .34, 1., 1.45) * 1.5) * reach * (1. + lane * .5);
+  float reach = mix(.35, 1., smoothstep(.55, .85, y));
+  color += (stars(px, 11., .07, .22, .7) * .7 + stars(px, 27., .13, .5, 1.) + stars(px, 74., .22, 1., 1.45) * 1.4) * reach * (1. + lane * .5);
   color += (hash(gl_FragCoord.xy) - .5) / 255.;
   gl_FragColor = vec4(color, 1.);
 }`;
