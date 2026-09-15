@@ -1,0 +1,20 @@
+{
+  "status": "passed",
+  "verifiedAt": "2026-09-14T18:36:11.500868+00:00",
+  "url": "https://geological-ones-medline-loans.trycloudflare.com/",
+  "httpStatus": 200,
+  "viewport": [
+    390,
+    844
+  ],
+  "scene": "ready",
+  "canvasCount": 1,
+  "silentEntry": true,
+  "pageErrors": [],
+  "badResponses": [],
+  "modelsLoaded": [
+    "https://geological-ones-medline-loans.trycloudflare.com/models/dome.glb",
+    "https://geological-ones-medline-loans.trycloudflare.com/models/ambient.glb"
+  ],
+  "physicalPhoneTested": false
+}

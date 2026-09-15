@@ -1,0 +1,48 @@
+{
+  "status": "passed",
+  "finishedAt": "2026-09-15T04:32:44.368662+00:00",
+  "results": [
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "blockedBrandwallModelFallback": [
+        "crosscheck",
+        "surgeline",
+        "driftwatch",
+        "duewatch",
+        "brandwall"
+      ],
+      "noticeClearOfCopy": true
+    },
+    {
+      "viewport": [
+        360,
+        740
+      ],
+      "blockedBrandwallModelFallback": [
+        "crosscheck",
+        "surgeline",
+        "driftwatch",
+        "duewatch",
+        "brandwall"
+      ],
+      "noticeClearOfCopy": true
+    },
+    {
+      "viewport": [
+        430,
+        932
+      ],
+      "blockedBrandwallModelFallback": [
+        "crosscheck",
+        "surgeline",
+        "driftwatch",
+        "duewatch",
+        "brandwall"
+      ],
+      "noticeClearOfCopy": true
+    }
+  ]
+}

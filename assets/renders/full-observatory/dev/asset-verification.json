@@ -1,0 +1,93 @@
+{
+  "status": "passed",
+  "totalBytes": 737440,
+  "files": [
+    {
+      "file": "dome.glb",
+      "bytes": 157308,
+      "nodes": [
+        "ObservatoryDome"
+      ],
+      "draco": true
+    },
+    {
+      "file": "ambient.glb",
+      "bytes": 33996,
+      "nodes": [
+        "AmbientPlanet"
+      ],
+      "draco": true
+    },
+    {
+      "file": "crosscheck.glb",
+      "bytes": 317336,
+      "nodes": [
+        "CrossCheckMount",
+        "Lens1",
+        "Lens2",
+        "Lens3",
+        "OpticsBody",
+        "OpticsPivot"
+      ],
+      "draco": true
+    },
+    {
+      "file": "surgeline.glb",
+      "bytes": 75328,
+      "nodes": [
+        "DishPivot0Mesh",
+        "DishPivot0",
+        "DishPivot1Mesh",
+        "DishPivot1",
+        "DishPivot2Mesh",
+        "DishPivot2",
+        "DishPivot3Mesh",
+        "DishPivot3",
+        "surgelineMount"
+      ],
+      "draco": true
+    },
+    {
+      "file": "driftwatch.glb",
+      "bytes": 52836,
+      "nodes": [
+        "driftwatchMount",
+        "NeedlePivotMesh",
+        "NeedlePivot",
+        "PaperFeedMesh",
+        "PaperFeed",
+        "RollerPivot0Mesh",
+        "RollerPivot0",
+        "RollerPivot1Mesh",
+        "RollerPivot1"
+      ],
+      "draco": true
+    },
+    {
+      "file": "duewatch.glb",
+      "bytes": 59748,
+      "nodes": [
+        "duewatchMount",
+        "OrbitPivot0Mesh",
+        "OrbitPivot0",
+        "OrbitPivot1Mesh",
+        "OrbitPivot1",
+        "OrbitPivot2Mesh",
+        "OrbitPivot2"
+      ],
+      "draco": true
+    },
+    {
+      "file": "brandwall.glb",
+      "bytes": 40888,
+      "nodes": [
+        "brandwallMount",
+        "PrismPivotMesh",
+        "PrismPivot",
+        "SpectrumPivotMesh",
+        "SpectrumPivot"
+      ],
+      "draco": true
+    }
+  ]
+}

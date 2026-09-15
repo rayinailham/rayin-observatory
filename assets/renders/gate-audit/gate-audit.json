@@ -1,0 +1,331 @@
+{
+  "results": {
+    "chromium-390x844": {
+      "overflowX": false,
+      "offenders": [],
+      "clipped": [],
+      "ctaBottom": 789,
+      "ctaInFirstScreen": true,
+      "ctaHeight": 50,
+      "summaryHeight": 44,
+      "h1Width": 330,
+      "h1Lines": 2,
+      "fonts": [
+        "Fraunces:loaded",
+        "Inter:loaded",
+        "JetBrains Mono:loaded"
+      ],
+      "images": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "lang": "en",
+      "brand": true,
+      "fullName": true,
+      "badName": false,
+      "draft": true,
+      "amazon": false,
+      "anchor": true,
+      "detailsOpen": true,
+      "errors": []
+    },
+    "chromium-360x740": {
+      "overflowX": false,
+      "offenders": [],
+      "clipped": [],
+      "ctaBottom": 685,
+      "ctaInFirstScreen": true,
+      "ctaHeight": 50,
+      "summaryHeight": 44,
+      "h1Width": 308,
+      "h1Lines": 2,
+      "fonts": [
+        "Fraunces:loaded",
+        "Inter:loaded",
+        "JetBrains Mono:loaded"
+      ],
+      "images": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "lang": "en",
+      "brand": true,
+      "fullName": true,
+      "badName": false,
+      "draft": true,
+      "amazon": false,
+      "anchor": true,
+      "detailsOpen": true,
+      "errors": []
+    },
+    "chromium-430x932": {
+      "overflowX": false,
+      "offenders": [],
+      "clipped": [],
+      "ctaBottom": 877,
+      "ctaInFirstScreen": true,
+      "ctaHeight": 50,
+      "summaryHeight": 44,
+      "h1Width": 330,
+      "h1Lines": 2,
+      "fonts": [
+        "Fraunces:loaded",
+        "Inter:loaded",
+        "JetBrains Mono:loaded"
+      ],
+      "images": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "lang": "en",
+      "brand": true,
+      "fullName": true,
+      "badName": false,
+      "draft": true,
+      "amazon": false,
+      "anchor": true,
+      "detailsOpen": true,
+      "errors": []
+    },
+    "firefox-390x844": {
+      "overflowX": false,
+      "offenders": [],
+      "clipped": [],
+      "ctaBottom": 789,
+      "ctaInFirstScreen": true,
+      "ctaHeight": 50,
+      "summaryHeight": 44,
+      "h1Width": 330,
+      "h1Lines": 2,
+      "fonts": [
+        "Fraunces:loaded",
+        "Inter:loaded",
+        "\"JetBrains Mono\":loaded"
+      ],
+      "images": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "lang": "en",
+      "brand": true,
+      "fullName": true,
+      "badName": false,
+      "draft": true,
+      "amazon": false,
+      "anchor": true,
+      "detailsOpen": true,
+      "errors": []
+    },
+    "firefox-360x740": {
+      "overflowX": false,
+      "offenders": [],
+      "clipped": [],
+      "ctaBottom": 685,
+      "ctaInFirstScreen": true,
+      "ctaHeight": 50,
+      "summaryHeight": 44,
+      "h1Width": 308,
+      "h1Lines": 2,
+      "fonts": [
+        "Fraunces:loaded",
+        "Inter:loaded",
+        "\"JetBrains Mono\":loaded"
+      ],
+      "images": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "lang": "en",
+      "brand": true,
+      "fullName": true,
+      "badName": false,
+      "draft": true,
+      "amazon": false,
+      "anchor": true,
+      "detailsOpen": true,
+      "errors": []
+    },
+    "firefox-430x932": {
+      "overflowX": false,
+      "offenders": [],
+      "clipped": [],
+      "ctaBottom": 877,
+      "ctaInFirstScreen": true,
+      "ctaHeight": 50,
+      "summaryHeight": 44,
+      "h1Width": 330,
+      "h1Lines": 2,
+      "fonts": [
+        "Fraunces:loaded",
+        "Inter:loaded",
+        "\"JetBrains Mono\":loaded"
+      ],
+      "images": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "lang": "en",
+      "brand": true,
+      "fullName": true,
+      "badName": false,
+      "draft": true,
+      "amazon": false,
+      "anchor": true,
+      "detailsOpen": true,
+      "errors": []
+    },
+    "webkit-390x844": {
+      "overflowX": false,
+      "offenders": [],
+      "clipped": [],
+      "ctaBottom": 789,
+      "ctaInFirstScreen": true,
+      "ctaHeight": 50,
+      "summaryHeight": 44,
+      "h1Width": 330,
+      "h1Lines": 2,
+      "fonts": [
+        "Fraunces:loaded",
+        "Inter:loaded",
+        "JetBrains Mono:loaded"
+      ],
+      "images": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "lang": "en",
+      "brand": true,
+      "fullName": true,
+      "badName": false,
+      "draft": true,
+      "amazon": false,
+      "anchor": true,
+      "detailsOpen": true,
+      "errors": []
+    },
+    "webkit-360x740": {
+      "overflowX": false,
+      "offenders": [],
+      "clipped": [],
+      "ctaBottom": 685,
+      "ctaInFirstScreen": true,
+      "ctaHeight": 50,
+      "summaryHeight": 44,
+      "h1Width": 308,
+      "h1Lines": 2,
+      "fonts": [
+        "Fraunces:loaded",
+        "Inter:loaded",
+        "JetBrains Mono:loaded"
+      ],
+      "images": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "lang": "en",
+      "brand": true,
+      "fullName": true,
+      "badName": false,
+      "draft": true,
+      "amazon": false,
+      "anchor": true,
+      "detailsOpen": true,
+      "errors": []
+    },
+    "webkit-430x932": {
+      "overflowX": false,
+      "offenders": [],
+      "clipped": [],
+      "ctaBottom": 877,
+      "ctaInFirstScreen": true,
+      "ctaHeight": 50,
+      "summaryHeight": 44,
+      "h1Width": 330,
+      "h1Lines": 2,
+      "fonts": [
+        "Fraunces:loaded",
+        "Inter:loaded",
+        "JetBrains Mono:loaded"
+      ],
+      "images": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "lang": "en",
+      "brand": true,
+      "fullName": true,
+      "badName": false,
+      "draft": true,
+      "amazon": false,
+      "anchor": true,
+      "detailsOpen": true,
+      "errors": []
+    }
+  },
+  "fails": {
+    "chromium-390x844": [],
+    "chromium-360x740": [],
+    "chromium-430x932": [],
+    "firefox-390x844": [],
+    "firefox-360x740": [],
+    "firefox-430x932": [],
+    "webkit-390x844": [],
+    "webkit-360x740": [],
+    "webkit-430x932": []
+  },
+  "contrast": {
+    "ivory on ink (body)": {
+      "ratio": 15.49,
+      "min": 4.5,
+      "pass": true
+    },
+    "muted on ink (small labels)": {
+      "ratio": 8.5,
+      "min": 4.5,
+      "pass": true
+    },
+    "amber on ink (project label)": {
+      "ratio": 9.23,
+      "min": 4.5,
+      "pass": true
+    },
+    "ink on amber (CTA)": {
+      "ratio": 9.23,
+      "min": 4.5,
+      "pass": true
+    },
+    "ivory on panel": {
+      "ratio": 14.01,
+      "min": 4.5,
+      "pass": true
+    },
+    "signal-ok on ink": {
+      "ratio": 11.73,
+      "min": 4.5,
+      "pass": true
+    },
+    "signal-alarm on ink": {
+      "ratio": 6.2,
+      "min": 4.5,
+      "pass": true
+    }
+  }
+}

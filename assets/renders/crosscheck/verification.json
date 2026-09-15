@@ -1,0 +1,85 @@
+{
+  "status": "passed",
+  "startedAt": "2026-09-14T19:43:09.965698+00:00",
+  "url": "https://geological-ones-medline-loans.trycloudflare.com",
+  "engine": "Chromium",
+  "results": [
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "canvasCount": 1,
+      "scene": "ready",
+      "entryInViewport": true,
+      "silentEntry": true,
+      "audioContextResumed": true,
+      "muteRemembered": true,
+      "menuAndContact": true,
+      "workNavigation": true,
+      "chapterPinned": true,
+      "caseDialog": true,
+      "idlePixelDifference": 9.894507721255442,
+      "orbitPixelDifference": 49.20705434383246,
+      "scrollReadout": "100%",
+      "touchSwipe": true,
+      "overflow": false,
+      "pageErrors": [],
+      "badResponses": []
+    },
+    {
+      "viewport": [
+        360,
+        740
+      ],
+      "canvasCount": 1,
+      "scene": "ready",
+      "entryInViewport": true,
+      "silentEntry": true,
+      "audioContextResumed": true,
+      "muteRemembered": true,
+      "menuAndContact": true,
+      "workNavigation": true,
+      "chapterPinned": true,
+      "caseDialog": true,
+      "idlePixelDifference": 8.398754409171076,
+      "orbitPixelDifference": 45.163966049382715,
+      "scrollReadout": "100%",
+      "touchSwipe": false,
+      "overflow": false,
+      "pageErrors": [],
+      "badResponses": []
+    },
+    {
+      "viewport": [
+        430,
+        932
+      ],
+      "canvasCount": 1,
+      "scene": "ready",
+      "entryInViewport": true,
+      "silentEntry": true,
+      "audioContextResumed": true,
+      "muteRemembered": true,
+      "menuAndContact": true,
+      "workNavigation": true,
+      "chapterPinned": true,
+      "caseDialog": true,
+      "idlePixelDifference": 7.761813239614508,
+      "orbitPixelDifference": 47.72591819737697,
+      "scrollReadout": "100%",
+      "touchSwipe": false,
+      "overflow": false,
+      "pageErrors": [],
+      "badResponses": []
+    },
+    {
+      "freshVisitorSoundOn": true
+    },
+    {
+      "blockedCrosscheckModelFallback": true
+    }
+  ],
+  "finishedAt": "2026-09-14T19:44:04.045983+00:00",
+  "scope": "Phase 2, mobile emulation; no physical-device fps/network claim"
+}

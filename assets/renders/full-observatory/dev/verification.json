@@ -1,0 +1,276 @@
+{
+  "status": "passed",
+  "startedAt": "2026-09-15T04:29:36.933895+00:00",
+  "url": "http://127.0.0.1:8767",
+  "scope": "Phase 3 Development; Chromium mobile emulation, no physical-device performance claim",
+  "results": [
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "chapters": [
+        {
+          "id": "crosscheck",
+          "pinned": true,
+          "reading": "1,080",
+          "idlePixelDifference": 11.333956108307074,
+          "orbitPixelDifference": 47.9473801622933,
+          "dialog": true
+        },
+        {
+          "id": "surgeline",
+          "pinned": true,
+          "reading": "50,000",
+          "idlePixelDifference": 9.550784045806493,
+          "orbitPixelDifference": 72.42525306042776,
+          "dialog": true
+        },
+        {
+          "id": "driftwatch",
+          "pinned": true,
+          "reading": "11/11",
+          "idlePixelDifference": 2.9302399077921235,
+          "orbitPixelDifference": 42.32713346904251,
+          "dialog": true
+        },
+        {
+          "id": "duewatch",
+          "pinned": true,
+          "reading": "200",
+          "idlePixelDifference": 16.531887008170436,
+          "orbitPixelDifference": 41.80036808789493,
+          "dialog": true
+        },
+        {
+          "id": "brandwall",
+          "pinned": true,
+          "reading": "300",
+          "idlePixelDifference": 7.605011944266288,
+          "orbitPixelDifference": 51.37115529405203,
+          "dialog": true
+        }
+      ],
+      "skillLinks": 64,
+      "skillNavigation": [
+        "crosscheck",
+        "surgeline",
+        "driftwatch",
+        "duewatch",
+        "brandwall"
+      ],
+      "aboutPortrait": true,
+      "scanClipping": [
+        "inset(0px 0px 100%)",
+        "inset(0px 0px 6.0241%)"
+      ],
+      "contactLinks": [
+        "mailto:rayinailham9@gmail.com",
+        "https://www.linkedin.com/in/rayinailham/",
+        "https://github.com/rayinailham",
+        "https://www.upwork.com/freelancers/~0107019e8124d357e2"
+      ],
+      "silentEntry": true,
+      "audioResumed": true,
+      "muteRemembered": true,
+      "readout": "100%",
+      "reverseNavigation": true,
+      "nativeScrollNavigation": true,
+      "errors": [],
+      "badResponses": []
+    },
+    {
+      "viewport": [
+        360,
+        740
+      ],
+      "chapters": [
+        {
+          "id": "crosscheck",
+          "pinned": true,
+          "reading": "1,080",
+          "idlePixelDifference": 11.790850349521707,
+          "orbitPixelDifference": 47.974579194260485,
+          "dialog": true
+        },
+        {
+          "id": "surgeline",
+          "pinned": true,
+          "reading": "50,000",
+          "idlePixelDifference": 9.10197065857248,
+          "orbitPixelDifference": 70.28928669977925,
+          "dialog": true
+        },
+        {
+          "id": "driftwatch",
+          "pinned": true,
+          "reading": "11/11",
+          "idlePixelDifference": 2.8102350073583517,
+          "orbitPixelDifference": 40.815006438557766,
+          "dialog": true
+        },
+        {
+          "id": "duewatch",
+          "pinned": true,
+          "reading": "200",
+          "idlePixelDifference": 15.412527593818986,
+          "orbitPixelDifference": 41.63992365710081,
+          "dialog": true
+        },
+        {
+          "id": "brandwall",
+          "pinned": true,
+          "reading": "300",
+          "idlePixelDifference": 7.320318248712288,
+          "orbitPixelDifference": 49.52947939661516,
+          "dialog": true
+        }
+      ],
+      "skillLinks": 64,
+      "skillNavigation": [
+        "crosscheck",
+        "surgeline",
+        "driftwatch",
+        "duewatch",
+        "brandwall"
+      ],
+      "aboutPortrait": true,
+      "scanClipping": [
+        "inset(0px 0px 100%)",
+        "inset(0px 0px 24.4944%)"
+      ],
+      "contactLinks": [
+        "mailto:rayinailham9@gmail.com",
+        "https://www.linkedin.com/in/rayinailham/",
+        "https://github.com/rayinailham",
+        "https://www.upwork.com/freelancers/~0107019e8124d357e2"
+      ],
+      "silentEntry": true,
+      "audioResumed": true,
+      "muteRemembered": true,
+      "readout": "100%",
+      "reverseNavigation": true,
+      "nativeScrollNavigation": true,
+      "errors": [],
+      "badResponses": []
+    },
+    {
+      "viewport": [
+        430,
+        932
+      ],
+      "chapters": [
+        {
+          "id": "crosscheck",
+          "pinned": true,
+          "reading": "1,080",
+          "idlePixelDifference": 13.042596704898392,
+          "orbitPixelDifference": 49.039712155551996,
+          "dialog": true
+        },
+        {
+          "id": "surgeline",
+          "pinned": true,
+          "reading": "50,000",
+          "idlePixelDifference": 9.828514304464946,
+          "orbitPixelDifference": 72.81469441328419,
+          "dialog": true
+        },
+        {
+          "id": "driftwatch",
+          "pinned": true,
+          "reading": "11/11",
+          "idlePixelDifference": 2.907091565364041,
+          "orbitPixelDifference": 42.68053997542791,
+          "dialog": true
+        },
+        {
+          "id": "duewatch",
+          "pinned": true,
+          "reading": "200",
+          "idlePixelDifference": 16.729676518394726,
+          "orbitPixelDifference": 42.10048609998245,
+          "dialog": true
+        },
+        {
+          "id": "brandwall",
+          "pinned": true,
+          "reading": "300",
+          "idlePixelDifference": 7.703379806628359,
+          "orbitPixelDifference": 51.4691513472677,
+          "dialog": true
+        }
+      ],
+      "skillLinks": 64,
+      "skillNavigation": [
+        "crosscheck",
+        "surgeline",
+        "driftwatch",
+        "duewatch",
+        "brandwall"
+      ],
+      "aboutPortrait": true,
+      "scanClipping": [
+        "inset(0px 0px 100%)",
+        "inset(0px 0px 2.3508%)"
+      ],
+      "contactLinks": [
+        "mailto:rayinailham9@gmail.com",
+        "https://www.linkedin.com/in/rayinailham/",
+        "https://github.com/rayinailham",
+        "https://www.upwork.com/freelancers/~0107019e8124d357e2"
+      ],
+      "silentEntry": true,
+      "audioResumed": true,
+      "muteRemembered": true,
+      "readout": "100%",
+      "reverseNavigation": true,
+      "nativeScrollNavigation": true,
+      "errors": [],
+      "badResponses": []
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "blockedBrandwallModelFallback": [
+        "crosscheck",
+        "surgeline",
+        "driftwatch",
+        "duewatch",
+        "brandwall"
+      ],
+      "noticeClearOfCopy": true
+    },
+    {
+      "viewport": [
+        360,
+        740
+      ],
+      "blockedBrandwallModelFallback": [
+        "crosscheck",
+        "surgeline",
+        "driftwatch",
+        "duewatch",
+        "brandwall"
+      ],
+      "noticeClearOfCopy": true
+    },
+    {
+      "viewport": [
+        430,
+        932
+      ],
+      "blockedBrandwallModelFallback": [
+        "crosscheck",
+        "surgeline",
+        "driftwatch",
+        "duewatch",
+        "brandwall"
+      ],
+      "noticeClearOfCopy": true
+    }
+  ],
+  "finishedAt": "2026-09-15T04:32:44.397703+00:00"
+}

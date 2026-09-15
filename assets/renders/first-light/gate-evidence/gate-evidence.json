@@ -1,0 +1,250 @@
+{
+  "status": "passed",
+  "startedAt": "2026-09-14T18:59:59.132017+00:00",
+  "url": "https://geological-ones-medline-loans.trycloudflare.com/",
+  "viewport": [
+    390,
+    844
+  ],
+  "scope": "Phase 1 checklist, emulated phones; no physical-device fps/speaker/carrier claim",
+  "items": {
+    "preview": "Preview link opens (HTTP 200, scene ready)",
+    "gate": "Entry gate + calibrating loader + Enter without sound",
+    "canvas": "One persistent Canvas",
+    "hero": "Hero: open dome, sky + planet, DRAFT positioning line",
+    "sound": "Ambient sound + header toggle",
+    "scroll": "Smooth Lenis scroll + minimal header + progress readout",
+    "clean": "No page errors, no responses >= 400"
+  },
+  "engines": [
+    {
+      "engine": "chromium",
+      "readySeconds": 2.6,
+      "checks": [
+        {
+          "item": "preview",
+          "pass": true,
+          "detail": "HTTP 200, scene=ready, Enter enabled after 2.6s",
+          "screenshot": "02-gate-ready.png"
+        },
+        {
+          "item": "gate",
+          "pass": true,
+          "detail": "loader text ['A portfolio by Rayina Ilham', '', 'FIRST LIGHT', ''], Enter bottom y=591, silent button visible=True, audio contexts before gesture=0",
+          "screenshot": "01-loader.png"
+        },
+        {
+          "item": "hero",
+          "pass": true,
+          "detail": "heading='I test.\\nI watch.', DRAFT label=True, horizontal overflow=False, silent entry audio contexts=0",
+          "screenshot": "03-hero.png"
+        },
+        {
+          "item": "sound",
+          "pass": true,
+          "detail": "AudioContext state after toggle=running; mute saved to localStorage",
+          "screenshot": "04-sound-on.png"
+        },
+        {
+          "item": "scroll",
+          "pass": true,
+          "detail": "readout ['083%', '100%'], lenis=True, header visible=True, scrollY after return=0",
+          "screenshot": "08-scroll-end.png"
+        },
+        {
+          "item": "canvas",
+          "pass": true,
+          "detail": "canvas elements after entry, dialogs, scroll and return=1",
+          "screenshot": null
+        },
+        {
+          "item": "clean",
+          "pass": true,
+          "detail": "page/console errors=[], bad responses=[]",
+          "screenshot": null
+        }
+      ],
+      "screenshots": [
+        "01-loader.png",
+        "02-gate-ready.png",
+        "03-hero.png",
+        "04-sound-on.png",
+        "05-menu.png",
+        "06-contact.png",
+        "07-scroll-mid.png",
+        "08-scroll-end.png",
+        "09-returned.png"
+      ],
+      "video": "chromium/chromium-walkthrough.mp4",
+      "contactSheet": "chromium/contact-sheet.png"
+    },
+    {
+      "engine": "webkit",
+      "readySeconds": 1.63,
+      "checks": [
+        {
+          "item": "preview",
+          "pass": true,
+          "detail": "HTTP 200, scene=ready, Enter enabled after 1.63s",
+          "screenshot": "02-gate-ready.png"
+        },
+        {
+          "item": "gate",
+          "pass": true,
+          "detail": "loader text ['A portfolio by Rayina Ilham', '', 'FIRST LIGHT', ''], Enter bottom y=591, silent button visible=True, audio contexts before gesture=0",
+          "screenshot": "01-loader.png"
+        },
+        {
+          "item": "hero",
+          "pass": true,
+          "detail": "heading='I test.\\nI watch.', DRAFT label=True, horizontal overflow=False, silent entry audio contexts=0",
+          "screenshot": "03-hero.png"
+        },
+        {
+          "item": "sound",
+          "pass": null,
+          "detail": "toggle stayed off, label='Turn sound on'; bare AudioContext resume in this browser: InvalidStateError: Failed to start the audio device",
+          "screenshot": "04-sound-unavailable.png"
+        },
+        {
+          "item": "scroll",
+          "pass": true,
+          "detail": "readout ['076%', '100%'], lenis=True, header visible=True, scrollY after return=0",
+          "screenshot": "08-scroll-end.png"
+        },
+        {
+          "item": "canvas",
+          "pass": true,
+          "detail": "canvas elements after entry, dialogs, scroll and return=1",
+          "screenshot": null
+        },
+        {
+          "item": "clean",
+          "pass": true,
+          "detail": "page/console errors=[], bad responses=[]",
+          "screenshot": null
+        }
+      ],
+      "screenshots": [
+        "01-loader.png",
+        "02-gate-ready.png",
+        "03-hero.png",
+        "04-sound-unavailable.png",
+        "05-menu.png",
+        "06-contact.png",
+        "07-scroll-mid.png",
+        "08-scroll-end.png",
+        "09-returned.png"
+      ],
+      "video": "webkit/webkit-walkthrough.mp4",
+      "contactSheet": "webkit/contact-sheet.png"
+    },
+    {
+      "engine": "firefox",
+      "readySeconds": 0.94,
+      "checks": [
+        {
+          "item": "preview",
+          "pass": true,
+          "detail": "HTTP 200, scene=ready, Enter enabled after 0.94s",
+          "screenshot": "02-gate-ready.png"
+        },
+        {
+          "item": "gate",
+          "pass": true,
+          "detail": "loader text ['A portfolio by Rayina Ilham', '', 'FIRST LIGHT', ''], Enter bottom y=591, silent button visible=True, audio contexts before gesture=0",
+          "screenshot": "01-loader.png"
+        },
+        {
+          "item": "hero",
+          "pass": true,
+          "detail": "heading='I test.\\nI watch.', DRAFT label=True, horizontal overflow=False, silent entry audio contexts=0",
+          "screenshot": "03-hero.png"
+        },
+        {
+          "item": "sound",
+          "pass": true,
+          "detail": "AudioContext state after toggle=running; mute saved to localStorage",
+          "screenshot": "04-sound-on.png"
+        },
+        {
+          "item": "scroll",
+          "pass": true,
+          "detail": "readout ['075%', '100%'], lenis=True, header visible=True, scrollY after return=0",
+          "screenshot": "08-scroll-end.png"
+        },
+        {
+          "item": "canvas",
+          "pass": true,
+          "detail": "canvas elements after entry, dialogs, scroll and return=1",
+          "screenshot": null
+        },
+        {
+          "item": "clean",
+          "pass": true,
+          "detail": "page/console errors=[], bad responses=[]",
+          "screenshot": null
+        }
+      ],
+      "screenshots": [
+        "01-loader.png",
+        "02-gate-ready.png",
+        "03-hero.png",
+        "04-sound-on.png",
+        "05-menu.png",
+        "06-contact.png",
+        "07-scroll-mid.png",
+        "08-scroll-end.png",
+        "09-returned.png"
+      ],
+      "video": "firefox/firefox-walkthrough.mp4",
+      "contactSheet": "firefox/contact-sheet.png"
+    }
+  ],
+  "slow4g": {
+    "profile": "Lighthouse slow 4G: 150 ms RTT, 1.6 Mbps down (emulated)",
+    "domContentLoadedSeconds": 0.5,
+    "enterEnabledSeconds": 5.93,
+    "scene": "ready",
+    "transferBytes": 952602,
+    "video": "chromium-slow-4g/chromium-slow-4g-load.mp4"
+  },
+  "finishedAt": "2026-09-14T19:01:18.241369+00:00",
+  "verdict": {
+    "preview": {
+      "chromium": "pass",
+      "webkit": "pass",
+      "firefox": "pass"
+    },
+    "gate": {
+      "chromium": "pass",
+      "webkit": "pass",
+      "firefox": "pass"
+    },
+    "canvas": {
+      "chromium": "pass",
+      "webkit": "pass",
+      "firefox": "pass"
+    },
+    "hero": {
+      "chromium": "pass",
+      "webkit": "pass",
+      "firefox": "pass"
+    },
+    "sound": {
+      "chromium": "pass",
+      "webkit": "n/a",
+      "firefox": "pass"
+    },
+    "scroll": {
+      "chromium": "pass",
+      "webkit": "pass",
+      "firefox": "pass"
+    },
+    "clean": {
+      "chromium": "pass",
+      "webkit": "pass",
+      "firefox": "pass"
+    }
+  }
+}
