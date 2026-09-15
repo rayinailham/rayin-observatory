@@ -83,7 +83,7 @@ async def run():
             await open_case(page, f'flight-{width}x{height}.png')
             assert await page.evaluate("window.__originalCanvas===document.querySelector('canvas')")
             assert await page.locator('canvas').count() == 1
-            assert await page.locator('.draft-label').inner_text() == 'DRAFT'
+            assert await page.locator('.draft-label').count() == 0  # case copy approved at the Phase 4 gate
             assert await page.evaluate('scrollY') < 2
             assert not videos, videos
             await page.screenshot(path=str(OUT / f'brief-{width}x{height}.png'))

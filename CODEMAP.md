@@ -4,7 +4,7 @@
 > menunjuknya dan berkas akan diubah. Update setiap berkas dibuat/diubah/dipindah/dihapus.
 > Entri tidak cocok dengan kode = bug; perbaiki saat ditemukan.
 
-**Terakhir diperbarui:** 2026-09-15 · Claude Code · Fase 4 Testing: fix error route home→case (trigger homepage basi), paket bukti `case-crosscheck/evidence/` 14/14 pass; `awaiting-gate` (approval copy + gate pemilik pending).
+**Terakhir diperbarui:** 2026-09-15 · Claude Code · Fase 4 `done` (gate + copy case approved, DRAFT dilepas); `assets/` di-ignore git (lokal saja). Fase 5 `todo`.
 
 ## 1. Ringkasan arsitektur
 
@@ -78,6 +78,7 @@ Rayin Observatory/
 ├── PROMPT.md                       prompt sesi; tidak diubah
 ├── PROGRESS.md                     status fase + checklist + log
 ├── CODEMAP.md                      peta ini
+├── .gitignore                      root: assets/, *.blend1, Python cache/venv, env, OS files
 ├── web/
 │   ├── package.json               npm commands + pinned dependencies
 │   ├── package-lock.json          generated npm dependency graph
@@ -97,7 +98,7 @@ Rayin Observatory/
 │   │   ├── observatory-scene.tsx  one Canvas, dome/Saturn + five instrument groups
 │   │   ├── instrument-motion.ts   per-instrument idle rigs + Saturn rig (moons, ring dust)
 │   │   └── sky.tsx                full-screen sky shader: gradient, stars, nebula
-│   ├── lib/crosscheck-case.ts      DRAFT components/readings/tools + CaseView type
+│   ├── lib/crosscheck-case.ts      approved components/readings/tools + CaseView type
 │   ├── lib/ambient.ts             original oscillator hum / fade / lifecycle
 │   ├── lib/instruments.ts         ordered chapter copy, readings, dialog context + types
 │   ├── lib/skills.ts              grouped skills and evidence-project IDs
@@ -181,7 +182,7 @@ Rayin Observatory/
 - **Bergantung pada:** data `crosscheck-case.ts`, GSAP, Next Link; CSS + model/fallback/video lokal.
 - **State / efek samping:** selected card (3 lensa); IntersectionObserver memicu count-up sekali per reading;
   tween/observer di-cleanup saat unmount. Video native controls, muted, playsInline, preload none.
-- **Catatan:** semua copy baru DRAFT. Next Link `onNavigate` mencegah push langsung, delegasi shell
+- **Catatan:** copy approved di gate Fase 4 (tanpa label DRAFT). Next Link `onNavigate` mencegah push langsung, delegasi shell
   menyelesaikan transisi; modifier-click tetap link normal. Next instrument menuju chapter SurgeLine
   homepage, rantai case-to-case tetap Fase 5. Fallback controls tetap berfungsi tanpa leader.
 
@@ -221,7 +222,7 @@ Rayin Observatory/
 - **Catatan:** Chromium GPU ANGLE, DPR 2. Flow utama 390×844 direkam: flight in (frame start/mid/end), 3 hotspot, flow, count-up
   (MutationObserver), tools, video lazy + seek 0:48, Return flight, Back/Forward, Tool→Skills, Next→SurgeLine; lalu fallback model
   diblok dan 360×740/430×932. `glide` = wheel nyata lalu posisi pas, target di-clamp ke scroll maksimum (dulu loop 30 dtk).
-  `FINDINGS.flightIn` = penilaian visual tester (lihat PROGRESS). Screenshot saat WebGL sibuk memberi kilatan frame kecil di MP4 (artefak rekaman).
+  `FINDINGS.flightIn` = penilaian visual tester, diterima pemilik di gate. Arsip gate Fase 4: cek `copy` mengharapkan label DRAFT, jadi gagal bila dijalankan ulang sekarang. Screenshot saat WebGL sibuk memberi kilatan frame kecil di MP4 (artefak rekaman).
 
 ### `assets/renders/case-crosscheck/evidence/`
 - **Peran:** paket bukti gate Fase 4.
@@ -679,7 +680,7 @@ Rayin Observatory/
   tahap Development (Codex/Claude Code) lalu Testing (Claude Code/Antigravity, paket bukti di
   `assets/renders/<slug-fase>/evidence/`); lihat PLAN §12 dan `PROMPT.md`.
 - **State / efek samping:** diperbarui setiap sesi; tidak menandai fase done tanpa gate pemilik.
-- **Catatan:** Fase 0 `done` 2026-09-14; Fase 1 `done` 2026-09-15; Fase 2 `done` 2026-09-15; Fase 3 `done` 2026-09-15. Fase 4 `awaiting-gate`: Testing 14/14 + paket bukti terkirim; approval copy + gate belum. Log sesi dijaga ringkas.
+- **Catatan:** Fase 0 `done` 2026-09-14; Fase 1 `done` 2026-09-15; Fase 2 `done` 2026-09-15; Fase 3 `done` 2026-09-15. Fase 4 `done` 2026-09-15 (copy case approved). Fase 5 `todo`. `assets/` tidak dilacak git sejak 2026-09-15 (tetap lokal; riwayat commit lama masih memuatnya). Log sesi dijaga ringkas.
 
 ## 5. Aset
 

@@ -9,12 +9,12 @@
 
 | Hal | Isi |
 |---|---|
-| Fase aktif | **Fase 4 — First case file** · Testing selesai; menunggu approval copy + gate |
-| Status fase | `awaiting-gate` |
+| Fase aktif | **Fase 5 — All case files** · Development belum mulai |
+| Status fase | `todo` |
 | Bagian PLAN.md yang relevan | §4 (peta situs), §5 (lima instrumen + urutan), §6 (alur scroll), §7 (template case + transisi), §8 (identitas FINAL), §9 (skills), §10 (aturan copy), §11 (arsitektur), §12 (target fase) |
 | Blocker | Tidak ada |
 | Preview sesi ini | Lokal `http://127.0.0.1:8767/work/crosscheck`; tunnel tidak dinyalakan. Bukti Testing `assets/renders/case-crosscheck/evidence/` |
-| Langkah berikut | Pemilik: lihat MP4 + contact sheet, putuskan temuan flight-in (terima / kembali ke Development), approve copy case, gate |
+| Langkah berikut | Codex / Claude Code: Fase 5 Development (case SurgeLine, DriftWatch, DueWatch, BrandWall + Next berantai), pola template case CrossCheck |
 
 ## Ringkasan fase
 
@@ -24,7 +24,7 @@
 | 1 | First light | `done` | 2026-09-15 |
 | 2 | One instrument alive | `done` | 2026-09-15 |
 | 3 | Full observatory | `done` | 2026-09-15 |
-| 4 | First case file | `awaiting-gate` | — |
+| 4 | First case file | `done` | 2026-09-15 |
 | 5 | All case files | `todo` | — |
 | 6 | Desktop | `todo` | — |
 | 7 | Showpiece polish | `todo` | — |
@@ -152,8 +152,8 @@ Development (Codex / Claude Code):
 Testing (Claude Code / Antigravity):
 - [x] Tes otomatis item di atas + transisi masuk/kembali; bug diperbaiki + tes ulang
 - [x] Paket bukti `assets/renders/case-crosscheck/evidence/` dikirim (14/14 pass)
-- [ ] Copy case file CrossCheck di-approve
-- [ ] Gate
+- [x] Copy case file CrossCheck di-approve (label DRAFT dilepas, 2026-09-15)
+- [x] Gate: pemilik menyatakan lolos (2026-09-15, "lolos semua ini fase 4 aman"; dinilai dari video + foto bukti)
 
 Bahan gate Fase 4 (Testing, 2026-09-15): folder `assets/renders/case-crosscheck/evidence/` —
 `case-crosscheck-walkthrough.mp4` (390×844, ±62 dtk), `contact-sheet.jpg` (17 frame berlabel),
@@ -161,7 +161,7 @@ Bahan gate Fase 4 (Testing, 2026-09-15): folder `assets/renders/case-crosscheck/
 - Bug diperbaiki: tiap home → case melempar `TypeError … getBoundingClientRect` (ResizeObserver homepage lama
   refresh setelah DOM case masuk → `#skills` null). Fix guard `live()` di `observatory-shell.tsx`; lint/typecheck/build,
   `verify_case.py` + `verify:mobile` 3 viewport pass, 0 error.
-- **Temuan untuk pemilik (bukan fail otomatis):** flight-in terbaca lemah — teks memudar, teleskop sedikit berputar
+- **Temuan untuk pemilik (bukan fail otomatis; diterima apa adanya di gate):** flight-in terbaca lemah — teks memudar, teleskop sedikit berputar
   tapi tidak tampak mendekat, lalu turun keluar layar; case terbuka di Brief tanpa instrumen. PLAN §7 minta kamera
   terbang masuk + instrumen jadi objek utama. Pilihan: terima, atau kembali ke Development (zoom masuk terlihat +
   instrumen tetap di layar pertama case). Return terasa baik (instrumen turun kembali ke tempatnya).
@@ -242,12 +242,15 @@ Testing (Claude Code / Antigravity):
 | 2026-09-15 | Revisi pasca Fase 3 disetujui: langit gelap hanya 30% atas + bintang lebih jarang, animasi baru 5 instrumen + Saturnus, label BrandWall observer. Repo GitHub personal public | Pemilik, chat sesi Claude Code |
 | 2026-09-15 | Gate Fase 3 lolos + seluruh copy homepage di-approve (DRAFT dilepas); kontak asli dipasang. Disalin ke PLAN §3 Q32 | Pemilik, chat sesi Claude Code |
 | 2026-09-15 | Mulai Fase 3 tiap fase = Development (Codex utama / Claude Code) → Testing (Claude Code / Antigravity, context ±1M) + paket bukti video/foto; gate dari bukti; tes manual HP fisik ditunda ke Fase 8. Disalin ke PLAN §3 Q31 + §12 | Pemilik, chat sesi Claude Code |
+| 2026-09-15 | Gate Fase 4 lolos; copy case CrossCheck di-approve (DRAFT dilepas); flight-in diterima apa adanya; `assets/` keluar dari git (lokal saja). Disalin ke PLAN §3 Q34 | Pemilik, chat sesi Claude Code |
 
 ## Log sesi
 
 > Entri terbaru di atas. Singkat, 1–2 baris: tanggal · harness · fase — apa yang dikerjakan,
 > verifikasi, berikutnya. Detail teknis taruh di CODEMAP / folder bukti, bukan di sini.
 
+- **2026-09-15 · Claude Code · Fase 4 → done** — Pemilik nyatakan lolos + approve copy. Label DRAFT case dilepas, `verify_case` disesuaikan;
+  `assets/` di-ignore + untrack (file lokal utuh). Build + `verify_case` diulang; commit + push. Berikutnya: Fase 5 Development.
 - **2026-09-15 · Claude Code · Fase 4 → awaiting-gate** — Testing: fix TypeError home→case (guard trigger homepage basi),
   `case_crosscheck_evidence.py` 14/14 pass + MP4/contact sheet; temuan flight-in lemah diajukan ke pemilik. Berikutnya: approve copy + gate.
 - **2026-09-15 · Codex · Fase 4 → ready-for-test** — Route CrossCheck, kamera persisten, 3 hotspot, alur, Readings, tools, video English; copy DRAFT.

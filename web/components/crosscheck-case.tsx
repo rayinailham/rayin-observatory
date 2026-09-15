@@ -27,7 +27,7 @@ export default function CrossCheckCase() {
   return <main ref={root} className="case-page">
     <section className="case-brief" aria-labelledby="case-heading">
       <Link onNavigate={event => event.preventDefault()} className="case-back" href="/#crosscheck" data-home-target="return">↙ Return to the instrument</Link>
-      <p className="section-kicker">Case file 01 / Web QA <span className="draft-label">DRAFT</span></p>
+      <p className="section-kicker">Case file 01 / Web QA</p>
       <h1 id="case-heading" tabIndex={-1}>CrossCheck</h1>
       <p className="case-deck">Find the gaps.<br />Bring back proof.</p>
       <h2>Brief</h2>

@@ -1,4 +1,4 @@
-// DRAFT. Source: CAPABILITY_CROSSCHECK.md; section-level provenance in web/README.md.
+// Owner-approved at the Phase 4 gate. Source: CAPABILITY_CROSSCHECK.md; section-level provenance in web/README.md.
 export const components = [
   { id: 'matrix', node: 'Lens1', title: 'Browser matrix', label: 'Pages, screens & roles',
     body: 'I open the selected pages in Chromium, Firefox and WebKit, across screen sizes and user roles. Each visit checks for broken layouts, missing content and browser errors.' },

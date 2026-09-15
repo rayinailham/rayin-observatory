@@ -1,7 +1,7 @@
 # Rayin Observatory · First case file
 
 Phase 4 Development: CrossCheck case route, persistent camera transition, component hotspots, animated readings and the original English demo video.
-Phase 0–3 gates passed (Phase 3 on 2026-09-15). All homepage copy is **owner-approved**; DRAFT labels removed.
+Phase 0–4 gates passed (Phase 3 and Phase 4 on 2026-09-15). All homepage and CrossCheck case copy is **owner-approved**; DRAFT labels removed.
 The owner clarified the job focus as **Automation Engineer** on 2026-09-15.
 Testing (Claude Code / Antigravity) follows developer verification and produces the gate evidence pack.
 
@@ -203,7 +203,7 @@ Readings, Tools used, Demo video, Next instrument. Tools return to homepage Skil
 instrument link returns to the SurgeLine homepage chapter; case-to-case chaining belongs to
 Phase 5. No route for another case was added.
 
-All new case copy is **DRAFT**, including labels, descriptions and the qualified readings.
+All case copy, including labels, descriptions and the qualified readings, was **approved by the owner at the Phase 4 gate** (2026-09-15); the DRAFT label is removed.
 Homepage copy remains owner-approved. The instrument is the existing approved Blender export;
 this phase adds camera motion and DOM markers, with leaders projected from the actual lens
 nodes. A labeled still view preserves the component controls when a model/WebGL fails.
@@ -214,7 +214,7 @@ no audio stream, verified using ffprobe). Poster: frame at 1 second, scaled to 9
 `preload="none"` keeps video download behind playback; native controls and a full-size link
 allow viewing the burned-in captions. The original footage contains a clearly labeled replay.
 
-### Case copy provenance — DRAFT
+### Case copy provenance — approved at the Phase 4 gate
 
 Source: `/home/rayin/Projects/Testing/portfolio/CAPABILITY_CROSSCHECK.md`.
 

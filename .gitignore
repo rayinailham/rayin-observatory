@@ -12,3 +12,6 @@ Thumbs.db
 
 # Local env
 .env*
+
+# Local-only source assets (Blender, renders, evidence, photos); runtime copies live in web/public
+assets/
