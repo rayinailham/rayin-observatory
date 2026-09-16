@@ -79,14 +79,19 @@ button { transition: color .18s, background-color .18s, scale .12s ease-out; }
 .loading-help button { min-height: 44px; color: var(--amber); text-decoration: underline; }
 /* Depth layers behind the gate. Wide screens only; the phone gate keeps its approved flat field. */
 .gate-field { display: none; position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+/* Wrapper = placement + parallax; inner <i> = the paint GSAP scales on exit. Keeping them apart
+   is what stops GSAP's transform folding from dropping a calc() translate and decentring a layer. */
 .gate-field > * { position: absolute; display: block; }
-.gate-stars { inset: -90px; opacity: .55;
+.gate-field i { position: absolute; inset: 0; display: block; }
+.gate-stars { inset: -90px; }
+.gate-stars i { opacity: .55;
   background-image: radial-gradient(1px 1px at 37px 29px, #fff, transparent), radial-gradient(1.5px 1.5px at 129px 83px, #CFE0FF, transparent), radial-gradient(1px 1px at 211px 47px, #FFE2B8, transparent), radial-gradient(1.5px 1.5px at 74px 187px, #fff, transparent), radial-gradient(1px 1px at 248px 151px, #fff, transparent);
   background-size: 281px 233px; -webkit-mask-image: linear-gradient(#000 6%, transparent 52%); mask-image: linear-gradient(#000 6%, transparent 52%); }
-.gate-rings { left: 50%; top: 46%; width: min(74vw, 940px); aspect-ratio: 1; border: 1px solid rgb(48 58 80 / .5); border-radius: 50%; }
-.gate-rings::before, .gate-rings::after { content: ''; position: absolute; border: 1px solid rgb(48 58 80 / .45); border-radius: 50%; }
-.gate-rings::before { inset: 13%; }
-.gate-rings::after { inset: 24% 6%; border-color: rgb(242 165 65 / .12); animation: gate-orbit-drift 72s linear infinite; }
+.gate-rings { left: 50%; top: 46%; width: min(74vw, 940px); aspect-ratio: 1; }
+.gate-rings i { border: 1px solid rgb(48 58 80 / .5); border-radius: 50%; }
+.gate-rings i::before, .gate-rings i::after { content: ''; position: absolute; border: 1px solid rgb(48 58 80 / .45); border-radius: 50%; }
+.gate-rings i::before { inset: 13%; }
+.gate-rings i::after { inset: 24% 6%; border-color: rgb(242 165 65 / .12); animation: gate-orbit-drift 72s linear infinite; }
 .gate-horizon { left: 50%; bottom: -46vh; width: 150vw; height: 88vh; translate: -50% 0; border-radius: 50%;
   background: radial-gradient(50% 50% at 50% 50%, rgb(26 39 84 / .55), transparent 70%); }
 @keyframes gate-orbit-drift { to { transform: rotate(360deg); } }

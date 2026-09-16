@@ -9,13 +9,28 @@
 
 | Hal | Isi |
 |---|---|
-| Fase aktif | **Fase 8 — Launch ready** · Development |
+| Fase aktif | **Fase 7A — CrossCheck: inspection room** · Development |
 | Status fase | `todo` |
-| Bagian PLAN.md yang relevan | §12 (target Fase 8), §11 (target performa), §3 Q39 (gate Fase 7), §3 Q40 (tes di URL Vercel) |
+| Bagian PLAN.md yang relevan | §3 Q41, §5.1 (CrossCheck), §7 (kontrak isi), §8.1–§8.2 (visual/motion/mobile → desktop), §10 (copy), §11 (performa), §12 (fase personalisasi) |
 | Blocker | Rig tes: `verify_desktop.py` / `verify_mobile.py` di venv `crosscheck` (Playwright 1.62) gagal — canvas R3F tetap 300×150, `data-scene=loading`, Chrome for Testing 149/151, headless + headed; direproduksi pada kode lama, perlu re-provision engine |
 | Preview sesi ini | Revisi planet: `http://127.0.0.1:8780/` · preview produksi lokal (`next start`) |
-| Revisi terakhir | Gerbang desktop: satu kolom di tengah, Enter di sumbu tengah, field parallax berlapis + arrival/exit berlapis (HP tidak berubah); siap review |
-| Langkah berikut | Sesi Development Fase 8 (Codex utama / Claude Code): meta + share card + favicon, **deploy ke Vercel produksi** + instruksi domain → `ready-for-test`. Testing lalu memakai URL Vercel (Q40). Vercel CLI sudah login 2026-09-16 (user `chhrone`, scope `chhrones-projects`); `web/` belum `vercel link` |
+| Revisi terakhir | PLAN/PROGRESS diperbarui untuk personalisasi lima project (Q41); belum ada implementasi personalisasi baru. Revisi gerbang desktop sebelumnya tetap siap review |
+| Langkah berikut | Development 7A: baca dossier CrossCheck lokal, susun brief personal, bangun chapter + case **mobile dulu**, lalu poles desktop sebagai tampilan utama; verifikasi → `ready-for-test`. Pulihkan rig browser sebelum mengklaim hasil visual lulus |
+| Launch | Fase 8 menunggu gate 7A–7F. Catatan deployment terdahulu: Vercel CLI login 2026-09-16 (`chhrone`, scope `chhrones-projects`), `web/` belum `vercel link`; verifikasi lagi saat Fase 8. Testing produksi tetap mengikuti Q40 |
+
+### Arahan wajib saat memakai prompt universal
+
+- **Baca Q41 terlebih dahulu:** sumber copy/angka adalah `portfolio/CAPABILITY_*.md` di root
+  **Rayin Observatory**, menggantikan path sibling pada prompt lama. Jangan berpindah sumber
+  tanpa mencatat perbedaannya. Dossier adalah snapshot, bukan laporan hasil run hari ini.
+- Urutan aktif: **7A CrossCheck → 7B SurgeLine → 7C DriftWatch → 7D DueWatch → 7E BrandWall →
+  7F integrasi → 8 launch → 9 aksesibilitas**. Kerjakan hanya fase/tahap aktif.
+- Setiap fase project: **brief personal → mobile selesai dan diuji → desktop dipoles →
+  regresi mobile → Testing → gate**. Desktop tetap panggung utama; bukan pekerjaan sisa.
+- Personalisasi meliputi cerita, chapter homepage, case file, komposisi bukti, hotspot,
+  animasi penjelas, serta entry/return/Next. Mengganti warna/nama saja belum memenuhi gate.
+- Fase 0–7 dan copy lama tetap riwayat approved; checklist baru belum dikerjakan. Copy baru
+  berstatus DRAFT. Bukti lama tidak dipakai untuk meluluskan personalisasi baru.
 
 ## Ringkasan fase
 
@@ -29,6 +44,12 @@
 | 5 | All case files | `done` | 2026-09-15 |
 | 6 | Desktop | `done` | 2026-09-15 |
 | 7 | Showpiece polish | `done` | 2026-09-16 |
+| 7A | CrossCheck — inspection room | `todo` | — |
+| 7B | SurgeLine — dispatch room | `todo` | — |
+| 7C | DriftWatch — monitoring room | `todo` | — |
+| 7D | DueWatch — time control room | `todo` | — |
+| 7E | BrandWall — visual studio | `todo` | — |
+| 7F | Five rooms, one observatory | `todo` | — |
 | 8 | Launch ready | `todo` | — |
 | 9 | Accessibility | `deferred` | — |
 
@@ -340,12 +361,20 @@ Bahan gate Fase 7 (Testing, 2026-09-15 — arsip; diulang setelah fix Enter): fo
 - Batas: emulasi Chromium; GPU laptop tidak di-throttle (beban GPU HP belum terwakili); HP fisik = Fase 8.
 
 ### Fase 8 — Launch ready
+Prasyarat: gate 7A–7F lolos. Detail personalisasi dan bukti per project tetap wajib saat launch.
+
 Development (Codex / Claude Code):
 - [ ] Meta, share card (preview WhatsApp/LinkedIn), favicon
+- [ ] Judul/deskripsi/share card lima case mengikuti cerita masing-masing, angka dan batas dossier
 - [ ] Deploy Vercel (produksi); instruksi sambung domain untuk pemilik → `ready-for-test`
 
 Testing (Claude Code / Antigravity) — **semua tes memakai URL Vercel, bukan preview lokal (Q40)**:
 - [ ] QA lintas browser (Chromium/Firefox/WebKit) + viewport HP/tablet/desktop di URL Vercel
+- [ ] CrossCheck: scan/matriks/temuan, entry lensa dan return tetap utuh di produksi
+- [ ] SurgeLine: antrean/crash/resume, konfirmasi vs kegagalan, transisi antena tetap utuh
+- [ ] DriftWatch: snapshot/diff/alarm, label tanggal dan transisi pita tetap utuh
+- [ ] DueWatch: dua modul, eskalasi manusia, label simulasi/video dan transisi waktu tetap utuh
+- [ ] BrandWall: specimen/tema, kontrol sebelum/sesudah dan transisi prisma tetap utuh
 - [ ] Cek preview share (WhatsApp/LinkedIn) dari URL Vercel
 - [ ] Paket bukti `assets/renders/launch/evidence/` dikirim
 - [ ] Tes manual pemilik di HP fisik (satu-satunya; rasa scroll, fps, suara, 4G)
@@ -353,6 +382,12 @@ Testing (Claude Code / Antigravity) — **semua tes memakai URL Vercel, bukan pr
 
 ### Fase 9 — Accessibility (ditunda)
 - [ ] Mode gerak minimal, keyboard, screen reader
+- [ ] CrossCheck: matriks dan temuan tetap dipahami tanpa scan; detail bukti terjangkau keyboard
+- [ ] SurgeLine: urutan/crash/resume dan hasil tersedia sebagai teks; perubahan status diumumkan
+- [ ] DriftWatch: diff/alarm terbaca tanpa gerak/warna; pasangan snapshot berlabel jelas
+- [ ] DueWatch: tanggal, kategori dan handoff manusia terbaca berurutan; fokus antar modul jelas
+- [ ] BrandWall: pembanding berlabel, alternatif tombol untuk slider, anotasi tidak hanya warna
+- [ ] Regresi mobile dahulu lalu desktop; bukti terpisah per project + gate setelah Testing
 
 ---
 
@@ -377,12 +412,25 @@ Testing (Claude Code / Antigravity) — **semua tes memakai URL Vercel, bukan pr
 | 2026-09-16 | Setiap akhir fase (gate lolos) wajib git commit + push ke `origin main`; ditulis di `PROMPT.md` (langkah tutup sesi no. 4). Disalin ke PLAN §3 Q38 | Pemilik, chat sesi Claude Code |
 | 2026-09-16 | Gate Fase 7 lolos dari paket bukti Testing ulang 14/14 ("lolos commit dan push"); jeda instrumen ±3 dtk diterima apa adanya. Disalin ke PLAN §3 Q39 | Pemilik, chat sesi Claude Code |
 | 2026-09-16 | Testing Fase 8 dijalankan di **URL produksi Vercel** (deploy dulu, baru tes), bukan preview lokal. Vercel CLI 54.9.1 terpasang + dicatat di `RULES.md` agar semua harness pakai. Disalin ke PLAN §3 Q40 | Pemilik, chat sesi Claude Code |
+| 2026-09-16 | Personalisasi cerita, visual, animasi dan transisi lima project dari `portfolio/` lokal; setiap fase mobile dahulu, lalu desktop sebagai tampilan utama. Sisipkan 7A–7E per project + 7F integrasi sebelum launch; fase aktif berikut 7A. Disalin ke PLAN §3 Q41 | Pemilik, chat sesi Codex |
 
 ## Log sesi
 
 > Entri terbaru di atas. Singkat, 1–2 baris: tanggal · harness · fase — apa yang dikerjakan,
 > verifikasi, berikutnya. Detail teknis taruh di CODEMAP / folder bukti, bukan di sini.
 
+- **2026-09-16 · Codex · revisi rencana personalisasi** — PLAN/PROGRESS: brief lima project, fase 7A–7F,
+  mobile dulu → desktop utama. Cek sumber dossier dan konsistensi tracker; berikutnya 7A Development.
+
+- **2026-09-16 · Claude Code · fix cincin gerbang lompat** — Laporan pemilik: line art di loading screen "teleport ke kanan
+  bawah" saat Enter diklik. Sebab terukur: GSAP melipat transform dan membuang `translate` milik lapisan parallax
+  (`translate: none` di inline style). Saat pointer pernah bergerak, `translate` bernilai `calc(-50% + …px)` yang tak bisa
+  diurai GSAP, jadi centring −50%/−50% hilang → pusat cincin lompat **+465 px kanan, +465 px bawah** (separuh lebarnya,
+  mendarat di area observatorium). Kalau pointer belum digerakkan nilainya pas `-50% -50%` dan lolos — itu sebabnya
+  luput di uji pertama. Perbaikan: tiap lapisan dipecah jadi pembungkus (posisi + parallax lewat `translate`, tak
+  disentuh GSAP) dan `<i>` di dalamnya (yang di-scale GSAP); timeline menyasar `.gate-rings i` / `.gate-stars i`.
+  Diukur ulang: selama tween, drift pusat cincin **7,4 px konstan** (sisa easing parallax, bukan lompatan) sementara
+  lebarnya 940 → 1402 px; frame-diff canvas 34 → 6,5 tanpa nol/lonjakan. lint/typecheck/build pass. Berikutnya: review pemilik.
 - **2026-09-16 · Claude Code · revisi gerbang desktop** — Atas permintaan pemilik: gerbang ≥1024px jadi satu kolom di tengah
   (dial → kicker → judul → status → track → Enter → tanpa suara), tombol Enter di sumbu tengah, bukan lagi rail kanan.
   Ditambah field parallax berlapis (`.gate-field`: bintang, cincin orbit, horizon) yang digerakkan pointer lewat

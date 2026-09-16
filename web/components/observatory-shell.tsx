@@ -283,8 +283,8 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
       else if (wide) exit
         .to('.gate-main > *', { y: -34, opacity: 0, duration: .5, ease: 'power2.in', stagger: { each: .045, from: 'end' } }, 0)
         .to('.gate-byline, .gate-note', { opacity: 0, duration: .4, ease: 'power2.in' }, 0)
-        .to('.gate-rings', { scale: 1.5, opacity: 0, duration: 1.15, ease: 'power2.inOut' }, 0)
-        .to('.gate-stars', { scale: 1.3, opacity: 0, duration: 1.15, ease: 'power2.inOut' }, 0)
+        .to('.gate-rings i', { scale: 1.5, opacity: 0, duration: 1.15, ease: 'power2.inOut' }, 0)
+        .to('.gate-stars i', { scale: 1.3, opacity: 0, duration: 1.15, ease: 'power2.inOut' }, 0)
         .to(gate.current, { opacity: 0, duration: .8, ease: 'sine.inOut' }, .16);
       else exit.to(gate.current, { opacity: 0, yPercent: -4, duration: .7, ease: 'power2.inOut' });
       // The hero lands as the gate clears, on the same curve as the camera settling behind it.
@@ -461,7 +461,9 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
     </div>
 
     <div ref={gate} className="entry-gate" data-ready={ready} data-fallback={failed} inert={entered} aria-label="Enter Rayin Observatory">
-      <div className="gate-field" aria-hidden="true"><span className="gate-stars" /><span className="gate-rings" /><span className="gate-horizon" /></div>
+      {/* Each layer is a wrapper that owns its parallax translate plus an inner <i> for GSAP to
+          scale: GSAP folds transforms and drops a calc() `translate`, which would decentre it. */}
+      <div className="gate-field" aria-hidden="true"><span className="gate-stars"><i /></span><span className="gate-rings"><i /></span><span className="gate-horizon" /></div>
       <p className="gate-byline">A portfolio by Rayina Ilham</p>
       <div className="gate-main">
         <div className="calibration-orbit" aria-hidden="true"><span /><i /><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" pathLength="100" strokeDasharray="100" strokeDashoffset={100 - loaded} /></svg></div>
