@@ -1,7 +1,7 @@
 // Case file content for all five instruments, in homepage order (PLAN §5 / §7).
-// All five case files owner-approved at the Phase 5 gate (2026-09-15).
-// Every reading traces to its dossier section (`source`);
-// /home/rayin/Projects/Testing/portfolio/CAPABILITY_<NAME>.md. Full table: web/README.md.
+// All five case files owner-approved at the Phase 5 gate (2026-09-15); CrossCheck's hotspot copy is DRAFT
+// again after the Phase 7A rewrite. Every reading traces to its dossier section (`source`);
+// portfolio/CAPABILITY_<NAME>.md in the project root. Full table: web/README.md.
 import type { InstrumentId } from './instruments';
 
 export type CaseComponent = {
@@ -19,11 +19,18 @@ export type CaseFile = {
   readingsHeading: readonly string[]; readingsIntro: string; readings: readonly CaseReading[]; limits: readonly string[];
   tools: readonly string[];
   video: { duration: number; label: string; intro: string };
+  // Phase 7A: a named node the case is entered and left through (CrossCheck's middle lens).
+  aperture?: string;
 };
+
+// Screen position (CSS px) of the lens a case is entered through: written by the scene every frame,
+// read by the shell's iris. A plain object on purpose — see observatory-scene.tsx.
+export const apertureScreen = { x: NaN, y: NaN };
 
 export const caseFiles: readonly CaseFile[] = [
   {
-    id: 'crosscheck', draft: false,
+    // Phase 7A: hotspot copy rewritten as inspection results (DRAFT until the owner approves it).
+    id: 'crosscheck', draft: false, aperture: 'Lens2',
     deck: ['Find the gaps.', 'Bring back proof.'],
     brief: [
       'Your app can work in one browser and fail in another. Different screens and user permissions make the gaps harder to spot.',
@@ -33,12 +40,12 @@ export const caseFiles: readonly CaseFile[] = [
     instrumentHeading: ['Three lenses.', 'One target.'],
     // Revision 3: 01 → Lens3 (upper tube), 03 → Lens1, so left leaders never cross another lens.
     components: [
-      { id: 'matrix', node: 'Lens3', marker: [12, 32], title: 'Browser matrix', label: 'Pages, screens & roles',
-        body: 'I open the selected pages in Chromium, Firefox and WebKit, across screen sizes and user roles. Each visit checks for broken layouts, missing content and browser errors.' },
-      { id: 'access', node: 'Lens2', marker: [88, 44], title: 'Access checks', label: 'Who can see what',
-        body: 'I check each page against the intended permissions for each role. Suspected access leaks are reopened in a real browser before they enter the report.' },
-      { id: 'flows', node: 'Lens1', marker: [12, 57], title: 'End-to-end flows', label: 'Check what was saved',
-        body: 'I run tasks such as creating, searching and updating a record. After saving, I reload and check the stored data, so a success message cannot hide missing changes.' },
+      { id: 'matrix', node: 'Lens3', marker: [12, 32], title: 'Browser matrix', label: '40 pages × 27 settings',
+        body: 'Every page opens in Chromium, Firefox and WebKit at three screen sizes, as admin, editor and viewer. Eleven checks look for errors, broken layouts and missing content.' },
+      { id: 'access', node: 'Lens2', marker: [88, 44], title: 'Access checks', label: 'Who can open what',
+        body: 'All 72 pages are tried as each role against the written policy. Suspected leaks reopen in a real browser first: 3 confirmed, one of them nobody planted.' },
+      { id: 'flows', node: 'Lens1', marker: [12, 57], title: 'End-to-end flows', label: 'Saved is not stored',
+        body: 'Five everyday tasks run as an editor, then the page is reloaded and the data read back. One save said “Post updated”; the CRM Owner was never stored.' },
     ],
     flowHeading: ['From page visits', 'to a clear report.'],
     flow: [

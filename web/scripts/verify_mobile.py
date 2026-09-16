@@ -13,6 +13,8 @@ from playwright.async_api import async_playwright
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'assets/renders/full-observatory/dev'
 URL = os.environ.get('OBSERVATORY_URL', 'http://127.0.0.1:8767')
+# Q42: OBSERVATORY_PHONES=390x844 narrows an older phase's regression to one phone (run_regressions.py --phone-only).
+PHONES = [tuple(map(int, s.split('x'))) for s in os.environ.get('OBSERVATORY_PHONES', '390x844,360x740,430x932').split(',')]
 SLUGS = ['crosscheck', 'surgeline', 'driftwatch', 'duewatch', 'brandwall']
 NAMES = ['CrossCheck', 'SurgeLine', 'DriftWatch', 'DueWatch', 'BrandWall']
 READINGS = ['1,080', '50,000', '11/11', '200', '300']
@@ -51,7 +53,7 @@ async def enter(page, silent=True):
 
 async def verify_fallback(browser):
     results = []
-    for width, height in [(390, 844), (360, 740), (430, 932)]:
+    for width, height in PHONES:
         context = await browser.new_context(viewport={'width':width,'height':height}, is_mobile=True, has_touch=True)
         page = await context.new_page()
         await page.route('**/models/ambient.glb', lambda route: route.abort())
@@ -78,7 +80,7 @@ async def run():
     save()
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True, args=['--use-gl=angle', '--use-angle=gl-egl', '--enable-webgl', '--ignore-gpu-blocklist'])
-        for width, height in [(390, 844), (360, 740), (430, 932)]:
+        for width, height in PHONES:
             print(f'Checking {width}x{height}', flush=True)
             context = await browser.new_context(viewport={'width': width, 'height': height}, device_scale_factor=1, is_mobile=True, has_touch=True)
             page = await context.new_page()
@@ -206,8 +208,8 @@ async def run():
             assert all(c['target'] == '_blank' and 'noopener' in c['rel'] for c in contacts[1:])
             assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth')
             await page.screenshot(path=str(OUT / f'contact-{width}x{height}.png'))
-            await page.evaluate('window.scrollTo(0,document.documentElement.scrollHeight)')
-            await page.wait_for_function("document.querySelector('.progress-readout output').textContent==='100%'")
+            # A Lenis tail from the Contact menu scroll can overwrite one native jump; re-issue it until it lands.
+            await page.wait_for_function("(scrollTo(0,document.documentElement.scrollHeight), document.querySelector('.progress-readout output').textContent==='100%')", polling=300)
             await page.get_by_role('button', name='Rayin Observatory, return to the dome').click()
             await page.wait_for_function('scrollY<2', timeout=8000)
             if width == 390:

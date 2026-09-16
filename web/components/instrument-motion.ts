@@ -64,17 +64,21 @@ function glow(radiusIn: number, radiusOut: number) {
 function disposeAll(items: (BufferGeometry | Material)[]) { items.forEach(item => item.dispose()); }
 
 // CrossCheck: the three engines light in turn, then agree together and turn green.
-// Each channel's focus collar creeps while that channel is reading.
-function crosscheck(view: Object3D, materials: MeshStandardMaterial[]): Rig {
+// Each channel's focus collar creeps while that channel is reading. `onScan` reports the lane being
+// read ('0'–'2', 'agree', 'idle') so the page's lane strip follows the lenses, only when it changes.
+function crosscheck(view: Object3D, materials: MeshStandardMaterial[], onScan?: (lane: string) => void): Rig {
   const lenses = [1, 2, 3].map(i => materials.filter(material => material.name === `Lens${i}Glow`));
   const collars = [0, 1, 2].map(i => view.getObjectByName(`FocusPivot${i}`));
   const strip = materials.filter(material => material.name === 'Amber light');
   const pivot = view.getObjectByName('OpticsPivot');
   const tint = new Color();
+  let lane = '';
   return { dispose() {}, update(time) {
     const u = time % 6.6;
     const fade = 1 - MathUtils.smoothstep(u, 5.6, 6.4);
     const all = MathUtils.smoothstep(u, 3.7, 4.2) * fade;
+    const reading = u < 3.6 ? String(Math.floor(u / 1.2)) : all > .4 ? 'agree' : 'idle';
+    if (reading !== lane) { lane = reading; onScan?.(lane); }
     tint.copy(amber).lerp(ok, all);
     lenses.forEach((group, j) => {
       const turn = Math.sin(MathUtils.clamp((u - j * 1.2) / 1.2, 0, 1) * Math.PI);
@@ -322,8 +326,8 @@ function brandwall(view: Object3D, materials: MeshStandardMaterial[], onObserve?
   };
 }
 
-export function rigInstrument(id: string, view: Object3D, materials: MeshStandardMaterial[], onObserve?: (observed: boolean) => void): Rig {
-  if (id === 'crosscheck') return crosscheck(view, materials);
+export function rigInstrument(id: string, view: Object3D, materials: MeshStandardMaterial[], onObserve?: (observed: boolean) => void, onScan?: (lane: string) => void): Rig {
+  if (id === 'crosscheck') return crosscheck(view, materials, onScan);
   if (id === 'surgeline') return surgeline(view);
   if (id === 'driftwatch') return driftwatch(view, materials);
   if (id === 'duewatch') return duewatch(view, materials);

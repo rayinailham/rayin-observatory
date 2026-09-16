@@ -4,6 +4,7 @@
 > Dokumen ini adalah hasil sesi grilling 2026-09-14. Semua keputusan di bawah **sudah dikunci**
 > oleh pemilik; jangan diubah tanpa persetujuan eksplisit. Status kerja harian ada di
 > `PROGRESS.md`, peta kode ada di `CODEMAP.md`, cara memulai sesi ada di `PROMPT.md`.
+> Revisi 2026-09-16 (Q41): personalisasi lima project, mobile dahulu, desktop tetap utama.
 
 ---
 
@@ -15,7 +16,9 @@ sendiri dan animasi berat. Temanya **observatorium malam**: Rayina adalah operat
 "mengawasi sistem klien", dan kelima project-nya tampil sebagai **lima instrumen** di dalam
 observatorium. Tiap instrumen punya halaman **case file** sendiri; perpindahan ke sana memakai
 transisi kamera yang terbang masuk ke instrumen, jadi pengunjung tidak pernah merasa keluar dari
-observatorium. Dikerjakan **mobile-first**, desktop menyusul, dalam 10 fase bertarget non-teknis.
+observatorium. Setiap project mendapat cerita, komposisi visual, animasi penjelas, dan transisi
+sesuai pekerjaannya. **Mobile-first adalah urutan pengembangan; desktop tetap panggung utama**.
+Fase 0–7 menjadi fondasi yang sudah lolos; fase personalisasi 7A–7F mendahului launch Fase 8.
 
 ---
 
@@ -40,7 +43,7 @@ observatorium. Dikerjakan **mobile-first**, desktop menyusul, dalam 10 fase bert
 | Q2 | Bentuk web | **2D scroll + aset 3D**, animasi & transisi banyak. **Lenis wajib**, scroll harus sangat halus |
 | Q3 | Metafora | **Observatorium** |
 | Q4 | Konten non-project | **About**, **Skills & Tools** (hanya yang legit dicari perusahaan), **Contact** |
-| Q5 | Device | **Mobile-first**, desktop belakangan |
+| Q5 | Device | **Mobile-first**, lalu desktop sebagai panggung utama; diperjelas Q41: urutan ini berlaku di setiap fase personalisasi |
 | Q6 | Bahasa | Full English |
 | Q7 | Ambisi | **Showpiece**, banyak fase, pelan-pelan; fase ditarget secara non-teknis |
 | Q8 | Foto | Foto `/home/rayin/Documents/profile foto.jpg` **di-crop tanpa logo Amazon** (tidak ada afiliasi) + stilisasi duotone navy + garis scan |
@@ -56,7 +59,7 @@ observatorium. Dikerjakan **mobile-first**, desktop menyusul, dalam 10 fase bert
 | Q18 | Urutan homepage | Hero → Work → Skills → About → Contact |
 | Q19 | Intro | Gerbang **"Enter the Observatory"** dengan loader "calibrating instruments", plus "Enter without sound" |
 | Q20 | Tampilan instrumen | Chapter full-screen yang **di-pin**; kamera memutari instrumen |
-| Q21 | Template case study | Lihat §7 |
+| Q21 | Struktur case study | Lihat §7; sejak Q41, bagian wajib adalah kontrak isi, bukan template visual seragam |
 | Q22 | Navigasi | Header minimal + readout progres scroll; mobile: menu overlay bergaya panel kontrol |
 | Q23 | Copy | Agen yang draft dari dossier, pemilik approve. Orang pertama, bahasa klien |
 | Q24 | Aset 3D | Custom di Blender (via Blender MCP) untuk kubah + 5 instrumen; CC0 hanya untuk HDRI/tekstur |
@@ -76,6 +79,9 @@ observatorium. Dikerjakan **mobile-first**, desktop menyusul, dalam 10 fase bert
 | Q39 | Gate Fase 7 (Showpiece) | (2026-09-16) Gate Fase 7 lolos dari paket bukti Testing ulang 14/14 ("lolos commit dan push"); Enter aktif 6.39 dtk di slow 4G. Temuan jeda ±3 dtk (chapter/case tampil tanpa model, garis penunjuk case sempat bertemu di ruang kosong) **diterima apa adanya**. Berikutnya Fase 8 Launch ready |
 | Q40 | Tes Fase 8 di URL Vercel | (2026-09-16) Tahap Testing Fase 8 dijalankan terhadap **URL produksi Vercel**, bukan preview lokal: Development deploy dulu, lalu QA lintas browser + paket bukti + tes HP fisik pemilik semuanya memakai link Vercel. Vercel CLI 54.9.1 sudah terpasang di device (dicatat di `RULES.md`); `vercel login` dilakukan pemilik sendiri. Domain/DNS tetap di luar cakupan agent |
 | Q38 | Commit + push akhir fase | (2026-09-16) Setiap akhir fase (gate lolos → `done`) **wajib** git commit + push ke `origin main` (akun personal). Di luar akhir fase tetap hanya atas permintaan pemilik. Aturan di `PROMPT.md` |
+| Q41 | Personalisasi lima project | (2026-09-16) Pemilik meminta plan/progress mengarahkan sesi berikut ke penjelasan personal tiap project berdasarkan **`portfolio/` di root Rayin Observatory**. Cerita, visual, animasi, dan transisi boleh berbeda sesuai jenis project; jangan terasa template. Setiap fase membangun dan memverifikasi mobile dulu, kemudian memoles desktop sebagai tampilan utama. Tambahkan 7A–7E per project + 7F integrasi sebelum Fase 8; gate 0–7 tetap sebagai riwayat. Rincian §5, §7, §8, §12 |
+| Q42 | Efisiensi tes | (2026-09-16, sesi Testing 7A) Pemilik tidak mau Testing selama sesi ini (regresi jalan dua kali setelah bug performa baru ketahuan di Testing). Berlaku mulai fase berikut: (1) Development wajib cek fps `perf_quick.py` sebelum `ready-for-test`; (2) regresi lewat `run_regressions.py` — suite yang sudah lolos pada sidik jari sumber yang sama dilewati, setelah fix hanya suite yang belum hijau di kode baru; (3) paket bukti Testing memanggil ulang tes dev fase aktif di dalam paketnya, bukan menjalankan suite dev terpisah lalu mengulang; (4) suite fase lama cukup 390×844 (`--phone-only`), tiga HP hanya untuk fase aktif. Detail §12.3 |
+| Q43 | Gate 7A CrossCheck | (2026-09-16) Gate 7A lolos dari paket bukti Testing 16/17 ("lulus semua aman"); copy baru 7A di-approve, label DRAFT CrossCheck dilepas. Dua temuan diterima apa adanya: scrub inspection field 52–54 fps dengan 11–13% frame lambat di 4× CPU (gagal p95 ketat), crop "Expected" CC-001 sulit dibaca di HP. Fase aktif berikut 7B |
 
 ---
 
@@ -100,8 +106,10 @@ observatorium. Dikerjakan **mobile-first**, desktop menyusul, dalam 10 fase bert
 
 ## 5. Lima instrumen
 
-Sumber materi tiap project: `/home/rayin/Projects/Testing/portfolio/CAPABILITY_<NAMA>.md`.
-Detail isi project **belum dibahas**; dibahas saat fase copy (Fase 2–5).
+Sumber materi yang dipakai sesi berikut: **`portfolio/CAPABILITY_<NAMA>.md` di root project ini**
+(`/home/rayin/Projects/Testing/Rayin Observatory/portfolio/`). Dossier adalah snapshot bukti,
+bukan data live. Baca pitch, masalah klien, alur, angka, dan keterbatasan project aktif sebelum
+menulis copy atau merancang adegan. Jangan hanya mengganti nama/angka pada case lain.
 
 | Urutan | Project | Fungsi singkat | Instrumen | Gerakan idle khas |
 |---|---|---|---|---|
@@ -112,6 +120,97 @@ Detail isi project **belum dibahas**; dibahas saat fase copy (Fase 2–5).
 | 5 | **BrandWall** | Design QA / visual brand testing | **Spektrograf prisma** (cahaya dipecah jadi pita warna) | prisma berputar pelan, pita warna bergeser |
 
 Aset tambahan: **kubah observatorium** (hero + gerbang), **langit + planet ambient** (latar).
+
+### 5.1 CrossCheck — ruang inspeksi, dari sinyal ke masalah yang bisa ditindak
+
+- **Sumber:** `portfolio/CAPABILITY_CROSSCHECK.md` §1–4, §7, §9.
+- **Cerita:** aplikasi tampak baik di satu layar → periksa browser, ukuran layar, dan peran
+  pengguna → kelompokkan sinyal → buka satu temuan beserta bukti dan langkah reproduksi.
+  Fokus klien: tahu apa yang rusak, siapa terdampak, dan apa yang harus diperbaiki dulu.
+- **Visual:** teleskop tiga lensa, garis bidik presisi, matriks cakupan, lembar temuan terkurasi;
+  navy/ivory dengan hijau sebagai hasil pemeriksaan dan merah hanya pada masalah.
+- **Animasi penjelas:** lensa memindai tiga jalur browser; sel matriks terisi lalu sinyal
+  mengelompok menjadi temuan. Sorot satu bukti saat kartu temuan dipilih; hindari efek alarm acak.
+- **Transisi:** homepage → mendekati lensa → bidang inspeksi membuka case file; kembali
+  menarik kamera ke teleskop dan posisi chapter semula. Scroll balik membalik urutan scan.
+- **Mobile → desktop:** matriks bertahap dan bukti dalam satu kolom yang bisa di-tap; kemudian
+  desktop menjadi meja inspeksi lebar dengan matriks dan detail bukti berdampingan.
+- **Bukti & batas:** 1,080 kombinasi, 881 sinyal → 18 isu, 12/12 bug tertanam tertangkap.
+  Jelaskan target demo milik sendiri; bukan hasil aplikasi klien. Jangan menyiratkan semua
+  pengurangan sinyal adalah false positive; dossier mencatat 562 false positive terpisah.
+
+### 5.2 SurgeLine — ruang pengiriman, pekerjaan tetap lanjut setelah putus
+
+- **Sumber:** `portfolio/CAPABILITY_SURGELINE.md` §1–4, §7, §9.
+- **Cerita:** spreadsheet besar → antrean → pekerja paralel → pengiriman terputus → lanjut
+  dari posisi tersimpan → hasil terkonfirmasi atau gagal dengan alasan. Fokus: tidak hilang,
+  tidak terkirim dua kali, dan estimasi waktu yang jujur.
+- **Visual:** antena array, jalur pengiriman, blok record dan tanda konfirmasi; susunan memanjang
+  dengan ritme tegas, amber sebagai aktivitas dan hijau khusus hasil terkonfirmasi.
+- **Animasi penjelas:** record mengalir ke pekerja, satu jalur berhenti saat demonstrasi crash,
+  pekerjaan tertunda kembali mengalir saat resume; record sukses tidak mengulang pengiriman.
+  Pisahkan hasil confirmed, rejected, dan dead-letter secara terbaca.
+- **Transisi:** kamera mengikuti pulsa menuju antena → jalur antrean menjadi pengantar case;
+  saat kembali, aliran menyusut ke antena, tanpa animasi reset seolah data hilang.
+- **Mobile → desktop:** alur vertikal bertahap dengan kontrol crash/resume yang bisa di-tap;
+  desktop memperlihatkan beberapa jalur pekerja dan ringkasan hasil serentak.
+- **Bukti & batas:** 50,000 baris input → 49,950 unik; 48,273 terkonfirmasi, 844 ditolak,
+  833 dead-letter; dua kali kill, nol duplikat. Selesai diproses bukan berarti semua sukses.
+  Target lokal sintetis; 6 juta record adalah estimasi, bukan volume yang pernah dijalankan.
+
+### 5.3 DriftWatch — ruang pemantauan, perubahan tidak lewat diam-diam
+
+- **Sumber:** `portfolio/CAPABILITY_DRIFTWATCH.md` §1–4, §7, §9.
+- **Cerita:** snapshot kemarin → pengambilan hari ini → bedakan data baru/berubah/hilang →
+  bedakan perubahan sumber dari pipeline rusak → alarm yang bisa ditelusuri.
+  Fokus: tahu kapan data sudah tidak dapat dipercaya.
+- **Visual:** seismograf, pita waktu, dua snapshot, anotasi perubahan; ruang lebih tenang,
+  trace hijau dan lonjakan merah bermakna dengan label sebab.
+- **Animasi penjelas:** trace berjalan stabil, perubahan memicu lonjakan lokal, detail diff
+  terbuka; contoh hasil kosong masuk ke alarm, tidak berubah menjadi indikator sukses.
+- **Transisi:** ikuti jarum ke pita rekaman; pita melebar menjadi timeline case file.
+  Kembali menggulung ke titik asal; beda snapshot tetap mudah dipahami saat scroll balik.
+- **Mobile → desktop:** pasangan snapshot ditumpuk dengan penanda tanggal dan tombol banding;
+  desktop menampilkan timeline lebar serta snapshot/diff sejajar.
+- **Bukti & batas:** 1,323 record/hari dari empat sumber; 11/11 kegagalan tertanam tertangkap,
+  nol false positive pada pengujian itu; tiga hari unattended yang dibuktikan.
+  Jangan mengubah bukti tiga hari menjadi klaim monitoring berbulan-bulan atau status live.
+
+### 5.4 DueWatch — ruang kendali waktu, tahu kapan menindak dan kapan berhenti
+
+- **Sumber:** `portfolio/CAPABILITY_DUEWATCH.md` §1–4, §7–8, §11.
+- **Cerita:** kontrak dihitung ulang → tenggat diprioritaskan → pesan dipilah → tindak lanjut
+  aman atau eskalasi manusia. Jelaskan dua modul yang berbeda: tracker kontrak dan triage pesan.
+- **Visual:** orrery/jam astronomi, kalender berbentuk lintasan, kartu status dan jalur handoff;
+  ivory/amber dominan, tempo tenang, status memakai label selain warna.
+- **Animasi penjelas:** penunjuk waktu melewati batas status kontrak, kartu pindah kategori;
+  pesan sensitif berhenti di manusia, replay tidak menambah pengingat ganda. Adegan berlabel
+  simulasi; tidak menyerupai inbox atau pengiriman pesan live.
+- **Transisi:** kamera mengikuti cincin waktu → lintasan membuka agenda case file;
+  kembali ke orrery dengan ritme halus, tanpa hitung mundur yang memberi kesan darurat palsu.
+- **Mobile → desktop:** agenda vertikal dan pilihan modul lewat tap; desktop memakai agenda
+  kontrak serta meja triage berdampingan, tetap jelas bahwa keduanya punya alur berbeda.
+- **Bukti & batas:** 200 kontrak/run, 18 pesan uji, 6/6 pesan sensitif dieskalasi, nol panggilan
+  API eksternal. Pertahankan catatan tanggal simulasi video Q35 dan temuan audit mandiri
+  (tujuh cacat; A9/A10 terbuka pada dossier); jangan menjanjikan sistem bebas cacat/siap produksi.
+
+### 5.5 BrandWall — studio visual, tunjukkan tepat di mana brand rusak
+
+- **Sumber:** `portfolio/CAPABILITY_BRANDWALL.md` §1–4, §6 K2–K8, §7, §9.
+- **Cerita:** aset ekstrem → coba pada surface dan tema → lihat crop/kontras/rasio/overflow →
+  temukan titik patah → bandingkan hasil aturan CSS. Fokus pada bukti visual dan kelas kerusakan.
+- **Visual:** spektrograf prisma, bidang spesimen terang/gelap, contact sheet dan overlay ukur;
+  komposisi seperti studio editorial. Spektrum warna menjadi aksen identitas khusus project ini.
+- **Animasi penjelas:** berkas cahaya memisah menjadi surface/tema, specimen berganti ukuran,
+  garis ukur menandai titik rusak, reveal sebelum/sesudah menunjukkan efek aturan.
+  Animasi observer/celah ganda yang sudah ada boleh tetap sebagai aksen; cerita QA harus utama.
+- **Transisi:** kamera mengikuti berkas melalui prisma → bidang cahaya membuka galeri;
+  kembali merapat ke prisma. Reveal gambar menjaga pasangan pembanding tetap sejajar.
+- **Mobile → desktop:** satu pasangan gambar terbaca, tombol sebelum/sesudah serta slider
+  opsional; desktop memperluas menjadi galeri dan perbandingan besar dengan anotasi.
+- **Bukti & batas:** 30 aset sintetis × 5 surface × 2 tema = 300 screenshot/run;
+  11 titik patah dan tujuh aturan CSS. Bukan logo klien asli; aset 404/kosong tidak diklaim
+  selesai lewat CSS. A8 pemahaman oleh pengguna non-teknis masih parsial pada dossier.
 
 ---
 
@@ -125,7 +224,9 @@ Aset tambahan: **kubah observatorium** (hero + gerbang), **langit + planet ambie
    ke Contact.
 3. **Work** — lima chapter full-screen yang di-pin. Tiap chapter: kamera memutari instrumen
    mengikuti scroll, muncul **pitch 1 kalimat**, **1 angka bukti** (gaya readout), dan tombol
-   **Open case file**.
+   **Open case file**. Sesudah personalisasi, komposisi dan ritme setiap chapter mengikuti
+   §5.1–§5.5: scan, aliran antrean, trace perubahan, agenda waktu, lalu studio spesimen.
+   Gaya pinned dan CTA tetap dikenali; jangan mengulang koreografi yang sama lima kali.
 4. **Skills** — dikelompokkan (lihat §9). Tap skill → sorot project yang membuktikannya.
 5. **About** — foto ter-crop dengan reveal "scan", paragraf singkat orang pertama.
 6. **Contact** — CTA utama besar, lalu tautan sekunder.
@@ -136,9 +237,11 @@ suara; menu = overlay full-screen bergaya panel kontrol.
 
 ---
 
-## 7. Template halaman case file
+## 7. Kontrak isi halaman case file — penyajian personal
 
-Urutan bagian (isi ditulis per project nanti):
+Bagian wajib di bawah menjaga kelengkapan informasi. Urutan setelah Brief, proporsi,
+komposisi, bentuk diagram, cara membuka bukti, dan koreografi **boleh berbeda per project**
+mengikuti §5.1–§5.5. Struktur lama menjadi baseline, bukan template visual yang wajib disalin.
 
 1. **Brief** — masalah klien dalam bahasa klien.
 2. **The instrument** — instrumen 3D besar dengan **hotspot** yang bisa di-tap; tiap hotspot
@@ -154,12 +257,24 @@ Transisi masuk: tap **Open case file** → kamera terbang masuk ke instrumen, in
 objek utama halaman case file, teks homepage memudar. Kembali = kamera mundur. Satu kanvas 3D
 tetap hidup lintas halaman supaya transisi ini mulus.
 
+**Kontrak personalisasi setiap project:** pitch homepage, pembuka case, masalah klien,
+alur penjelas, hotspot, Readings, demo, batas bukti, dan pengantar Next harus sesuai dossier
+project itu. Setiap hotspot menjawab fungsi komponen bagi klien. Readings menyebut konteks
+ukur; animasi ilustratif diberi label dan tidak menyamar sebagai hasil run langsung.
+Minimal ada satu komposisi bukti dan satu interaksi penjelas yang khas tiap project.
+
+**Next instrument:** tutup adegan asal, pindah fokus, buka adegan tujuan sesuai karakternya.
+Uji seluruh rantai CrossCheck → SurgeLine → DriftWatch → DueWatch → BrandWall → CrossCheck,
+direct URL, refresh, Back/Forward, dan kembali ke homepage. Copy baru tetap DRAFT sampai
+approve; persetujuan copy lama tidak otomatis meliputi narasi baru.
+
 ---
 
 ## 8. Identitas visual (FINAL — dikunci di gate Fase 0, 2026-09-14)
 
 > Disetujui pemilik setelah review `assets/style-lock/` (render kubah, teleskop CrossCheck,
-> foto, layar HP 390×844). Token dan font di bawah dipakai apa adanya mulai Fase 1.
+> foto, layar HP 390×844). Token dan font di bawah tetap fondasi bersama. Q41 mengizinkan
+> variasi komposisi, pencahayaan, aksen lokal, dan motion per project sesuai §5.
 
 | Token | Nilai | Pakai untuk |
 |---|---|---|
@@ -186,6 +301,36 @@ muncul lewat animasi scan. Final: `assets/photo/rayina-duotone.png` (sumber bers
 
 Suara: ambient hum observatorium + bunyi klik instrumen halus. Default on setelah Enter,
 toggle selalu terlihat, pilihan diingat per pengunjung.
+
+### 8.1 Variasi yang tetap terasa satu observatorium
+
+Header, navigasi, font, CTA utama, dan makna warna status konsisten. Setiap ruang boleh punya
+proporsi bidang, kepadatan informasi, aksen, material/cahaya, framing kamera, dan ritme berbeda.
+CrossCheck presisi; SurgeLine bertenaga dan teratur; DriftWatch tenang lalu tajam saat perubahan;
+DueWatch terukur; BrandWall kaya pembanding visual. Mengganti warna dan judul saja belum cukup.
+
+### 8.2 Standar animasi, transisi, dan dua ukuran layar
+
+- **Urutan wajib tiap fase:** rancang cerita mobile → implementasi dan verifikasi mobile →
+  komposisi/polish desktop → regresi mobile. Desktop tetap presentasi utama: ruang, hierarki,
+  detail cahaya, kamera, dan bukti dimanfaatkan sengaja, bukan sekadar memperbesar versi HP.
+- Uji mobile 390×844 → 360×740 → 430×932; tablet 768×1024; desktop 1440×900 dan 1920×1080.
+  Konten utama dan bukti setara; mobile boleh menyederhanakan partikel, lapisan, dan orbit.
+  Fungsi penjelas tidak boleh hanya tersedia lewat hover atau drag presisi.
+- Setiap animasi punya tujuan: menjelaskan proses, memberi feedback, atau menjaga orientasi.
+  Tetapkan trigger, objek yang bergerak, kondisi akhir, easing/durasi, serta perilaku balik
+  dan interupsi. Idle tetap sekunder terhadap teks; teks tidak ikut bergerak terus saat dibaca.
+- Feedback UI ditargetkan 100–250 ms; adegan penjelas boleh lebih lama dengan kontrol pengguna.
+  Kamera dan reveal sinkron; hindari lompatan pose, kedipan, teks bertumpuk, CTA tertahan,
+  atau animasi antre saat tap cepat. Nilai durasi final dipilih lewat rekaman, bukan angka saja.
+- Model terlambat/gagal: tampilkan poster/fallback berlabel; hotspot tidak menunjuk ruang
+  kosong. Penerimaan jeda lama Q39 adalah riwayat, bukan target kualitas personalisasi baru.
+- Pakai stack yang ada (§11); utamakan transform/opacity untuk DOM, ukur beban shader/blur/
+  partikel sebelum menambah efek. Budget mobile §11 tetap berlaku; catat hasil aktual dan
+  selisih target, jangan menyamakan lulus build dengan animasi mulus.
+- Testing menilai video kecepatan normal + potongan lambat untuk masuk/keluar, scroll balik,
+  perpindahan chapter, tap cepat, dan perubahan viewport. Foto saja tidak membuktikan motion.
+  Audit aksesibilitas penuh tetap Fase 9; fallback statis harus menjaga cerita tetap terbaca.
 
 ---
 
@@ -220,6 +365,8 @@ Aturan: hanya tool/skill yang legit dicari perusahaan. Nama skill internal agen
 - Metafora observatorium hanya di label/judul (Readings, Case file, Instrument), isi tetap jelas.
 - Setiap angka wajib tertelusur ke dossier sumbernya. Tidak ada klaim afiliasi (termasuk Amazon).
 - Agen menulis draft; pemilik approve sebelum dianggap final.
+- Tiap project mengikuti konflik, proses, dan bukti khas §5; hindari pembuka, urutan reveal,
+  dan paragraf manfaat yang bisa ditukar antar project hanya dengan mengganti nama.
 
 ---
 
@@ -262,6 +409,26 @@ Online Access menyala). Detail di `RULES.md` bagian Blender dan memory
 
 ## 12. Fase dan target
 
+### 12.1 Aturan sesi berikut dan urutan revisi
+
+**Q41 berlaku saat prompt universal lama dipakai:** baca fase aktif di PROGRESS, lalu §5
+khusus project itu, §7, §8.1–§8.2, dan §12 ini. Gunakan dossier di `portfolio/` dalam root
+Rayin Observatory; rujukan folder sibling `/home/rayin/Projects/Testing/portfolio/` pada
+prompt lama sudah digantikan oleh Q41. Tidak perlu mengganti prompt untuk melanjutkan.
+
+Fase aktif berikut **7A**, lalu **7B → 7C → 7D → 7E → 7F → 8 → 9**. Fase 0–7 tetap `done`
+sebagai fondasi historis. Tambahan ini bukan klaim bahwa revisi personalisasi sudah selesai.
+Tiap fase 7A–7E mengerjakan chapter homepage **dan** case file satu project, mobile dahulu,
+desktop dalam fase yang sama. Jangan menunda desktop semuanya ke akhir atau menyelesaikan
+lima project sekaligus dalam satu template. Fase 7F menyatukan perjalanan dan regresi kelimanya.
+Fase 8 menunggu gate 7F. Penambahan fase dalam revisi dokumen Q41 belum merupakan implementasi.
+
+Awal Development: baca dossier → tulis brief personal singkat (klien/masalah/cerita/bukti/
+visual/motion/mobile/desktop) → bangun checklist project aktif. Akhir sesi: catat kemajuan
+mobile dan desktop secara terpisah, sumber copy, serta item yang belum lolos.
+
+### 12.2 Development, Testing, dan gate
+
 Mulai Fase 3, setiap fase dikerjakan dalam **dua tahap** (keputusan pemilik 2026-09-15, Q31):
 
 | Tahap | Harness | Isi | Selesai bila |
@@ -278,6 +445,11 @@ diminta tes manual di HP sampai Fase 8. Tanpa gate lolos, fase berikut tidak dim
 Gate lolos → fase `done` → **wajib commit + push** ke `origin main` (Q38).
 Fase 0–2 selesai dengan aturan lama (pemilik membuka hasil sendiri).
 
+Untuk fase personalisasi, paket bukti memuat walkthrough **mobile dan desktop**, foto per
+item, serta pass/fail terpisah untuk cerita, visual, animasi, transisi, mobile, desktop,
+dan sumber bukti. Tiap fase 7A–7E harus menunjukkan alasan desainnya cocok dengan project itu;
+7F/8/9 melaporkan kelima project satu per satu, bukan hanya satu hasil umum.
+
 | Fase | Nama | Target — yang terlihat di paket bukti | Hasil nyata |
 |---|---|---|---|
 | 0 | **Style lock** | Satu render kubah, satu render instrumen (CrossCheck), dan satu layar contoh di HP disetujui. Palet dan font final. Foto sudah ter-crop tanpa logo dan terstilisasi. | render PNG, foto olahan, token warna/font final |
@@ -288,14 +460,44 @@ Fase 0–2 selesai dengan aturan lama (pemilik membuka hasil sendiri).
 | 5 | **All case files** | Empat case file lain selesai, tombol Next instrument berantai. | 5 case file |
 | 6 | **Desktop** | Semua halaman tampil megah di laptop/monitor lebar, bukan versi HP yang diperbesar. | layout desktop |
 | 7 | **Showpiece polish** | Sound design, micro-interaksi, loader, dan transisi terasa premium; tetap lancar di emulasi HP menengah (CPU throttle + 4G lambat). | versi showpiece |
+| 7A | **CrossCheck — inspection room** | Scan tiga browser → matriks cakupan → temuan berbukti; entry lewat lensa; mobile dulu, lalu meja inspeksi desktop. | chapter + case CrossCheck personal, bukti dua device |
+| 7B | **SurgeLine — dispatch room** | Antrean → paralel → crash/resume → konfirmasi tanpa duplikat; pulsa antena; mobile dulu, lalu jalur desktop. | chapter + case SurgeLine personal, bukti dua device |
+| 7C | **DriftWatch — monitoring room** | Snapshot → diff → alarm bermakna; trace seismograf; mobile dulu, lalu timeline desktop. | chapter + case DriftWatch personal, bukti dua device |
+| 7D | **DueWatch — time control room** | Agenda kontrak + triage pesan dengan eskalasi; cincin waktu; mobile dulu, lalu dua modul desktop. | chapter + case DueWatch personal, bukti dua device |
+| 7E | **BrandWall — visual studio** | Specimen → kerusakan → batas ukur → sebelum/sesudah; prisma; mobile dulu, lalu galeri desktop. | chapter + case BrandWall personal, bukti dua device |
+| 7F | **Five rooms, one observatory** | Kelima cerita tetap beda; seluruh entry/return/Next menyambung, navigasi konsisten, motion dan performa diverifikasi mobile lalu desktop. | perjalanan lengkap + bukti per project |
 | 8 | **Launch ready** | Lolos QA di Chrome/Firefox/Safari + viewport HP/tablet/desktop; preview link rapi saat dibagikan ke WhatsApp/LinkedIn; siap disambung domain. Satu-satunya tes manual: pemilik mencoba di HP fisik (rasa scroll, fps, suara, 4G). | kandidat rilis |
 | 9 | **Accessibility** (ditunda) | Mode gerak minimal, navigasi keyboard, screen reader. | versi aksesibel |
+
+### 12.3 Efisiensi tes (Q42, berlaku mulai Fase 7B)
+
+Tujuan: Testing tidak mengulang pekerjaan yang sudah terbukti pada kode yang sama, dan regresi performa
+ketahuan di Development. Alat ada di `web/scripts/` (perintah lengkap CODEMAP §2).
+
+1. **Development — gerbang fps sebelum `ready-for-test`.** Jalankan
+   `perf_quick.py --slug <project>` (390×844 DPR 2, suara nyala, CPU 4×, swipe chapter → terbang → scroll case → Return).
+   Lolos bila tiap segmen ≥ 45 fps dan ≤ 10% frame lebih lambat dari 45 fps. Bila turun, ukur pembanding
+   `--baseline <url build HEAD>` untuk atribusi sebelum menyerahkan. Tetap alarm regresi, bukan klaim fps HP fisik.
+2. **Regresi lewat runner.** `run_regressions.py` menjalankan suite berurutan (satu GPU) dan mencatat
+   `assets/renders/regression-ledger.json` per suite dengan sidik jari sumber `web/app|components|lib|public` + lockfile.
+   Suite yang sudah `passed` pada sidik jari yang sama **dilewati** (Development → Testing tanpa ulang).
+   Setelah fix, runner hanya menjalankan suite yang belum hijau di kode baru; satu putaran penuh cukup di akhir.
+   Runner menolak jalan bila build lebih tua dari sumber. `--force` hanya bila ada alasan (rig berubah, hasil diragukan).
+3. **Paket bukti = tes fase.** Skrip bukti Testing mengimpor fungsi tes Development fase aktif dan menyimpan
+   hasil + foto ke paket (contoh `crosscheck_room_evidence.py` → `verify_crosscheck_room`). Jangan menjalankan
+   suite dev fase aktif terpisah lalu mengulangnya lagi di paket.
+4. **Cakupan viewport.** Fase aktif: 390×844 → 360×740 → 430×932 → 768 → 1440/1920 (tetap §8.2).
+   Suite fase lama: `--phone-only mobile,case,cases,showpiece` (390×844 saja, `OBSERVATORY_PHONES`);
+   `desktop-a/-b` tetap. Hasil phone-only tidak menggantikan putaran penuh sebelum Fase 8.
+5. **Urutan sesi Testing:** runner (skip yang sudah hijau) → skrip bukti → cek visual → fix kecil →
+   runner lagi (hanya suite terdampak) → skrip bukti. Bug besar → kembali ke Development, jangan diperbaiki di Testing.
 
 ---
 
 ## 13. Di luar cakupan / belum dibahas
 
-- Detail isi masing-masing project (dibahas saat fase copy).
+- Copy final dan koreografi detail tiap project diselesaikan di 7A–7E dari brief §5; copy baru
+  memerlukan approval. Batas bukti dalam dossier tetap ditampilkan.
 - Domain (urusan pemilik).
 - Aksesibilitas penuh (Fase 9).
 - Versi bahasa Indonesia (tidak dibuat).

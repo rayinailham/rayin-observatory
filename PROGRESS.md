@@ -9,13 +9,13 @@
 
 | Hal | Isi |
 |---|---|
-| Fase aktif | **Fase 7A — CrossCheck: inspection room** · Development |
-| Status fase | `todo` |
-| Bagian PLAN.md yang relevan | §3 Q41, §5.1 (CrossCheck), §7 (kontrak isi), §8.1–§8.2 (visual/motion/mobile → desktop), §10 (copy), §11 (performa), §12 (fase personalisasi) |
-| Blocker | Rig tes: `verify_desktop.py` / `verify_mobile.py` di venv `crosscheck` (Playwright 1.62) gagal — canvas R3F tetap 300×150, `data-scene=loading`, Chrome for Testing 149/151, headless + headed; direproduksi pada kode lama, perlu re-provision engine |
-| Preview sesi ini | Revisi planet: `http://127.0.0.1:8780/` · preview produksi lokal (`next start`) |
-| Revisi terakhir | Skills deck kartu: 13 grup / 37 tool, tiap tool dijelaskan, link case file pindah ke footer kartu, grup baru "Scripting & glue". Revisi gerbang desktop sebelumnya tetap siap review |
-| Langkah berikut | Development 7A: baca dossier CrossCheck lokal, susun brief personal, bangun chapter + case **mobile dulu**, lalu poles desktop sebagai tampilan utama; verifikasi → `ready-for-test`. Pulihkan rig browser sebelum mengklaim hasil visual lulus |
+| Fase aktif | **Fase 7B — SurgeLine: dispatch room** · Development (belum dimulai) |
+| Status fase | 7B `todo`. 7A `done` (gate lolos 2026-09-16, "lulus semua aman") |
+| Bagian PLAN.md yang relevan | §3 Q41–Q43, §12.3 (efisiensi tes — wajib mulai 7B), §5.2 (SurgeLine), §7 (kontrak isi), §8.1–§8.2 (visual/motion/mobile → desktop), §10 (copy), §11 (performa), §12 (fase personalisasi) |
+| Blocker | Tidak ada. Rig tes pulih 2026-09-16 (canvas 390×844 `ready`, Chromium 151; `verify_case` baseline lolos tanpa re-provision). Dua timeout lama (`verify:mobile` 360×740 readout, edge `verify_showpiece` return) terbukti juga gagal di HEAD `ac01ca4` → timing ekor Lenis di tes, diperbaiki di tes |
+| Preview sesi ini | 7A: `http://127.0.0.1:8767/` → CrossCheck → Open case file, atau `/work/crosscheck` · preview produksi lokal (`npm run start --prefix web`) |
+| Revisi terakhir | Testing 7A: fix regresi fps (posisi lensa ditulis ke CSS akar tiap frame, 60 → ±34 fps di 4× CPU → 52–59 fps), chip tanpa scale, sel `crispEdges`; alat Q42 `run_regressions.py` + `perf_quick.py`. Sebelumnya 7A Development: strip lane chapter, iris lensa masuk/kembali, inspection field matriks run asli, finding desk 4 temuan berbukti, teaser Next SurgeLine. Copy baru DRAFT |
+| Langkah berikut | **Development 7B SurgeLine** (Codex / Claude Code): brief personal dari `portfolio/CAPABILITY_SURGELINE.md`, mobile → desktop; sebelum `ready-for-test` jalankan `perf_quick.py --slug surgeline` + regresi lewat `run_regressions.py` (PLAN §12.3); tambah suite fase 7B ke `SUITES` runner |
 | Launch | Fase 8 menunggu gate 7A–7F. Catatan deployment terdahulu: Vercel CLI login 2026-09-16 (`chhrone`, scope `chhrones-projects`), `web/` belum `vercel link`; verifikasi lagi saat Fase 8. Testing produksi tetap mengikuti Q40 |
 
 ### Arahan wajib saat memakai prompt universal
@@ -44,7 +44,7 @@
 | 5 | All case files | `done` | 2026-09-15 |
 | 6 | Desktop | `done` | 2026-09-15 |
 | 7 | Showpiece polish | `done` | 2026-09-16 |
-| 7A | CrossCheck — inspection room | `todo` | — |
+| 7A | CrossCheck — inspection room | `done` | 2026-09-16 |
 | 7B | SurgeLine — dispatch room | `todo` | — |
 | 7C | DriftWatch — monitoring room | `todo` | — |
 | 7D | DueWatch — time control room | `todo` | — |
@@ -360,6 +360,223 @@ Bahan gate Fase 7 (Testing, 2026-09-15 — arsip; diulang setelah fix Enter): fo
 - Bug tes diperbaiki (bukan bug situs): `verify_desktop` timeout 1440×900 karena ekor animasi Lenis menimpa `scrollTo`.
 - Batas: emulasi Chromium; GPU laptop tidak di-throttle (beban GPU HP belum terwakili); HP fisik = Fase 8.
 
+### Kontrak pengerjaan Fase 7A–7F
+
+Fase 0–7 di atas adalah riwayat implementasi dan gate lama. Revisi Q41 dimulai di bawah;
+semua checkbox baru sengaja kosong. Setiap tahap memakai aturan Development/Testing PLAN §12.
+
+| Fase | Mobile: implementasi + verifikasi | Desktop: komposisi + polish | Regresi mobile sesudah desktop |
+|---|---|---|---|
+| 7A CrossCheck | lolos Testing + gate 2026-09-16 (390/360/430 + 768) | lolos Testing + gate 2026-09-16 (1440/1920) | lolos 2026-09-16 |
+| 7B SurgeLine | `todo` | `todo` | `todo` |
+| 7C DriftWatch | `todo` | `todo` | `todo` |
+| 7D DueWatch | `todo` | `todo` | `todo` |
+| 7E BrandWall | `todo` | `todo` | `todo` |
+| 7F Integrasi lima project | `todo` | `todo` | `todo` |
+
+**Wajib dalam setiap checklist Testing di bawah:**
+
+1. Uji semua item Development pada mobile 390×844 → 360×740 → 430×932, kemudian tablet
+   768×1024 dan desktop 1440×900/1920×1080; ulang regresi mobile sesudah perubahan desktop.
+2. Uji chapter → case, direct URL/refresh, hotspot, interaksi penjelas, Next, Back/Forward,
+   kembali ke posisi homepage, scroll balik, tap cepat, resize, serta model lambat/gagal.
+3. Periksa keterbacaan, overflow/overlap, fokus interaksi, console/request gagal, dan performa
+   terhadap PLAN §11. Laporkan angka aktual dan keterbatasan rig; jangan klaim lancar dari build.
+4. Rekam walkthrough mobile **dan** desktop, PNG per item, contact sheet, `evidence.json`
+   dengan pass/fail cerita/visual/animasi/transisi/mobile/desktop/sumber. Lihat motion normal
+   dan lambat; bukti harus memperlihatkan ciri project aktif, bukan hanya halaman terbuka.
+5. Development selesai → `ready-for-test`; Testing + paket bukti → `awaiting-gate`;
+   approve copy baru + gate pemilik → `done`. Jangan meluluskan fase dari bukti lama.
+6. **Efisiensi tes (Q42, mulai 7B; detail PLAN §12.3):** Development menjalankan `perf_quick.py --slug <project>`
+   sebelum `ready-for-test`; regresi selalu lewat `run_regressions.py` (suite yang sudah lolos pada sumber yang sama
+   dilewati; setelah fix hanya yang belum hijau); skrip bukti Testing memanggil tes dev fase aktif di dalam paket;
+   suite fase lama `--phone-only` (390×844).
+
+### Fase 7A — CrossCheck: inspection room
+
+Sumber: `portfolio/CAPABILITY_CROSSCHECK.md` §1–4, §7, §9. Brief desain: PLAN §5.1.
+Target: pengunjung memahami cakupan tes → sinyal → temuan yang bisa direproduksi.
+
+Development (Codex / Claude Code), **urut mobile → desktop**:
+- [x] Baca dossier + implementasi terkait dari CODEMAP; tulis brief personal dan peta sumber
+  copy DRAFT: 1,080 kombinasi, 881 sinyal → 18 isu, 12/12 bug tertanam; target demo milik sendiri
+- [x] Mobile: chapter teleskop dan case menjadi ruang inspeksi; matriks bertahap, kartu temuan
+  dengan bukti/reproduksi; hotspot menjelaskan pemeriksaan, bukan deskripsi mesin generik
+- [x] Animasi scan tiga jalur browser → kelompok sinyal → temuan; pilih temuan menyorot bukti;
+  definisikan trigger, easing/durasi, state akhir, scroll balik dan interupsi
+- [x] Transisi lensa → bidang inspeksi, return ke chapter asal, pengantar Next ke SurgeLine;
+  fallback tidak meninggalkan hotspot menunjuk ruang kosong
+- [x] Verifikasi mobile selesai sebelum desktop; catat hasil pada tabel kemajuan
+- [x] Desktop: meja inspeksi lebar, matriks dan bukti berdampingan, framing teleskop/cahaya
+  presisi; komposisi 1440/1920 sengaja dirancang untuk presentasi utama
+- [x] Regresi mobile, lint/typecheck/build + tes fokus; catat sumber copy/bukti → `ready-for-test`
+
+
+Bahan handoff 7A Development (2026-09-16, Claude Code):
+- **Preview:** `http://127.0.0.1:8767/` → chapter CrossCheck → Open case file (atau `/work/crosscheck`). Server mati → `npm run build --prefix web && npm run start --prefix web`.
+- **Brief + peta sumber copy DRAFT:** `web/README.md` bagian Phase 7A. Copy baru: strip lane, 3 body hotspot, readout 4 step,
+  heading/intro/4 temuan (CC-003, CC-001, CC-017, CC-015), label bingkai desktop. Deck/brief/readings/tools/video/judul-body 4 step tetap approved; teaser Next memakai deck SurgeLine approved.
+- **Bukti = data asli, bukan karangan:** `build_crosscheck_run.py` membaca hasil run CrossCheck dan menolak menulis bila total ≠ dossier (1,080 / 422 / 877 / 40 / 216→3 / 5→1 / 18 = 3·14·1). Screenshot temuan = crop gambar bukti proyek sendiri (V4 before/after 1–3 + screenshot flow langkah gagal).
+- **Yang dibangun:** chapter → strip 3 lane × 9 sel terisi mengikuti orbit, lane menyala sinkron lensa (rig `onScan`), hijau saat ketiga lensa sepakat.
+  Masuk: iris keluar dari lensa tengah (grid inspeksi + garis bidik) menutup layar, case terbuka dari titik yang sama; Return: case menutup ke lensa, dibuka lagi di lensa chapter; Back saat terbang aman.
+  Case: leader hanya tampil saat model terproyeksi (fallback/jeda model tak lagi menunjuk ruang kosong); hotspot = hasil inspeksi; **Inspection field** sticky: map → scan tiga jalur (1,080 sel run asli) → sort (baris tanpa isu jadi abu, duplikat memadat) → 18 chip isu; fungsi murni progress (mundur membalik, flick tak mengantre), reduced motion = state akhir. **Finding desk:** 4 temuan, tap → strip bukti menyala (matrix 9/27 sel, access 2 dari 3 pelanggaran, flow 1/5), screenshot + toggle before/expected (HP) atau berdampingan (desktop), langkah reproduksi, expected/actual. Desktop: rail step kiri + matriks berlabel route, meja temuan dua kolom, bingkai bidik teleskop.
+- **Verifikasi:** lint/typecheck/build exit 0. `verify_crosscheck_room.py` passed 390×844 → 360×740 → 430×932 → 768×1024 → 1440×900 → 1920×1080 + edge (Back saat terbang, `ambient.glb` diblok, reduced motion);
+  regresi `verify_case`, `verify_cases`, `verify:mobile`, `verify_desktop` (390+1366, 1440+1920), `verify_showpiece`, `verify_audio` 9/9 passed. Foto/JSON `assets/renders/personal-crosscheck/dev/`.
+- **Perbaikan rig (bukan situs):** path dossier 4 skrip → `portfolio/` root (Q41); tunggu ekor Lenis di `verify:mobile` (readout 100%) + `verify_showpiece` (origin return) — keduanya gagal identik di HEAD `ac01ca4` sebelum 7A.
+- **Ukur (emulasi Chromium 390×844, scrollTo tiap frame, 6 dtk):** CPU 1× 60 fps datar; CPU 4× scrub matriks 243 frame (±40 fps rata-rata, median 16.7 ms, p95 33 ms) vs pembanding scroll bagian lain 264 frame (±44 fps) → tambahan biaya matriks ±8%. Metode ini lebih berat dari swipe CDP Fase 7; Testing mengukur ulang dengan metode Fase 7 dan mencatat selisih §11.
+- **Untuk Testing/pemilik:** arsip bukti lama (`case_crosscheck_evidence.py`, `case_files_evidence.py`, `desktop_evidence.py`) masih mengharapkan `.signal-flow` / tanpa DRAFT untuk CrossCheck → perlu skrip bukti 7A baru. Still view fallback CrossCheck masih render teleskop lama (PNG approved) — marker tanpa leader. Keputusan desain terbuka: iris memakai warna ink + grid tipis (bukan warna baru).
+
+Testing (Claude Code / Antigravity):
+- [x] Jalankan seluruh kontrak Testing 7A–7F; matriks/temuan tetap jelas tanpa hover (semua interaksi diuji dengan tap/touch)
+- [x] Bukti menunjukkan identitas inspeksi, scan bermakna, entry/return mulus dan desktop matang;
+  paket `assets/renders/personal-crosscheck/evidence/` dikirim → `awaiting-gate` (16/17 pass; `performance` fail ketat, temuan 1)
+- [x] Copy baru di-approve + gate personalisasi CrossCheck lolos (2026-09-16, "lulus semua aman"; label DRAFT dilepas; temuan 1–2 diterima apa adanya)
+
+Bahan gate 7A (Testing 2026-09-16, Claude Code) — folder `assets/renders/personal-crosscheck/evidence/`:
+- **Video:** `walkthrough-mobile.mp4` (390×844 touch, 266 dtk), `walkthrough-desktop.mp4` (1440×900 wheel + resize, 80 dtk),
+  `slow-motion.mp4` (0.25×, 147 dtk: iris masuk/kembali HP + desktop, scroll balik membalik scan, tap cepat, resize 1440→390→1440).
+  Tanpa suara (masuk silent; suara sudah diuji Fase 7). **Foto:** `contact-sheet-mobile.jpg` (26 frame), `contact-sheet-desktop.jpg` (16),
+  strip per item `i01`…`i12`, grafik `p01-fps-4x.png`, per-viewport `viewports/`; `evidence.json` pass/fail per item + per kategori.
+- **Kategori:** cerita ✔ · visual ✔ · animasi ✔ · transisi ✔ · desktop ✔ · sumber ✔ · mobile ✘ + performa ✘ (keduanya hanya karena item `performance`).
+- Item lolos: story, chapterScan (0 → 27 sel ikut orbit, balik ke 12), irisEntry (disc → hole → hidden, fokus heading, HP + desktop), hotspots,
+  inspectionField (maju 0→3, balik 3→1 chip 0, flick 5 lompatan tepat), findingDesk (hit 1/2/9/27, toggle HP, berdampingan desktop), returnNext (±0 px,
+  fokus Open case file, Next → SurgeLine), historyDirect (Back/Forward, direct + refresh), interruptions (double tap +1 history, tap cepat → tap terakhir,
+  Back saat terbang, resize lintas 1024 progres tetap), modelSlowFail (leader tak pernah tampil sebelum model terproyeksi; `ambient.glb` diblok → still view, ruang tetap terbaca),
+  reducedMotion, 4 HP/tablet + 1440/1920, sources (15/15 klaim → dossier / skrip video proyek; data run ulang byte-identik), clean (1 Canvas, 0 error, 0 ≥400, 0 overflow),
+  regressions (8 suite di build final).
+- **Bug ditemukan + diperbaiki di Testing:** (a) **regresi fps 7A** — scene menulis `--aperture-x/y` ke `.observatory` tiap frame (lensa berayun) → style recalc seluruh halaman.
+  Diukur bergantian vs build HEAD `ac01ca4` (4× CPU, swipe): 7A 31–43 fps vs HEAD 57–60. Fix: posisi lensa di objek JS `apertureScreen` (`lib/cases.ts`) → chapter/readings kembali 56–60.
+  (b) Scrub matriks: chip tidak lagi `scale` (glyph dirasterisasi ulang tiap frame) — chip kini meluncur + fade; fade SVG pakai `fill-/stroke-opacity`; sel `shape-rendering: crispEdges`
+  → beat hand 46 → 55 fps. Semua suite + paket bukti diulang sesudah fix.
+- **Temuan untuk pemilik (keputusan):**
+  1. **Performa scrub field** (4× CPU, HP emulasi): 52–54 fps rata-rata, tapi 11–13% frame > 22 ms (p95 33 ms) → gagal aturan ketat Fase 7 (p95 ≤ 22 ms); segmen lain 52–59 fps lolos.
+     Pilihan: terima (rata-rata ≥ 45, setara chapter), atau kembali ke Development: pisahkan chip ke lapisan komposit + redupkan matriks lewat opacity elemen.
+  2. **Crop "Expected" CC-001** = teks "Forbidden: settings require administrator privileges" ±6 px di HP → tampak kotak putih kosong (bukti asli, tidak diubah).
+     Pilihan: terima (expected tertulis di bawahnya), atau crop lebih rapat ke notice.
+  3. Perubahan gerak kecil dari fix: chip isu kini meluncur tanpa membesar. Still view fallback masih teleskop PNG lama (catatan Development).
+- Batas: Chromium GPU emulasi lokal; GPU host tidak di-throttle; HP fisik = Fase 8.
+
+### Fase 7B — SurgeLine: dispatch room
+
+Sumber: `portfolio/CAPABILITY_SURGELINE.md` §1–4, §7, §9. Brief desain: PLAN §5.2.
+Target: pengunjung melihat bagaimana pekerjaan lanjut setelah crash tanpa pengiriman ganda.
+
+Development (Codex / Claude Code), **urut mobile → desktop**:
+- [ ] Brief dan copy personal DRAFT: 50,000 input → 49,950 unik; 48,273 terkonfirmasi,
+  844 ditolak, 833 dead-letter; dua kill, nol duplikat. Nyatakan target lokal dan batas estimasi 6M
+- [ ] Mobile: chapter antena + alur vertikal case dari spreadsheet sampai konfirmasi;
+  kontrol demonstrasi crash/resume lewat tap, hasil gagal tetap terlihat dan beralasan
+- [ ] Animasi record/pekerja/pulsa → satu jalur putus → resume tanpa mengulang record sukses;
+  tetapkan trigger, timing, state akhir dan interupsi, tandai ilustrasi sebagai demonstrasi
+- [ ] Transisi mengikuti pulsa antena; return menjaga orientasi; Next memperkenalkan DriftWatch
+- [ ] Verifikasi mobile selesai sebelum desktop; catat hasil pada tabel kemajuan
+- [ ] Desktop: jalur pekerja paralel lebar, area crash/resume dan hasil berdampingan;
+  ritme pengiriman tegas, bukti tetap terbaca saat aliran bergerak
+- [ ] Regresi mobile, lint/typecheck/build + tes fokus; sumber copy/bukti → `ready-for-test`
+
+Testing (Claude Code / Antigravity):
+- [ ] Jalankan seluruh kontrak Testing 7A–7F; simulasi resume tidak menggandakan hasil visual
+- [ ] Bukti membedakan selesai diproses dari sukses terkonfirmasi; motion antrean dan entry/return
+  dinilai di dua device; paket `assets/renders/personal-surgeline/evidence/` → `awaiting-gate`
+- [ ] Copy baru di-approve + gate personalisasi SurgeLine lolos
+
+### Fase 7C — DriftWatch: monitoring room
+
+Sumber: `portfolio/CAPABILITY_DRIFTWATCH.md` §1–4, §7, §9. Brief desain: PLAN §5.3.
+Target: pengunjung membedakan perubahan sumber, data hilang, dan pipeline yang rusak.
+
+Development (Codex / Claude Code), **urut mobile → desktop**:
+- [ ] Brief dan copy personal DRAFT: 1,323 record/hari, empat sumber, 11/11 kegagalan uji,
+  nol false positive pada uji itu, tiga hari unattended; semua label tanggal/konteks jelas
+- [ ] Mobile: chapter seismograf + case snapshot bertanggal ditumpuk, kontrol banding dan
+  detail perubahan; hasil kosong mendapat penjelasan alarm, bukan status sehat
+- [ ] Trace tenang → lonjakan sesuai sebab → diff terbuka; pisahkan perubahan sumber dari
+  gangguan pipeline; tentukan trigger, timing, state akhir, scroll balik dan interupsi
+- [ ] Transisi jarum/pita → timeline; return menggulung ke asal; Next memperkenalkan DueWatch
+- [ ] Verifikasi mobile selesai sebelum desktop; catat hasil pada tabel kemajuan
+- [ ] Desktop: timeline lebar, snapshot sejajar dan panel alarm kontekstual; cukup ruang tenang
+  untuk membaca perubahan, tidak mengulang layout antrean SurgeLine
+- [ ] Regresi mobile, lint/typecheck/build + tes fokus; sumber copy/bukti → `ready-for-test`
+
+Testing (Claude Code / Antigravity):
+- [ ] Jalankan seluruh kontrak Testing 7A–7F; sebab alarm terbaca dan trace tidak menyamar live
+- [ ] Bukti snapshot/diff/hasil kosong serta transisi pita mobile/desktop;
+  paket `assets/renders/personal-driftwatch/evidence/` → `awaiting-gate`
+- [ ] Copy baru di-approve + gate personalisasi DriftWatch lolos
+
+### Fase 7D — DueWatch: time control room
+
+Sumber: `portfolio/CAPABILITY_DUEWATCH.md` §1–4, §7–8, §11. Brief desain: PLAN §5.4.
+Target: pengunjung memahami agenda kontrak dan batas tindak lanjut otomatis pada pesan.
+
+Development (Codex / Claude Code), **urut mobile → desktop**:
+- [ ] Brief dan copy personal DRAFT memisahkan tracker/triage: 200 kontrak/run, 18 pesan uji,
+  6/6 sensitif dieskalasi, nol API eksternal; tampilkan batas audit dan tanggal simulasi video
+- [ ] Mobile: chapter orrery + agenda vertikal, pergantian modul via tap, status kontrak dan
+  handoff manusia jelas; jangan membuat dua modul terlihat sebagai satu alur yang tidak terbukti
+- [ ] Animasi waktu → kategori kontrak; pesan sensitif berhenti ke manusia; replay pengingat
+  tidak menambah duplikat; definisikan trigger, timing tenang, state akhir dan interupsi
+- [ ] Transisi cincin → agenda, return ke orrery; Next memperkenalkan studio BrandWall
+- [ ] Verifikasi mobile selesai sebelum desktop; catat hasil pada tabel kemajuan
+- [ ] Desktop: agenda kontrak dan meja triage berdampingan dengan hierarki berbeda;
+  pencahayaan hangat, tempo tenang, tanpa countdown darurat palsu
+- [ ] Regresi mobile, lint/typecheck/build + tes fokus; sumber copy/bukti → `ready-for-test`
+
+Testing (Claude Code / Antigravity):
+- [ ] Jalankan seluruh kontrak Testing 7A–7F; dua modul dan simulasi terlabel, tanpa pengiriman nyata
+- [ ] Bukti pergantian status/handoff/replay, catatan video dan batas audit tetap terlihat;
+  paket `assets/renders/personal-duewatch/evidence/` mobile/desktop → `awaiting-gate`
+- [ ] Copy baru di-approve + gate personalisasi DueWatch lolos
+
+### Fase 7E — BrandWall: visual studio
+
+Sumber: `portfolio/CAPABILITY_BRANDWALL.md` §1–4, §6 K2–K8, §7, §9. Brief desain: PLAN §5.5.
+Target: pengunjung melihat kelas kerusakan, titik patah, dan efek aturan pada aset brand.
+
+Development (Codex / Claude Code), **urut mobile → desktop**:
+- [ ] Brief dan copy personal DRAFT: 30 aset sintetis × 5 surface × 2 tema = 300 screenshot/run,
+  11 titik patah, tujuh aturan CSS; catat A8 parsial dan aset rusak yang harus ditolak
+- [ ] Mobile: chapter prisma + specimen terang/gelap, anotasi ukur, pasangan sebelum/sesudah
+  besar dan terbaca; tombol pembanding tersedia selain slider opsional
+- [ ] Animasi spektrum → specimen → garis titik rusak → reveal hasil; observer lama sekunder
+  terhadap cerita QA; tetapkan trigger, timing, state akhir dan perilaku interupsi
+- [ ] Transisi berkas prisma → galeri, return merapat; Next kembali memperkenalkan CrossCheck
+- [ ] Verifikasi mobile selesai sebelum desktop; catat hasil pada tabel kemajuan
+- [ ] Desktop: galeri editorial lebar, contact sheet, pembanding besar dan anotasi sejajar;
+  detail logo/teks tetap tajam, spektrum tidak mengacaukan makna warna status
+- [ ] Regresi mobile, lint/typecheck/build + tes fokus; sumber copy/bukti → `ready-for-test`
+
+Testing (Claude Code / Antigravity):
+- [ ] Jalankan seluruh kontrak Testing 7A–7F; pembanding terpakai dengan tap tanpa drag presisi
+- [ ] Bukti crop/kontras/rasio/overflow dan perbandingan terbaca, efek tidak menutupi spesimen;
+  paket `assets/renders/personal-brandwall/evidence/` mobile/desktop → `awaiting-gate`
+- [ ] Copy baru di-approve + gate personalisasi BrandWall lolos
+
+### Fase 7F — Five rooms, one observatory
+
+Prasyarat: gate 7A–7E lolos. Referensi: PLAN §5.1–§5.5, §7, §8, §11–§12.
+Target: lima pengalaman khas menyatu; desktop menjadi presentasi utama yang sudah matang.
+
+Development (Codex / Claude Code), **mobile dahulu, kemudian desktop**:
+- [ ] CrossCheck: scan → temuan tetap terbaca; entry lensa dan sambungan ke SurgeLine konsisten
+- [ ] SurgeLine: aliran → crash/resume tetap jelas; sambungan ke DriftWatch menjaga state kamera
+- [ ] DriftWatch: snapshot → diff/alarm tetap tenang; sambungan ke DueWatch punya ritme tepat
+- [ ] DueWatch: agenda dan triage tetap terpisah; sambungan ke BrandWall menjaga label simulasi
+- [ ] BrandWall: perbandingan visual tetap utama; sambungan kembali CrossCheck menutup rantai
+- [ ] Homepage, Skills, header, audio, CTA dan About/Contact tetap satu observatorium;
+  perbedaan layout/bukti/motion kelima project terlihat, tidak hanya beda warna dan nama
+- [ ] Verifikasi mobile seluruh perjalanan → poles tempo, kamera, lighting dan komposisi desktop
+  → regresi mobile; tidak ada lompatan framing, ruang kosong tanpa fallback, atau scroll terkunci
+- [ ] Lint/typecheck/build + regresi fokus dan pengukuran performa lima project → `ready-for-test`
+
+Testing (Claude Code / Antigravity):
+- [ ] Kontrak Testing 7A–7F pada kelima project, hasil terpisah per project/device;
+  seluruh rantai Next, entry/return, refresh, Back/Forward dan interupsi lulus
+- [ ] Rekaman memperlihatkan lima komposisi, lima cara menjelaskan, dan transisi yang sesuai;
+  desktop dinilai sebagai showpiece, mobile tetap utuh; selisih target performa dicatat
+- [ ] Paket `assets/renders/personal-observatory/evidence/` dikirim → `awaiting-gate`
+- [ ] Gate integrasi lolos → aktifkan Fase 8 Development; belum deploy sebelum tahap itu
+
 ### Fase 8 — Launch ready
 Prasyarat: gate 7A–7F lolos. Detail personalisasi dan bukti per project tetap wajib saat launch.
 
@@ -412,12 +629,26 @@ Testing (Claude Code / Antigravity) — **semua tes memakai URL Vercel, bukan pr
 | 2026-09-16 | Setiap akhir fase (gate lolos) wajib git commit + push ke `origin main`; ditulis di `PROMPT.md` (langkah tutup sesi no. 4). Disalin ke PLAN §3 Q38 | Pemilik, chat sesi Claude Code |
 | 2026-09-16 | Gate Fase 7 lolos dari paket bukti Testing ulang 14/14 ("lolos commit dan push"); jeda instrumen ±3 dtk diterima apa adanya. Disalin ke PLAN §3 Q39 | Pemilik, chat sesi Claude Code |
 | 2026-09-16 | Testing Fase 8 dijalankan di **URL produksi Vercel** (deploy dulu, baru tes), bukan preview lokal. Vercel CLI 54.9.1 terpasang + dicatat di `RULES.md` agar semua harness pakai. Disalin ke PLAN §3 Q40 | Pemilik, chat sesi Claude Code |
+| 2026-09-16 | Gate 7A lolos ("lulus semua aman"): copy 7A approved, DRAFT dilepas; performa scrub (11–13% frame lambat) dan crop CC-001 diterima apa adanya. Disalin ke PLAN §3 Q43 | Pemilik, chat sesi Claude Code |
+| 2026-09-16 | Testing jangan lama lagi: mulai 7B Development wajib `perf_quick.py`; regresi lewat `run_regressions.py` (skip suite yang sudah lolos di sumber sama, setelah fix hanya yang belum hijau); paket bukti memanggil tes dev fase aktif; suite fase lama 390×844 saja. Disalin ke PLAN §3 Q42 + §12.3 | Pemilik, chat sesi Claude Code (Testing 7A) |
 | 2026-09-16 | Personalisasi cerita, visual, animasi dan transisi lima project dari `portfolio/` lokal; setiap fase mobile dahulu, lalu desktop sebagai tampilan utama. Sisipkan 7A–7E per project + 7F integrasi sebelum launch; fase aktif berikut 7A. Disalin ke PLAN §3 Q41 | Pemilik, chat sesi Codex |
 
 ## Log sesi
 
 > Entri terbaru di atas. Singkat, 1–2 baris: tanggal · harness · fase — apa yang dikerjakan,
 > verifikasi, berikutnya. Detail teknis taruh di CODEMAP / folder bukti, bukan di sini.
+
+- **2026-09-16 · Claude Code · Gate 7A lolos → done** — Pemilik "lulus semua aman": label DRAFT CrossCheck dilepas (`cases.ts` + 3 tes), build, `run_regressions.py --suites case,cases --phone-only case,cases` passed (34 + 88 dtk). Commit + push (Q38). Berikutnya: Development 7B dengan aturan Q42.
+
+- **2026-09-16 · Claude Code · Fase 7A Testing → awaiting-gate** — Skrip bukti baru `crosscheck_room_evidence.py` (walkthrough HP touch + desktop wheel, slow-motion 0.25×,
+  6 viewport + edge, fps 4× CPU, audit sumber). Temuan: regresi fps 7A (CSS akar tiap frame) + biaya scrub SVG → diperbaiki, diukur vs build HEAD. 8 suite regresi + paket diulang di build final:
+  16/17 pass (`performance` gagal p95 ketat di scrub 52–54 fps). Keputusan pemilik Q42 (efisiensi tes) dicatat + diterapkan: `run_regressions.py` (ledger, skip, `--phone-only`),
+  `perf_quick.py` (gerbang fps dev), hook `OBSERVATORY_PHONES` di 4 suite. Berikutnya: gate pemilik + 2 keputusan temuan + approve copy DRAFT.
+
+- **2026-09-16 · Claude Code · Fase 7A → ready-for-test** — Ruang inspeksi CrossCheck mobile → desktop: strip lane chapter sinkron lensa,
+  iris lensa masuk/kembali, inspection field dari run asli (generator ber-assert dossier), finding desk 4 temuan berbukti, leader hanya saat model ada,
+  teaser Next. Copy baru DRAFT. Verifikasi: lint/typecheck/build + `verify_crosscheck_room` 6 viewport + edge, 7 suite regresi passed; rig pulih,
+  2 timing tes Lenis + path dossier diperbaiki. Berikutnya: Testing 7A + approve copy.
 
 - **2026-09-16 · Claude Code · isi kartu Skills dijelaskan** — Permintaan pemilik lanjutan: tiap tool dijelaskan
   "itu apa dan gimana pakainya" (n8n, unittest, Playwright, dst), link project **tidak lagi per tool** tapi satu baris

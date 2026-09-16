@@ -1,5 +1,7 @@
 import Image from 'next/image';
+import type { CSSProperties } from 'react';
 import { instruments } from '@/lib/instruments';
+import { scanLanes } from '@/lib/crosscheck-room';
 import SkillDeck from '@/components/skill-deck';
 
 // Contact destinations supplied by the owner, 2026-09-15.
@@ -35,7 +37,12 @@ export default function Home() {
           <button className="case-button" data-open-case={instrument.id}>Open case file <span aria-hidden="true">↗</span></button>
           {instrument.id === 'brandwall'
             ? <p className="orbit-hint" id="observer-readout" data-observed="false">Tap to observe · <b className="when-off">detector off, wave pattern</b><b className="when-on">detector on, particle pattern</b></p>
-            : <p className="orbit-hint">Scroll to orbit the instrument</p>}
+            : instrument.id === 'crosscheck'
+              // Phase 7A (DRAFT): the lenses sweep three browser lanes; each lane fills its 3 screen sizes × 3 roles as you orbit.
+              ? <div className="scan-strip" role="img" aria-label="Scan pattern: three browsers, each checked at three screen sizes as three user roles">{scanLanes.map((lane, i) => <div key={lane} className="scan-lane" data-lane={i}>
+                <span>{lane}</span><div aria-hidden="true">{Array.from({ length: 9 }, (_, c) => <i key={c} style={{ '--c': c } as CSSProperties} />)}</div>
+              </div>)}</div>
+              : <p className="orbit-hint">Scroll to orbit the instrument</p>}
         </div>
       </div>
     </section>)}

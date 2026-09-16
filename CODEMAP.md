@@ -1,12 +1,16 @@
 # CODEMAP — Peta kode Rayin Observatory
 
-Revisi terbaru 2026-09-16 · Codex: urutan delapan planet + perbaikan gerak/fade; lihat “Revisi urutan planet”.
+Revisi terbaru 2026-09-16 · Claude Code: **Gate 7A lolos → `done`** (DRAFT CrossCheck dilepas); sebelumnya Testing 7A + alat efisiensi tes Q42; lihat “Fase 7A — Testing” dan “Alat tes Q42” di §4.
+Sebelumnya · Claude Code: Fase 7A Development (CrossCheck inspection room).
+Sebelumnya · Codex: urutan delapan planet + perbaikan gerak/fade; lihat “Revisi urutan planet”.
 
 > **Tujuan:** baca peta ini, bukan pindai seluruh kode. Buka berkas kode hanya jika peta
 > menunjuknya dan berkas akan diubah. Update setiap berkas dibuat/diubah/dipindah/dihapus.
 > Entri tidak cocok dengan kode = bug; perbaiki saat ditemukan.
 
-**Terakhir diperbarui:** 2026-09-16 · Claude Code · Fase 7 **Testing ulang** setelah fix "Enter aktif lebih cepat": item bukti baru `enterEarly` di `showpiece_evidence.py` (14 item) membuktikan lima GLB instrumen baru diminta sesudah Enter aktif dan chapter/case aman selama jeda. Paket bukti diperbarui 14/14 pass; diukur ulang: gate 1.41 dtk, Enter aktif **6.39 dtk** (dulu 12.2), transfer sebelum Enter 787,063 B, instrumen selesai +3.0 dtk. Enam suite regresi diulang `passed`. **Gate Fase 7 lolos 2026-09-16** (jeda instrumen ±3 dtk diterima apa adanya) → Fase 7 `done`, berikutnya Fase 8 Launch ready.
+**Terakhir diperbarui:** 2026-09-16 · Claude Code · **Gate 7A lolos → `done`**: `cases.ts` CrossCheck `draft: false`; `verify_case.py` (draft label 0), `verify_cases.py` (CrossCheck `draft: False`), `crosscheck_room_evidence.py` (story: label 0). Sebelumnya Testing 7A: paket bukti `crosscheck_room_evidence.py` 16/17; fix regresi fps (posisi lensa ke objek JS, bukan CSS akar) + scrub SVG lebih ringan; `run_regressions.py` + `perf_quick.py` + hook `OBSERVATORY_PHONES` (Q42).
+Sebelumnya: 2026-09-16 · Claude Code · Fase 7A Development → `ready-for-test`.
+Sebelumnya: 2026-09-16 · Claude Code · Fase 7 **Testing ulang** setelah fix "Enter aktif lebih cepat": item bukti baru `enterEarly` di `showpiece_evidence.py` (14 item) membuktikan lima GLB instrumen baru diminta sesudah Enter aktif dan chapter/case aman selama jeda. Paket bukti diperbarui 14/14 pass; diukur ulang: gate 1.41 dtk, Enter aktif **6.39 dtk** (dulu 12.2), transfer sebelum Enter 787,063 B, instrumen selesai +3.0 dtk. Enam suite regresi diulang `passed`. **Gate Fase 7 lolos 2026-09-16** (jeda instrumen ±3 dtk diterima apa adanya) → Fase 7 `done`, berikutnya Fase 8 Launch ready.
 Sebelumnya (Development hari yang sama): Enter menunggu hero saja (kubah + Saturnus + font), preload GLB/Draco dari HTML, Scene diimpor statis, font WOFF2 subset; tes fallback menunggu `data-scene=fallback`.
 
 ## 1. Ringkasan arsitektur
@@ -45,6 +49,11 @@ Semua dari root project kecuali disebut lain.
 | Perintah | Fungsi |
 |---|---|
 | `cd web/scripts && timeout 1500 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python showpiece_evidence.py` | Paket bukti Testing Fase 7 → `assets/renders/showpiece/evidence/`: 14 item (termasuk `enterEarly`: urutan unduh instrumen sesudah Enter + scroll/case dini), MP4 390×844 **dengan audio asli situs**, performa PLAN §11 (gate slow 4G + CPU 4×, fps 4×/6×, GLB, DPR), contact sheet, `evidence.json`; exit 1 bila ada fail. Jalankan setelah 6 suite regresi (item `phones` membaca JSON-nya). Server :8767 aktif. |
+| `/home/rayin/Projects/Testing/crosscheck/.venv/bin/python web/scripts/run_regressions.py [--suites a,b] [--phone-only mobile,case,cases,showpiece] [--force] [--list]` | **Q42 — pakai ini untuk semua regresi.** Suite berurutan (room, audio, mobile, case, cases, showpiece, desktop-a, desktop-b, perf-crosscheck); lewati suite yang sudah `passed` pada sidik jari sumber sama (`assets/renders/regression-ledger.json`); `--phone-only` = 390×844 saja; menolak jalan bila build lebih tua dari sumber. Dari root, server :8767 aktif. |
+| `cd web/scripts && timeout 600 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python perf_quick.py --slug <project> [--baseline <url>]` | **Q42 — gerbang fps Development** sebelum `ready-for-test`: 390×844 DPR 2, suara nyala, CPU 4×, chapter → terbang → scroll case → Return; tiap segmen ≥45 fps dan ≤10% frame lambat → `assets/renders/perf-quick/<slug>.json`. `--baseline` = build pembanding (mis. salinan HEAD di port lain) untuk atribusi. |
+| `cd web/scripts && timeout 2400 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python crosscheck_room_evidence.py [--only mobile,desktop,back,slow,viewports,fps,images]` | Paket bukti Testing 7A → `assets/renders/personal-crosscheck/evidence/` (17 item, 8 kategori, 3 MP4, contact sheet HP + desktop, `evidence.json`); `--only` untuk debug (paket tetap dihapus dulu). Jalankan sesudah runner regresi; ±25 menit. |
+| `/home/rayin/Projects/Testing/crosscheck/.venv/bin/python web/scripts/build_crosscheck_run.py` | Fase 7A: baca hasil run CrossCheck (read-only), assert total = dossier, tulis `web/lib/crosscheck-run.ts` + 7 crop bukti `web/public/images/crosscheck/`. Gagal (tanpa menulis) bila angka beda. |
+| `cd web/scripts && timeout 900 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python verify_crosscheck_room.py [--sizes WxH,...] [--no-edges]` | Fase 7A Development: strip lane chapter, iris lensa masuk/kembali, leader hanya saat model ada, scrub inspection field maju/mundur/flick, 4 temuan + bukti, teaser Next; 390/360/430 → 768 → 1440/1920; edge Back saat terbang, model diblok, reduced motion → `assets/renders/personal-crosscheck/dev/`. Server :8767 aktif. |
 | `node web/scripts/verify_audio.mjs` | Fase 7: 9 tes lifecycle audio (resume race, batas voice, hidden, mute, cleanup) → `showpiece/dev/audio-verification.json`. |
 | `timeout 600 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python web/scripts/verify_showpiece.py` | Fase 7 Development: tiga HP, Web Audio nyata, loader, lima pitch, chain/return/history/fallback → `showpiece/dev/`. Server :8767 aktif; suite GPU dijalankan bergantian. |
 | `npm ci --prefix web` | Instal versi terkunci dari package-lock. |
@@ -107,15 +116,23 @@ Rayin Observatory/
 │   │   └── globals.css            locked tokens, mobile + desktop composition, gate/menu
 │   ├── components/
 │   │   ├── case-file.tsx           case template: brief, hotspots, flow, readings, tools, video, Next
+│   │   ├── crosscheck-room.tsx     Fase 7A: InspectionField (SVG matrix scrub), FindingSheet, NextTeaser
 │   │   ├── observatory-shell.tsx  entry/loading/audio/menu/scroll ownership
 │   │   ├── observatory-scene.tsx  one Canvas, dome/Saturn + five instrument groups
 │   │   ├── instrument-models.ts   procedural build of the five instruments (shared kit + palette)
 │   │   ├── instrument-motion.ts   per-instrument idle rigs + Saturn rig (moons, ring dust)
 │   │   └── sky.tsx                full-screen sky shader: gradient, stars, nebula
-│   ├── lib/cases.ts                five approved case files + CaseView
+│   ├── lib/cases.ts                five case files (CrossCheck hotspot copy DRAFT, 7A) + CaseView + aperture
+│   ├── lib/crosscheck-room.ts      Fase 7A DRAFT copy: lanes, four steps' readouts, four findings
+│   ├── lib/crosscheck-run.ts       GENERATED run data: 40×27 matrix, 18 issues, access/flows, evidence cells
 │   ├── lib/ambient.ts             original hum + five clicks + camera sweeps / mute / lifecycle
 │   ├── lib/instruments.ts         ordered chapter copy, readings, dialog context + types
 │   ├── lib/skills.ts              grouped skills and evidence-project IDs
+│   ├── scripts/build_crosscheck_run.py  Phase 7A data + evidence crops from the CrossCheck run (asserted)
+│   ├── scripts/verify_crosscheck_room.py  Phase 7A focused checks, six viewports + edges
+│   ├── scripts/crosscheck_room_evidence.py  Phase 7A Testing evidence pack (phone + desktop walkthroughs, slow motion, fps, sources)
+│   ├── scripts/run_regressions.py  Q42 regression runner + ledger (skip suites already green on the same source)
+│   ├── scripts/perf_quick.py      Q42 Development fps gate (4x CPU, one phone)
 │   ├── scripts/case_files_evidence.py  Phase 5 Testing evidence pack (all 5 cases + chain)
 │   ├── scripts/desktop_evidence.py  Phase 6 Testing evidence pack (desktop MP4 + 21 items)
 │   ├── scripts/verify_audio.mjs    Phase 7 controlled audio lifecycle checks
@@ -136,6 +153,7 @@ Rayin Observatory/
 │       ├── models/                dome/ambient + five instrument GLBs, Draco
 │       ├── fonts/                 3 WOFF2 subset (served) + approved 3 TTF (source) + 3 OFL copies
 │       ├── images/                dome + five fallback PNGs; five demo posters; approved portrait copy
+│       ├── images/crosscheck/     Fase 7A: 7 crops of CrossCheck's own evidence images (CC-001/003/015/017)
 │       └── draco/                 WASM decoder + wrapper + README.md + LICENSE.txt
 └── assets/
     ├── blender/
@@ -158,6 +176,10 @@ Rayin Observatory/
     │   ├── rayina-crop.png         crop + edit latar tanpa logo
     │   └── rayina-duotone.png      treatment navy + scan
     ├── renders/
+    │   ├── personal-crosscheck/dev/  Phase 7A Development PNGs + verification.json (verify_crosscheck_room)
+    │   ├── personal-crosscheck/evidence/  Phase 7A Testing gate pack (MP4 ×3, sheets, evidence.json)
+    │   ├── perf-quick/<slug>.json  Q42 fps gate results
+    │   ├── regression-ledger.json  Q42 runner ledger (suite → source fingerprint, status)
     │   ├── showpiece/evidence/   Phase 7 Testing: MP4 390×844 + real audio, contact sheet, perf PNG/chart, phones/ + edges/, evidence.json
 │   ├── showpiece/dev/        Phase 7 PNGs, verification.json, audio-verification.json, env-check.md
     │   ├── desktop/evidence/     Phase 6 Testing: PNG per item, MP4 1440×900, contact sheet, viewports/ + phones/ sheets, evidence.json
@@ -195,6 +217,83 @@ Rayin Observatory/
 
 ## 4. Modul dan berkas
 
+### Alat tes Q42 (2026-09-16, Claude Code, sesi Testing 7A)
+Aturan pakai: PLAN §12.3. Tujuan: Testing tidak mengulang yang sudah hijau; regresi fps ketahuan di Development.
+
+#### `web/scripts/run_regressions.py`
+- **Peran:** satu pintu regresi; suite berurutan (satu GPU), ledger per suite.
+- **Ekspor utama:** `SUITES` (nama → perintah, cwd, timeout, JSON hasil, hormati `OBSERVATORY_PHONES`, salin JSON), `fingerprint()`, `main()`.
+- **Dipakai oleh:** Development + Testing semua fase berikut; tambah suite baru fase aktif (mis. `room`, `perf-<slug>`) ke `SUITES`.
+- **Bergantung pada:** venv CrossCheck, node, server :8767, `web/.next/BUILD_ID`.
+- **State / efek samping:** tulis `assets/renders/regression-ledger.json` {fingerprint, status, phones one|full, exit, seconds, finishedAt, report}; `desktop-a` menyalin JSON ke `desktop/dev/verification-390-1366.json` (verify_desktop menimpa JSON yang sama).
+- **Catatan:** sidik jari = isi `web/app|components|lib|public` (berkas >5 MB: ukuran + mtime) + lockfile + next config → build ulang dengan isi sama tidak memaksa ulang. Status gagal bila exit ≠ 0 atau JSON `status` ≠ passed. Phone-only tidak memenuhi permintaan full. Ledger dimulai 2026-09-16 (`audio`; `case` + `cases` phone-only di build gate 7A); run 8 suite penuh hari itu terjadi sebelum runner ada. Jebakan: jangan `pkill -f` dengan pola yang juga ada di baris perintah shell sendiri.
+
+#### `web/scripts/perf_quick.py`
+- **Peran:** gerbang fps Development per project.
+- **Ekspor utama:** `measure(browser, url, slug)`, `stats`, `swipe_until`; CLI `--slug`, `--baseline`.
+- **State / efek samping:** `assets/renders/perf-quick/<slug>.json` (`current`, `baseline`, `rule`); exit 1 bila segmen gagal.
+- **Catatan:** aturan ≥45 fps + ≤10% frame >22 ms (lebih longgar dari p95 ketat paket bukti Fase 7/7A; frame headless terkuantisasi 16.7/33.3 ms sehingga p95 biner). Ukur 2026-09-16 build final: chapter 55.9, terbang 47.8, scroll case 57.7, Return 56.2 fps; HEAD `ac01ca4` 59.0/56.7/59.8/56.8.
+
+#### Hook `OBSERVATORY_PHONES` (verify_mobile.py, verify_case.py, verify_cases.py via `verify_case.PHONES`, verify_showpiece.py)
+- Default `390x844,360x740,430x932` (perilaku lama); runner `--phone-only` mengisi `390x844`.
+
+### Fase 7A — Testing (2026-09-16, Claude Code)
+
+#### `web/scripts/crosscheck_room_evidence.py`
+- **Peran:** generator paket bukti gate 7A (bukan tes Development).
+- **Ekspor utama:** `ITEMS` (17 item → kategori), `CATEGORIES`, `REGRESSIONS`, `OWNER` (temuan untuk pemilik), `mobile_walk`, `desktop_walk`, `model_slow_fail`, `perf`, `image_weight`, `sources_check`, `viewports` (memanggil `verify_crosscheck_room.viewport/edges` dengan `vcr.OUT` = `evidence/viewports`), `back_during_flight_shot`, `slow_motion`, `sheets`, `verdicts`; `--only` debug.
+- **Bergantung pada:** `verify_crosscheck_room` (enter/idle/land/field_at/iris_trace), `case_files_evidence.tile`, dossier `portfolio/CAPABILITY_CROSSCHECK.md`, `/home/rayin/Projects/Testing/crosscheck/scripts/prepare_video_assets_en.py` (sumber "37%" dan "403"), node (parse `crosscheck-run.ts`), ffmpeg drawtext DejaVuSans, matplotlib/Pillow.
+- **State / efek samping:** hapus + tulis ulang `assets/renders/personal-crosscheck/evidence/`; menjalankan `build_crosscheck_run.py` untuk cek byte-identik lalu **mengembalikan mtime** output (agar runner tidak menganggap build basi).
+- **Catatan:** HP = touch CDP (`swipe` ± arah), desktop = wheel Lenis; posisi pasti tetap `land`. Slow motion = rekaman di-retime 4× (tanpa interpolasi), label drawtext. Cek `performance` memakai aturan ketat Fase 7 (≥45 fps **dan** p95 ≤22.2 ms). Instrumen prosedural → "model lambat" diuji sebagai leader selama terbang + `ambient.glb` diblok. `innerText` melewatkan readout step HP yang tersembunyi → sumber memakai `textContent` + teks tiap temuan.
+
+#### `assets/renders/personal-crosscheck/evidence/`
+- `walkthrough-mobile.mp4` (390×844, 266 dtk), `walkthrough-desktop.mp4` (1440×900, 80 dtk), `slow-motion.mp4` (720×844, 147 dtk), `contact-sheet-mobile.jpg`, `contact-sheet-desktop.jpg`, strip `i01`…`i12`, `p01-fps-4x.png`, PNG sumber `m*`/`d*`, `viewports/` (vcr 6 viewport + fallback/reduced motion), `edges/back-during-flight.png`, `evidence.json` (items, categories, measurements, videos, forOwner). Generated; jangan edit tangan (pengecualian 2026-09-16: `forOwner` diisi dari `OWNER` setelah run).
+- Hasil 2026-09-16 (build final): 16/17 pass; `performance` gagal ketat — 4× CPU: chapter 58.6, iris 56.4, scrub maju 54.1 (11% lambat), scrub balik 52.5 (13%), tap temuan 59.4, Return 51.7 fps; gambar bukti 8 berkas 115,575 B.
+
+### Fase 7A — CrossCheck inspection room (2026-09-16, Claude Code, Development)
+Brief personal + tabel sumber copy DRAFT: `web/README.md` bagian Phase 7A.
+
+#### `web/components/crosscheck-room.tsx`
+- **Peran:** ruang inspeksi khusus CrossCheck di case file; dipasang `case-file.tsx` hanya untuk `id === 'crosscheck'` (empat case lain tetap `.signal-flow` sampai fasenya).
+- **Ekspor utama:** `InspectionField` (`section.inspection-field[aria-labelledby=flow-heading][data-step]`, stage sticky, `ol.inspection-steps` 4 step approved + readout, `.inspection-detail` mobile, `svg.inspection-matrix[data-progress]`), `FindingSheet` (`#findings-heading`, `.finding-tab[data-finding][aria-pressed]`, `#finding-evidence[data-finding]`, `EvidenceStrip` `[data-hit]`, `.finding-proof[data-pair][data-view]` toggle, `.finding-repro`), `NextTeaser` (`.case-next-deck`).
+- **Dipakai oleh:** `case-file.tsx`; tes `verify_crosscheck_room.py`, `verify_case.py`, `verify_cases.py`.
+- **Bergantung pada:** `lib/crosscheck-run.ts`, `lib/crosscheck-room.ts`, GSAP ScrollTrigger (register sendiri: efek anak jalan sebelum shell pada direct URL), `use-reduced-motion`, next/image (`/images/crosscheck/*`).
+- **State / efek samping:** SVG dirender sekali (path per layer; baris "kept" = grup per route); satu ScrollTrigger (start top top → end bottom bottom) menulis target, `gsap.ticker` meng-ease 0.2/frame lalu `draw(p)` menulis ±40 atribut. Fade memakai `fill-opacity`/`stroke-opacity` (bukan `opacity` grup); chip hanya `translate` (tanpa `scale`: glyph dirasterisasi ulang tiap frame); sel `crispEdges` (CSS) — fix fps Testing 7A. `BEATS` map 0–.12 / scan .12–.5 / sort .52–.76 / hand .78–.96; semua fungsi murni progress → scroll balik membalik, flick tidak mengantre. Reduced motion = `draw(1)` statis. Tes membaca chip lewat `style.fillOpacity`. `useWide` (≥1024) mengganti layout viewBox (label route + chip 6 kolom). Finding: WAAPI 220 ms, strip bukti CSS stagger 12 ms/sel; toggle before/expected mobile, desktop keduanya tampil.
+- **Catatan:** jebakan: jangan set `style.transform` pada elemen SVG yang memakai atribut `transform` — CSS menimpanya. Gambar hidden (toggle) tetap lazy → tes hanya cek gambar terlihat. Baris "removed by rule" = penyederhanaan per baris route (caption jujur).
+
+#### `web/lib/crosscheck-room.ts`
+- **Peran:** copy 7A (approved gate 2026-09-16): `scanLanes`, `inspectionSteps` (judul/body approved Fase 5 + `readout` baru + `source`), `inspectionNote`, `findings` (CC-003, CC-001, CC-017, CC-015: title/where/steps/expected/actual/gambar/alt/caption/source), `findingsIntro`.
+- **Dipakai oleh:** `crosscheck-room.tsx`, `app/page.tsx` (`scanLanes`).
+- **Catatan:** setiap fakta punya `source` ke dossier atau gambar bukti; tabel lengkap README.
+
+#### `web/lib/crosscheck-run.ts` (GENERATED)
+- **Peran:** data run tercatat: `routes` (40), `columns` (27 = browser → size → role), `matrix` (baris '0/1'), `issues` (18: id/priority/source sweep|access|flow/row), `accessPages` 72, `violations` [page, role], `flows` (5), `evidenceCells` CC-017/CC-015.
+- **Bergantung pada:** `scripts/build_crosscheck_run.py`; jangan edit tangan.
+
+#### `web/scripts/build_crosscheck_run.py`
+- **Peran:** generator data + crop; assert 1,080/422/877/40/216→3/5→1/18=3·14·1 sebelum menulis. Box crop diukur dari piksel border merah/hijau gambar V4.
+- **Bergantung pada:** `/home/rayin/Projects/Testing/crosscheck/qa/out/*`, `assets/v4_before_after_{1,2,3}_en.png`, `qa/out/shots/flow_update_post_and_crm_owner_step5.png`; Pillow (venv CrossCheck).
+
+#### `web/public/images/crosscheck/`
+- `cc-003-actual.png` 1280×440, `cc-001-before/expected.png` 744×420, `cc-017-before.png` 383×824, `cc-017-expected.png` 619×824, `cc-015-before/expected.png` 383×824 (ukuran juga di `shotSize` komponen). Crop tanpa retouch.
+
+#### `web/scripts/verify_crosscheck_room.py`
+- **Peran:** tes fokus Development 7A (bukan paket gate). Viewport default 390/360/430/768/1440/1920 + edges (390).
+- **Cek:** strip lane menyala 0 → >0 → 27 mengikuti orbit + `data-scan` melihat 0/1/2/agree, tidak menimpa tombol; iris `disc → hole → hidden` masuk, `hole → disc → hidden` kembali, pusat dalam viewport, scroll asal ±3 px, fokus heading; `data-leaders=live` + opacity leader; kartu hotspot dalam viewport; field progress 0/.3/.62/.9/1 → step 0..3 monoton, stage top 0, 18 chip opacity 1, mundur ke .3 → step 1 chip 0, flick 5 lompatan → progress akurat; empat temuan (hit 1/2/9/27, gambar termuat, toggle mobile / dua figur desktop, langkah ≥2); teaser SurgeLine; satu Canvas, 0 error/≥400/overflow. Edge: Back saat terbang → iris hidden; `ambient.glb` diblok → tanpa `data-leaders`, leader opacity 0, still tampil; reduced motion → step 3 + chip 1, iris hidden.
+- **Jebakan:** screenshot DPR 2 makan ±300 ms → fase iris terlewat; screenshot diambil di dalam `iris_trace` saat radius melewati ambang.
+
+#### Perubahan berkas lama (7A)
+- `components/case-file.tsx`: import room; CrossCheck merender `InspectionField` + `FindingSheet` menggantikan section flow; `NextTeaser` (deck case berikut) hanya CrossCheck.
+- `lib/cases.ts`: `apertureScreen` {x,y} (NaN sampai scene menulis; dibaca `lensCentre` shell); tipe `CaseFile.aperture?` (node lensa masuk/keluar); CrossCheck `draft: false` (gate 7A), `aperture: 'Lens2'`, tiga body hotspot ditulis ulang sebagai hasil inspeksi (approved gate 7A).
+- `app/page.tsx`: chapter CrossCheck mengganti `orbit-hint` dengan `.scan-strip[role=img]` 3 × `.scan-lane[data-lane]` × 9 `<i style=--c>`.
+- `components/observatory-shell.tsx`: `syncChapters` menulis `--instrument-<i>-orbit` (1 sudah lewat, orbit aktif, 0 belum). Iris modul-level (`setIris`, `irisTween`, `lensCentre` membaca `apertureScreen`, `irisCentre`): `openCase` menambah disc 0→jangkau (.5 s, mulai .32) bila `aperture`; `leaveCase('return')` hole jangkau→0 (.48 s); layout effect pathname selalu membuka iris yang sedang menutup (case: hole dari pusat beku; home: disc mengecil ke lensa chapter live; interupsi: uncover singkat). Reduced motion: tanpa iris. `.lens-iris` di dalam `.site-content` (z 3, di bawah header).
+- `components/observatory-scene.tsx`: `showScan` → `.observatory[data-scan]`; per frame proyeksi node `aperture` instrumen terlihat → objek `apertureScreen` di `lib/cases.ts` (px, `size.left/top`). **Jangan** tulis ke CSS variable di `.observatory`: lensa berayun tiap frame → style recalc seluruh halaman (Testing 7A: 60 → ±34 fps di 4× CPU); `.case-inspection[data-leaders=live]` hanya saat `mix > .99` dan model case ada.
+- `components/instrument-motion.ts`: `rigInstrument(..., onScan?)`; rig CrossCheck melapor lane '0'|'1'|'2'|'agree'|'idle' saat berubah (siklus 6.6 dtk sama).
+- `app/globals.css`: blok "Phase 7A" sebelum reduced-motion: `.scan-strip/.scan-lane` (fill `clamp` dari `--instrument-0-orbit`), `.lens-iris` (mask radial disc/hole, grid inspeksi, ring + garis bidik), sel matriks `shape-rendering: crispEdges`, `.cells-pass`/`.cells-removed-grey` default `fill-opacity`, leader `opacity 0` tanpa `data-leaders=live`, `.inspection-*`, SVG matrix, `.finding-*`, `.evidence-*`, `.case-next-deck`; ≥1024: stage dua kolom, steps rail, finding desk grid, bingkai bidik `[data-case=crosscheck] .case-inspection::before/::after`.
+- Rig (bukan situs): `verify_cases.py`, `case_files_evidence.py`, `case_crosscheck_evidence.py`, `full_observatory_evidence.py` membaca dossier dari `portfolio/` root (Q41; path sibling lama sudah tidak ada). `verify_mobile.py` mengulang `scrollTo` bawah di dalam `wait_for_function` sampai readout 100%; `verify_showpiece.py` menunggu scroll diam 400 ms sebelum mencatat origin (2 tempat). Keduanya gagal identik di HEAD `ac01ca4` sebelum 7A (ekor Lenis menimpa lompatan native).
+- Performa (ukur 2026-09-16, 390×844 DPR 2, scrollTo tiap rAF 6 dtk): CPU 4× scrub matriks 243 frame vs pembanding scroll bagian lain 264 frame; CPU 1× 60 fps datar. `put()` di `draw` hanya menulis nilai yang berubah; "removed by rule" = crossfade dua layer (`removed` merah → `removed-grey` muted .32), bukan `color-mix` per frame (tidak mengubah angka ukur — biaya dominan = raster SVG + scroll).
+- Tes: `verify_case.py` (draft label 1, cek inspection steps + 18 chip), `verify_cases.py` (CrossCheck `draft: True`, steps alih-alih `.signal-flow`), `verify_desktop.py` (lewati cek flow horizontal CrossCheck). Arsip bukti `case_files_evidence.py`, `desktop_evidence.py`, `case_crosscheck_evidence.py` masih mengharapkan `.signal-flow`/tanpa DRAFT untuk CrossCheck → gagal bila diulang (arsip gate lama).
+
 
 ### `web/app/work/[slug]/page.tsx`
 - **Peran:** lima route statis `/work/<slug>` (generateStaticParams), template PLAN §7.
@@ -223,7 +322,7 @@ Rayin Observatory/
 - **Dipakai oleh:** case-file, route, scene (anchor leader), shell (route ↔ index, chain).
 - **Bergantung pada:** lima dossier CAPABILITY_* (kolom `source` per reading); provenance README.
 - **State / efek samping:** readonly; `CaseView` runtime = ref shell.
-- **Catatan:** Seluruh lima case approved (gate Fase 4–5); CrossCheck Lens3/Lens2/Lens1, revisi 3. Anchor: SurgeLine `DishPivot1/2/3` part `signal`;
+- **Catatan:** Lima case approved di gate Fase 4–5; body hotspot CrossCheck 7A approved di gate 7A (`draft: false`) + `aperture: 'Lens2'`. CrossCheck Lens3/Lens2/Lens1, revisi 3. Anchor: SurgeLine `DishPivot1/2/3` part `signal`;
   DriftWatch `NeedlePivot` (origin), `driftwatchMount` + `ceramic` (kertas), `RollerPivot0` + `ceramic`; DueWatch `OrbitPivot0/1/2` part
   `ceramic`/`alarm`/`ceramic` (planet mengorbit → leader ikut); BrandWall `brandwallMount` + `ceramic` (kolimator), `PrismPivot` + `Prism`,
   `SpectrumPivot` + `Spectrum0`. Marker dipilih lewat screenshot 390×844 agar leader tak memotong bagian lain.
@@ -635,6 +734,7 @@ Rayin Observatory/
   Fase 7 menambah kontrak suara/loader/transisi, perintah dua tes fokus, batas Development vs pengukuran performa Testing. Fase 6 gate sudah passed.
   2026-09-16: paragraf Enter lebih cepat (opsi B) + angka ukur sebelum/sesudah di bagian Phase 7.
   Script bukti Fase 1–2 diarsipkan, bukan acceptance Fase 3.
+  2026-09-16 (7A): bagian "Phase 7A" di atas = brief personal, sumber data/bukti, tabel copy DRAFT → dossier, perintah verifikasi; judul README jadi "Personal rooms".
 
 ### `web/lib/instruments.ts`
 - **Peran:** urutan lima instrumen + sumber data copy chapter (field `preview` dihapus Fase 5 bersama dialog).

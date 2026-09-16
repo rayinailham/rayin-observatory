@@ -9,6 +9,8 @@ from playwright.async_api import async_playwright, expect
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'assets/renders/showpiece/dev'
 URL = os.environ.get('OBSERVATORY_URL', 'http://127.0.0.1:8767')
+# Q42: OBSERVATORY_PHONES=390x844 narrows an older phase's regression to one phone (run_regressions.py --phone-only).
+PHONES = [tuple(map(int, s.split('x'))) for s in os.environ.get('OBSERVATORY_PHONES', '390x844,360x740,430x932').split(',')]
 CASES = ['crosscheck', 'surgeline', 'driftwatch', 'duewatch', 'brandwall']
 GPU = ['--use-gl=angle', '--use-angle=gl-egl', '--enable-webgl', '--ignore-gpu-blocklist']
 # Instrument the browser's actual audio graph; no app debug globals or fake audio on the main flow.
@@ -108,6 +110,8 @@ async def phone(browser, width, height):
     await shot(page, f'menu-{tag}')
     await page.get_by_role('navigation', name='Main navigation', exact=True).get_by_role('button', name='Work').click()
     await page.wait_for_function("Math.abs(document.getElementById('crosscheck').getBoundingClientRect().top) < 5", timeout=20000)
+    # The menu scroll's Lenis tail still moves a few px after the chapter is in place; sample once settled.
+    await page.wait_for_function("new Promise(r=>{const y=scrollY;setTimeout(()=>r(Math.abs(scrollY-y)<1),400)})", timeout=10000)
     origin = await page.evaluate('scrollY')
     before = await starts(page)
     await page.locator('[data-open-case=crosscheck]').click()
@@ -204,6 +208,8 @@ async def edges(browser):
     assert await page.evaluate('audioProbe.rms()') > .001
     await page.get_by_role('navigation', name='Main navigation', exact=True).get_by_role('button', name='Work').click()
     await page.wait_for_function("Math.abs(document.getElementById('crosscheck').getBoundingClientRect().top) < 5", timeout=20000)
+    # The menu scroll's Lenis tail still moves a few px after the chapter is in place; sample once settled.
+    await page.wait_for_function("new Promise(r=>{const y=scrollY;setTimeout(()=>r(Math.abs(scrollY-y)<1),400)})", timeout=10000)
     origin = await page.evaluate('scrollY')
     await page.locator('[data-open-case=crosscheck]').click()
     await page.wait_for_url('**/work/crosscheck')
@@ -268,7 +274,7 @@ async def run():
     try:
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True, args=GPU)
-            for width, height in [(390, 844), (360, 740), (430, 932)]:
+            for width, height in PHONES:
                 result['phones'].append(await phone(browser, width, height))
                 print(f'PASS {width}x{height}', flush=True)
                 path.write_text(json.dumps(result, indent=2))

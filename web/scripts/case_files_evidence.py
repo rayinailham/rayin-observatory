@@ -25,7 +25,7 @@ from verify_case import enter, idle, scroll_to  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'assets/renders/case-files/evidence'
-DOSSIERS = Path('/home/rayin/Projects/Testing/portfolio')
+DOSSIERS = Path(__file__).resolve().parents[2] / 'portfolio'  # Q41: dossiers in the project root
 URL = os.environ.get('OBSERVATORY_URL', 'http://127.0.0.1:8767').rstrip('/')
 W, H = 390, 844
 GPU = ['--use-gl=angle', '--use-angle=gl-egl', '--enable-webgl', '--ignore-gpu-blocklist']

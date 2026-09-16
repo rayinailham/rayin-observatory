@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { gsap } from 'gsap';
 import { caseFiles } from '@/lib/cases';
 import { instruments, type InstrumentId } from '@/lib/instruments';
+import { FindingSheet, InspectionField, NextTeaser } from './crosscheck-room';
 
 const lines = (text: readonly string[]) => text.map((line, i) => <Fragment key={line}>{i > 0 && <br />}{line}</Fragment>);
 
@@ -77,10 +78,11 @@ export default function CaseFile({ id }: { id: InstrumentId }) {
     </section>
 
     <div className="case-details">
-      <section className="case-section" aria-labelledby="flow-heading">
+      {/* Phase 7A: CrossCheck explains itself as an inspection room; the other four keep the shared flow until their phase. */}
+      {id === 'crosscheck' ? <><InspectionField /><FindingSheet /></> : <section className="case-section" aria-labelledby="flow-heading">
         <p className="section-kicker">How it works</p><h2 id="flow-heading">{lines(file.flowHeading)}</h2>
         <ol className="signal-flow">{file.flow.map(step => <li key={step.title}><span className="signal-node" aria-hidden="true" /><h3>{step.title}</h3><p>{step.body}</p></li>)}</ol>
-      </section>
+      </section>}
 
       <section className="case-section" aria-labelledby="readings-heading">
         <p className="section-kicker">Readings</p><h2 id="readings-heading">{lines(file.readingsHeading)}</h2>
@@ -107,6 +109,7 @@ export default function CaseFile({ id }: { id: InstrumentId }) {
       </section>
 
       <section className="case-section case-next" aria-labelledby="next-heading"><p className="section-kicker">Next instrument</p><h2 id="next-heading">{next.name}</h2>
+        {id === 'crosscheck' && <NextTeaser lines={caseFiles[(index + 1) % caseFiles.length].deck} />}
         <Link onNavigate={event => event.preventDefault()} className="case-button" href={`/work/${next.id}`} data-case-target={next.id}>Open the next case file <span aria-hidden="true">↗</span></Link>
         <Link onNavigate={event => event.preventDefault()} className="case-back" href={`/#${id}`} data-home-target="return">↙ Return to {name}</Link>
       </section>

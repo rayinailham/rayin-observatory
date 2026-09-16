@@ -8,11 +8,11 @@ import re
 from datetime import datetime, timezone
 from pathlib import Path
 from playwright.async_api import async_playwright
-from verify_case import URL, enter, idle, scroll_to
+from verify_case import PHONES, URL, enter, idle, scroll_to
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'assets/renders/case-files/dev'
-DOSSIERS = Path('/home/rayin/Projects/Testing/portfolio')
+DOSSIERS = Path(__file__).resolve().parents[2] / 'portfolio'  # Q41: dossiers in the project root
 REPORT = {'status': 'running', 'scope': 'Phase 5 Development, Chromium mobile emulation', 'results': []}
 # Mirrors lib/cases.ts on purpose: the page must render exactly these.
 CASES = [
@@ -77,7 +77,8 @@ async def inspect(page, case, width, height, shots):
     top_of_card = (await page.locator('#component-card').bounding_box())['y']
     assert all(b['y'] + b['height'] < top_of_card for b in cards)
     await page.get_by_role('button', name='Close component card').click()
-    assert await page.locator('.signal-flow li').count() == 4
+    # CrossCheck explains its flow as the Phase 7A inspection field; the others keep the shared list.
+    assert await page.locator('.inspection-steps li' if case['id'] == 'crosscheck' else '.signal-flow li').count() == 4
     for i, value in enumerate(case['readings']):
         await page.locator('.case-reading').nth(i).scroll_into_view_if_needed()
         await page.wait_for_function('(a)=>document.querySelectorAll("[data-count]")[a.i].textContent===a.v', arg={'i': i, 'v': value})
@@ -105,7 +106,7 @@ async def run():
     save()
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True, args=['--use-gl=angle', '--use-angle=gl-egl', '--enable-webgl', '--ignore-gpu-blocklist'])
-        for width, height in [(390, 844), (360, 740), (430, 932)]:
+        for width, height in PHONES:
             print(f'Case files {width}x{height}', flush=True)
             context = await browser.new_context(viewport={'width': width, 'height': height}, is_mobile=True, has_touch=True)
             page = await context.new_page()

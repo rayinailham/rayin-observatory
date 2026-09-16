@@ -12,6 +12,8 @@ from playwright.async_api import async_playwright
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'assets/renders/case-crosscheck/dev'
 URL = os.environ.get('OBSERVATORY_URL', 'http://127.0.0.1:8767').rstrip('/')
+# Q42: OBSERVATORY_PHONES=390x844 narrows an older phase's regression to one phone (run_regressions.py --phone-only).
+PHONES = [tuple(map(int, s.split('x'))) for s in os.environ.get('OBSERVATORY_PHONES', '390x844,360x740,430x932').split(',')]
 ONLY_FALLBACK = '--fallback-only' in sys.argv
 REPORT_NAME = 'fallback-verification.json' if ONLY_FALLBACK else 'verification.json'
 REPORT = {'fallbackOnly': ONLY_FALLBACK, 'status': 'running', 'scope': 'Phase 4 Development, Chromium mobile emulation', 'results': []}
@@ -68,7 +70,7 @@ async def run():
     save()
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True, args=['--use-gl=angle', '--use-angle=gl-egl', '--enable-webgl', '--ignore-gpu-blocklist'])
-        for width, height in ([] if ONLY_FALLBACK else [(390, 844), (360, 740), (430, 932)]):
+        for width, height in ([] if ONLY_FALLBACK else PHONES):
             print(f'Case file {width}x{height}', flush=True)
             context = await browser.new_context(viewport={'width': width, 'height': height}, is_mobile=True, has_touch=True)
             page = await context.new_page()
@@ -83,7 +85,7 @@ async def run():
             await open_case(page, f'flight-{width}x{height}.png')
             assert await page.evaluate("window.__originalCanvas===document.querySelector('canvas')")
             assert await page.locator('canvas').count() == 1
-            assert await page.locator('.draft-label').count() == 0  # case copy approved at the Phase 4 gate
+            assert await page.locator('.draft-label').count() == 0  # Phase 7A copy approved at the gate (2026-09-16)
             assert await page.evaluate('scrollY') < 2
             assert not videos, videos
             await page.screenshot(path=str(OUT / f'brief-{width}x{height}.png'))
@@ -105,9 +107,10 @@ async def run():
             assert all(0 < x < width and 100 < y < height for x, y in line_points), line_points
             await page.get_by_role('button', name='Close component card').click()
             assert await page.locator('.instrument-hotspot[aria-expanded=true]').count() == 0
+            # Phase 7A: How it works is the pinned inspection field (four approved steps), details in verify_crosscheck_room.py.
             await scroll_to(page, '#flow-heading', -110)
-            assert await page.locator('.signal-flow li').count() == 4
-            assert await page.locator('.signal-flow li').first.evaluate("e=>getComputedStyle(e,'::after').animationName") == 'case-signal'
+            assert await page.locator('.inspection-steps li').count() == 4
+            assert await page.locator('.inspection-matrix [data-chip]').count() == 18
             await page.screenshot(path=str(OUT / f'flow-{width}x{height}.png'))
             await page.locator('.case-reading').first.scroll_into_view_if_needed()
             await page.wait_for_function("(()=>{const n=Number(document.querySelector('[data-count]').textContent.replaceAll(',',''));return n>0&&n<1080})()")

@@ -19,7 +19,7 @@ from playwright.async_api import async_playwright
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'assets/renders/full-observatory/evidence'
-DOSSIERS = Path('/home/rayin/Projects/Testing/portfolio')
+DOSSIERS = Path(__file__).resolve().parents[2] / 'portfolio'  # Q41: dossiers in the project root
 URL = os.environ.get('OBSERVATORY_URL', 'http://127.0.0.1:8767')
 W, H = 390, 844
 GPU = ['--use-gl=angle', '--use-angle=gl-egl', '--enable-webgl', '--ignore-gpu-blocklist']

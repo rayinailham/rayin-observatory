@@ -1,8 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type MutableRefObject, type ReactNode } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { caseFiles, caseIndex, type CaseView } from '@/lib/cases';
+import { apertureScreen, caseFiles, caseIndex, type CaseView } from '@/lib/cases';
 import { useProgress } from '@react-three/drei';
 import Lenis from 'lenis';
 import { gsap } from 'gsap';
@@ -16,6 +16,45 @@ import Scene from './observatory-scene';
 import { useReducedMotion } from './use-reduced-motion';
 const SOUND_KEY = 'rayin-observatory:sound';
 const caseOf = (path: string) => caseIndex(path.startsWith('/work/') ? path.slice('/work/'.length) : null);
+
+// Lens iris (Phase 7A): ink between a lens and the screen edge. A `disc` grows out of the lens and
+// covers the screen; a `hole` opens in the ink and uncovers it. The centre follows the scene's
+// apertureScreen (kept on screen), or stays where the last cover closed so a case opens from the
+// lens it was entered through, even when that lens now sits below the fold.
+type IrisState = 'hidden' | 'disc' | 'hole';
+type IrisCentre = { x: number; y: number };
+const irisReach = () => Math.hypot(window.innerWidth, window.innerHeight);
+let irisCentre: IrisCentre = { x: 0, y: 0 };
+function lensCentre(): IrisCentre {
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  const x = Number.isFinite(apertureScreen.x) ? apertureScreen.x : w / 2;
+  const y = Number.isFinite(apertureScreen.y) ? apertureScreen.y : h * .45;
+  return { x: Math.min(w * .9, Math.max(w * .1, x)), y: Math.min(h * .86, Math.max(h * .14, y)) };
+}
+function setIris(element: HTMLElement | null, state: IrisState, r = 0, centre = irisCentre) {
+  if (!element) return;
+  element.dataset.state = state;
+  element.style.setProperty('--iris-x', `${centre.x.toFixed(1)}px`);
+  element.style.setProperty('--iris-y', `${centre.y.toFixed(1)}px`);
+  element.style.setProperty('--iris-r', `${r.toFixed(1)}px`);
+  element.style.setProperty('--iris-ring', Math.max(0, 1 - r / irisReach()).toFixed(3));
+}
+function irisTween(element: HTMLElement | null, motion: MutableRefObject<gsap.core.Tween | null>, state: 'disc' | 'hole', from: number, to: number, duration: number, ease: string, delay = 0, follow = true) {
+  motion.current?.kill();
+  const proxy = { r: from };
+  const place = () => { if (follow) irisCentre = lensCentre(); setIris(element, state, proxy.r); };
+  place();
+  const tween = gsap.to(proxy, { r: to, duration, ease, delay,
+    onUpdate: place,
+    onComplete: () => {
+      if (state === 'disc' ? to <= 0 : to >= irisReach() * .98) setIris(element, 'hidden');
+      if (motion.current === tween) motion.current = null;
+    },
+  });
+  motion.current = tween;
+  return tween;
+}
 
 export default function ObservatoryShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -31,6 +70,8 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
   const flight = useRef<gsap.core.Timeline | null>(null);
   const [flying, setFlying] = useState(false);
   const pageContent = useRef<HTMLDivElement>(null);
+  const iris = useRef<HTMLDivElement>(null);
+  const irisMotion = useRef<gsap.core.Tween | null>(null);
   const [entered, setEntered] = useState(false);
   const [sceneReady, setSceneReady] = useState(false);
   const [fontsReady, setFontsReady] = useState(false);
@@ -139,6 +180,19 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
       });
       homeTarget.current = null;
     }
+    // A lens flight leaves the iris covering the screen; the arriving page always uncovers it,
+    // including after Back interrupted a departure half way.
+    const irisState = iris.current?.dataset.state;
+    if (irisState === 'disc' || irisState === 'hole') {
+      const r = parseFloat(iris.current!.style.getPropertyValue('--iris-r')) || 0;
+      const reach = irisReach();
+      if (reducedMotion) setIris(iris.current, 'hidden');
+      else if (irisState === 'disc') {
+        if (isCase && r >= reach * .98) irisTween(iris.current, irisMotion, 'hole', 0, reach, .75, 'power2.out', .12, false); // the inspection field opens from the lens
+        else irisTween(iris.current, irisMotion, 'disc', r, 0, cameFromCase ? .72 : .3, 'power2.inOut', cameFromCase ? .08 : 0);
+      } else if (!isCase && r <= 1) irisTween(iris.current, irisMotion, 'disc', reach, 0, .72, 'power2.inOut', .08); // the view settles back into the chapter lens
+      else irisTween(iris.current, irisMotion, 'hole', r, reach, .3, 'power2.out');
+    }
     context.add(() => gsap.fromTo(pageContent.current, { opacity: 0 }, { opacity: 1, duration: reducedMotion ? 0 : .55, delay: reducedMotion ? 0 : .25, ease: 'power2.out',
       onComplete: () => {
         setFlying(false);
@@ -195,6 +249,8 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
       homeSections.forEach((_, i) => {
         const offset = i === index ? 1 - transition : i === index - 1 ? -transition : 2;
         root.current?.style.setProperty(`--instrument-${i}-offset`, String(offset - (i === index ? outro : 0)));
+        // Chapter-local scan progress (CrossCheck's lane strip): full once passed, empty before reached.
+        root.current?.style.setProperty(`--instrument-${i}-orbit`, (i < index ? 1 : i > index ? 0 : chapter.current.orbit).toFixed(3));
       });
     };
     measure();
@@ -368,6 +424,8 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
     flight.current = gsap.timeline({ onComplete: () => router.push(path, { scroll: false }) })
       .to(pageContent.current, { opacity: 0, duration: reducedMotion ? 0 : .48, ease: 'power2.out' }, 0)
       .to(caseView.current, { mix: 1, duration: reducedMotion ? 0 : .78, ease: 'power2.inOut' }, 0);
+    // Phase 7A: CrossCheck is entered through its lens; the arriving case opens the iris again.
+    if (caseFiles[index].aperture && !reducedMotion) flight.current.add(irisTween(iris.current, irisMotion, 'disc', 0, irisReach(), .5, 'power2.in'), .32);
   }
 
   // Next instrument: the camera backs away from this instrument, sweeps to the next one as the
@@ -405,7 +463,9 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
     lenis.current?.stop();
     audio.current?.transition('out');
     flight.current = gsap.timeline({ onComplete: () => router.push('/', { scroll: false }) })
-      .to(pageContent.current, { opacity: 0, duration: reducedMotion ? 0 : .28, ease: 'power2.out' });
+      .to(pageContent.current, { opacity: 0, duration: reducedMotion ? 0 : .28, ease: 'power2.out' }, 0);
+    // Returning to the chapter closes the inspection field back into the lens first.
+    if (target === 'return' && caseFiles[current].aperture && !reducedMotion) flight.current.add(irisTween(iris.current, irisMotion, 'hole', irisReach(), 0, .48, 'power2.in'), 0);
   }
 
   function returnToDome() { scrollFromMenu(0); }
@@ -454,6 +514,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
           scrollFromMenu(id);
         }
       }}>{children}</div>
+      <div ref={iris} className="lens-iris" data-state="hidden" aria-hidden="true" />
       <button className="hero-contact" onClick={openContact}>Contact <span aria-hidden="true">↗</span></button>
       <div className="progress-readout"><span>SCROLL</span><span className="readout-track" aria-hidden="true"><i /></span><output ref={readout} aria-label="Scroll progress">000%</output></div>
       {audioError && <p className="audio-notice" role="status">Sound could not start. Tap the sound control to retry.</p>}

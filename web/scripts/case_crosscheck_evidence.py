@@ -23,7 +23,7 @@ from verify_case import enter, idle  # noqa: E402  shared entry/flight helpers
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'assets/renders/case-crosscheck/evidence'
-DOSSIER = Path('/home/rayin/Projects/Testing/portfolio/CAPABILITY_CROSSCHECK.md')
+DOSSIER = Path(__file__).resolve().parents[2] / 'portfolio/CAPABILITY_CROSSCHECK.md'  # Q41: dossiers in the project root
 URL = os.environ.get('OBSERVATORY_URL', 'http://127.0.0.1:8767').rstrip('/')
 CASE = URL + '/work/crosscheck'
 W, H = 390, 844

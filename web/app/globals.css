@@ -515,6 +515,193 @@ button { transition: color .18s, background-color .18s, scale .12s ease-out; }
 .navigation-dialog[open] .dialog-footnote { animation-delay: .07s; }
 @keyframes control-arrival { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
+/* Phase 7A: CrossCheck inspection room. Mobile first; the desktop desk follows in the 1024px block. */
+.scan-strip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 14px 0 0; }
+.scan-lane span { display: flex; justify-content: space-between; margin-bottom: 5px; color: var(--muted); font: 8px 'JetBrains Mono', monospace; letter-spacing: .07em; text-transform: uppercase; transition: color .2s; }
+.scan-lane span::after { content: ''; width: 5px; height: 5px; margin-top: 1px; border-radius: 50%; background: var(--line); transition: background-color .2s, box-shadow .2s; }
+.scan-lane > div { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 2px; }
+.scan-lane i { position: relative; height: 6px; background: var(--line); }
+.scan-lane i::after { content: ''; position: absolute; inset: 0; background: var(--amber); opacity: clamp(0, calc(var(--instrument-0-orbit, 0) * 9.4 - var(--c)), 1); }
+.observatory[data-scan="0"] .scan-lane[data-lane="0"] span, .observatory[data-scan="1"] .scan-lane[data-lane="1"] span, .observatory[data-scan="2"] .scan-lane[data-lane="2"] span { color: var(--ivory); }
+.observatory[data-scan="0"] .scan-lane[data-lane="0"] span::after, .observatory[data-scan="1"] .scan-lane[data-lane="1"] span::after, .observatory[data-scan="2"] .scan-lane[data-lane="2"] span::after { background: var(--amber); box-shadow: 0 0 6px rgb(242 165 65 / .8); }
+.observatory[data-scan=agree] .scan-lane span { color: var(--signal-ok); }
+.observatory[data-scan=agree] .scan-lane span::after { background: var(--signal-ok); box-shadow: 0 0 6px rgb(91 228 155 / .7); }
+.observatory[data-scan=agree] .scan-lane i::after { background: var(--signal-ok); }
+
+/* Lens aperture: the page is entered and left through the lens, drawn as an iris over the scene. */
+.lens-iris { position: fixed; inset: 0; z-index: 3; pointer-events: none; visibility: hidden; --iris-x: 50vw; --iris-y: 45svh; --iris-r: 0px; }
+.lens-iris[data-state=disc], .lens-iris[data-state=hole] { visibility: visible; }
+.lens-iris::before { content: ''; position: absolute; inset: 0; background: linear-gradient(rgb(237 232 220 / .045) 1px, transparent 1px) 0 0 / 12px 9px, linear-gradient(90deg, rgb(237 232 220 / .045) 1px, transparent 1px) 0 0 / 12px 9px, var(--ink); }
+.lens-iris[data-state=disc]::before { -webkit-mask: radial-gradient(circle at var(--iris-x) var(--iris-y), #000 var(--iris-r), transparent calc(var(--iris-r) + 1px)); mask: radial-gradient(circle at var(--iris-x) var(--iris-y), #000 var(--iris-r), transparent calc(var(--iris-r) + 1px)); }
+.lens-iris[data-state=hole]::before { -webkit-mask: radial-gradient(circle at var(--iris-x) var(--iris-y), transparent var(--iris-r), #000 calc(var(--iris-r) + 1px)); mask: radial-gradient(circle at var(--iris-x) var(--iris-y), transparent var(--iris-r), #000 calc(var(--iris-r) + 1px)); }
+.lens-iris::after { content: ''; position: absolute; left: var(--iris-x); top: var(--iris-y); width: calc(var(--iris-r) * 2); height: calc(var(--iris-r) * 2); translate: -50% -50%; border: 1px solid var(--amber); border-radius: 50%; background: linear-gradient(transparent calc(50% - .5px), rgb(242 165 65 / .38) calc(50% - .5px) calc(50% + .5px), transparent calc(50% + .5px)), linear-gradient(90deg, transparent calc(50% - .5px), rgb(242 165 65 / .38) calc(50% - .5px) calc(50% + .5px), transparent calc(50% + .5px)); box-shadow: 0 0 0 5px rgb(242 165 65 / .08), inset 0 0 18px rgb(242 165 65 / .18); opacity: var(--iris-ring, 1); }
+/* Leaders appear only once the scene has projected them onto a model: no lines into empty space. */
+.case-inspection:not([data-leaders=live]) .hotspot-leaders line { opacity: 0; }
+
+.inspection-field { position: relative; height: 380svh; border-top: 1px solid var(--line); }
+.inspection-stage { position: sticky; top: 0; display: flex; flex-direction: column; height: 100svh; min-height: 640px; padding: 82px 24px 58px; overflow: hidden; }
+.case-page .inspection-copy h2 { font-size: 27px; margin: 0 0 16px; }
+.case-page .inspection-copy .section-kicker { margin-bottom: 12px; }
+.inspection-steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin: 0; padding: 0; list-style: none; }
+.inspection-steps li { position: relative; padding-top: 8px; border-top: 1px solid var(--line); transition: border-color .25s; }
+.inspection-steps li[data-done=true] { border-top-color: rgb(242 165 65 / .45); }
+.inspection-steps li[data-active=true] { border-top-color: var(--amber); }
+.case-page .inspection-steps h3 { margin: 0; color: var(--muted); font: 8px/1.35 'JetBrains Mono', monospace; letter-spacing: .04em; text-transform: uppercase; transition: color .25s; }
+.case-page .inspection-steps li[data-active=true] h3 { color: var(--ivory); }
+.inspection-step-index, .inspection-steps p { display: none; }
+.inspection-detail { min-height: 64px; margin-top: 10px; }
+.case-page .inspection-detail p { margin: 0; font-size: 11px; line-height: 1.6; }
+.case-page .inspection-detail .inspection-readout, .case-page .inspection-readout { margin-top: 5px; color: var(--amber); font: 10px/1.5 'JetBrains Mono', monospace; }
+.inspection-figure { display: flex; flex: 1; flex-direction: column; min-height: 0; margin: 8px 0 0; }
+.inspection-matrix { flex: 1; width: 100%; min-height: 0; overflow: visible; }
+.inspection-matrix text { fill: var(--muted); font-family: 'JetBrains Mono', monospace; }
+.inspection-matrix .lane-label { fill: var(--ivory); font-size: 8px; letter-spacing: .08em; text-transform: uppercase; }
+.route-labels text { font-size: 8px; }
+.matrix-outline rect { fill: none; stroke: var(--line); stroke-width: 1; }
+.cells-pass { fill: var(--signal-ok); fill-opacity: .62; }
+.cells-removed { color: var(--signal-alarm); }
+.cells-removed-grey { color: var(--muted); fill-opacity: 0; }
+.cells-removed path, .cells-removed-grey path, .cells-kept path { fill: currentColor; }
+.cells-pass, .cells-removed path, .cells-removed-grey path, .cells-kept path { shape-rendering: crispEdges; }
+.cells-kept { color: var(--signal-alarm); }
+.scan-bar { opacity: 0; filter: drop-shadow(0 0 4px rgb(242 165 65 / .9)); }
+.scan-bar rect { fill: var(--amber); }
+.inspection-matrix .strip-label { font-size: 7.5px; letter-spacing: .06em; text-transform: uppercase; }
+.access-ok { fill: var(--signal-ok); opacity: .28; }
+.access-leak { fill: var(--signal-alarm); }
+.flow-pass { fill: var(--signal-ok); opacity: .62; }
+.flow-fail { fill: var(--signal-alarm); }
+.issue-chip { color: var(--amber); }
+.issue-chip.high { color: var(--signal-alarm); }
+.issue-chip.low { color: var(--muted); }
+.issue-chip rect:first-child { fill: var(--panel); stroke: var(--line); }
+.issue-chip-mark { fill: currentColor; }
+.inspection-matrix .issue-chip text { fill: var(--ivory); font-size: 8.5px; }
+.inspection-matrix .issue-chip .issue-chip-priority { fill: currentColor; font-size: 7px; text-transform: uppercase; }
+.inspection-figure figcaption { display: grid; gap: 6px; margin-top: 8px; color: var(--muted); font: 8px/1.5 'JetBrains Mono', monospace; }
+.inspection-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
+.inspection-legend i { display: inline-block; width: 8px; height: 6px; margin-right: -6px; }
+.legend-pass { background: rgb(91 228 155 / .62); }
+.legend-flagged { background: var(--signal-alarm); }
+.legend-removed { background: rgb(165 174 194 / .32); }
+
+.finding-desk { margin-top: 30px; }
+.finding-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.finding-tab { display: flex; flex-direction: column; gap: 6px; min-height: 104px; padding: 12px; border: 1px solid var(--line); background: rgb(20 27 46 / .55); text-align: left; transition: border-color .18s, background-color .18s, scale .12s ease-out; }
+.finding-tab[aria-pressed=true] { border-color: var(--amber); background: var(--panel); }
+.finding-tab-top { display: flex; align-items: center; justify-content: space-between; gap: 6px; color: var(--ivory); font: 10px 'JetBrains Mono', monospace; }
+.priority { padding: 2px 5px; border: 1px solid currentColor; font: 400 8px/1.2 'JetBrains Mono', monospace; letter-spacing: .06em; text-transform: uppercase; }
+.priority.high { color: var(--signal-alarm); }
+.priority.medium { color: var(--amber); }
+.priority.low { color: var(--muted); }
+.finding-tab-kind { color: var(--muted); font: 8px 'JetBrains Mono', monospace; letter-spacing: .06em; text-transform: uppercase; }
+.finding-tab-title { color: var(--ivory); font-size: 12px; line-height: 1.4; }
+.finding-evidence { margin-top: 12px; padding: 18px 16px 20px; border: 1px solid var(--line); background: var(--panel); }
+.case-page .finding-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 0; font: 9px/1.4 'JetBrains Mono', monospace; }
+.case-page .finding-head h3 { margin: 12px 0 6px; font: 24px/1.15 Fraunces, serif; letter-spacing: -.02em; }
+.case-page .finding-where { margin: 0; color: var(--ivory); font: 10px/1.6 'JetBrains Mono', monospace; }
+.evidence-strip { margin: 16px 0; padding: 12px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.case-page .evidence-strip-label { display: flex; justify-content: space-between; gap: 8px; margin: 0 0 8px; color: var(--muted); font: 8px 'JetBrains Mono', monospace; letter-spacing: .06em; text-transform: uppercase; }
+.evidence-strip-label span:last-child { color: var(--ivory); }
+.evidence-lane, .evidence-access > div { display: grid; grid-template-columns: 58px minmax(0, 1fr); align-items: center; gap: 8px; margin-top: 4px; }
+.evidence-lane > span, .evidence-access > div > span { color: var(--muted); font: 8px 'JetBrains Mono', monospace; }
+.evidence-lane > div { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 3px; }
+.evidence-access > div > div { display: grid; grid-template-columns: repeat(72, minmax(0, 1fr)); gap: 1px; }
+.evidence-lane i, .evidence-access i { display: block; height: 12px; background: rgb(91 228 155 / .18); }
+.evidence-access i { height: 9px; }
+.evidence-access i[data-leak=true] { background: rgb(255 90 95 / .4); }
+.evidence-strip i[data-hit=true] { background: var(--signal-alarm); animation: evidence-hit .34s cubic-bezier(.23, 1, .32, 1) both; animation-delay: calc(var(--i) * 12ms); }
+@keyframes evidence-hit { from { opacity: .15; transform: scaleY(.35); } }
+.case-page .evidence-strip-axes { margin: 8px 0 0; font: 8px/1.5 'JetBrains Mono', monospace; }
+.evidence-flows { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; color: var(--muted); font: 9px 'JetBrains Mono', monospace; }
+.evidence-flows li { display: flex; align-items: center; gap: 10px; }
+.evidence-flows i { width: 12px; height: 12px; background: rgb(91 228 155 / .45); }
+.evidence-flows li[data-hit=true] { color: var(--ivory); }
+.evidence-flows li[data-hit=true] i { background: var(--signal-alarm); animation: evidence-hit .34s cubic-bezier(.23, 1, .32, 1) both; animation-delay: .1s; }
+.finding-proof-toggle { display: grid; grid-template-columns: 1fr 1fr; margin-bottom: 12px; border: 1px solid var(--line); }
+.finding-proof-toggle button { min-height: 44px; padding: 4px 8px; color: var(--muted); font: 9px/1.3 'JetBrains Mono', monospace; }
+.finding-proof-toggle button[aria-pressed=true] { background: var(--amber); color: var(--ink); }
+.finding-shot { margin: 0; }
+.finding-proof[data-pair=true] .finding-shot[data-current=false] { display: none; }
+.finding-shot img { display: block; width: 100%; height: auto; max-height: 440px; object-fit: contain; object-position: center top; }
+.finding-shot figcaption { margin-top: 6px; color: var(--muted); font: 8px 'JetBrains Mono', monospace; letter-spacing: .06em; text-transform: uppercase; }
+.case-page .finding-caption { margin: 10px 0 0; font-size: 11px; line-height: 1.7; }
+.case-page .finding-repro h4 { margin: 20px 0 8px; color: var(--amber); font: 9px 'JetBrains Mono', monospace; font-weight: 400; letter-spacing: .08em; text-transform: uppercase; }
+.finding-repro ol { margin: 0; padding-left: 18px; color: var(--ivory); font-size: 12px; line-height: 1.6; }
+.finding-repro ol li + li { margin-top: 4px; }
+.finding-repro dl { margin: 16px 0 0; }
+.finding-repro dl div { padding: 10px 0; border-top: 1px solid var(--line); }
+.finding-repro dt { color: var(--signal-ok); font: 8px 'JetBrains Mono', monospace; letter-spacing: .08em; text-transform: uppercase; }
+.finding-repro [data-actual] dt { color: var(--signal-alarm); }
+.finding-repro dd { margin: 4px 0 0; color: var(--ivory); font-size: 12px; line-height: 1.6; }
+.case-page .case-next-deck { margin: 0 0 26px; color: var(--ivory); font: 24px/1.25 Fraunces, serif; }
+
+@media (min-width: 1024px) {
+  .scan-strip { gap: 18px; margin-top: 20px; }
+  .scan-lane span { font-size: 9px; }
+  .scan-lane i { height: 7px; }
+  .inspection-field { height: 330svh; }
+  .inspection-stage { display: grid; grid-template-columns: minmax(300px, 31%) minmax(0, 1fr); align-items: center; gap: 72px; padding: 104px var(--page-gutter) 64px; }
+  .case-page .inspection-copy h2 { font-size: clamp(40px, 3.8vw, 60px); margin-bottom: 36px; }
+  .inspection-steps { grid-template-columns: 1fr; gap: 0; }
+  .inspection-steps li { padding: 16px 0 16px 44px; opacity: .42; transition: opacity .3s, border-color .3s; }
+  .inspection-steps li[data-done=true] { opacity: .62; }
+  .inspection-steps li[data-active=true] { opacity: 1; }
+  .inspection-step-index { display: block; position: absolute; left: 0; top: 18px; color: var(--amber); font: 11px 'JetBrains Mono', monospace; }
+  .case-page .inspection-steps h3 { color: var(--ivory); font: 400 18px/1.3 Inter, sans-serif; letter-spacing: 0; text-transform: none; }
+  .case-page .inspection-steps p { display: block; margin: 6px 0 0; font-size: 13px; line-height: 1.7; }
+  .case-page .inspection-steps .inspection-readout { font-size: 11px; }
+  .inspection-steps li:not([data-active=true]) p { display: none; }
+  .inspection-detail { display: none; }
+  .inspection-figure { height: 100%; justify-content: center; margin: 0; }
+  .inspection-matrix { flex: 0 1 auto; max-height: calc(100svh - 230px); }
+  .inspection-matrix .lane-label { font-size: 9px; }
+  .inspection-figure figcaption { grid-template-columns: auto 1fr; align-items: center; gap: 24px; font-size: 10px; }
+  .inspection-figure figcaption > span:last-child { text-align: right; }
+
+  .finding-desk { display: grid; grid-template-columns: minmax(260px, 30%) minmax(0, 1fr); align-items: start; gap: 48px; margin-top: 48px; }
+  .finding-list { grid-template-columns: 1fr; gap: 10px; position: sticky; top: 104px; }
+  .finding-tab { min-height: 0; padding: 18px 20px; gap: 8px; }
+  .finding-tab-top { font-size: 12px; }
+  .priority { font-size: 9px; }
+  .finding-tab-kind { font-size: 9px; }
+  .finding-tab-title { font-size: 15px; }
+  @media (hover: hover) and (pointer: fine) { .finding-tab:hover { border-color: rgb(242 165 65 / .6); } }
+  .finding-evidence { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 0 44px; margin: 0; padding: 36px 40px 40px; }
+  .finding-head { grid-column: 1 / -1; }
+  .case-page .finding-meta { font-size: 11px; }
+  .case-page .finding-head h3 { font-size: clamp(32px, 2.6vw, 44px); }
+  .case-page .finding-where { font-size: 12px; }
+  .finding-proof { grid-column: 1 / -1; grid-row: 2; margin: 28px 0 8px; }
+  .finding-proof-toggle { display: none; }
+  .finding-shots { display: flex; align-items: flex-start; gap: 28px; }
+  .finding-proof[data-pair=true] .finding-shot[data-current=false] { display: block; }
+  .finding-shot { flex: 1 1 0; min-width: 0; }
+  .finding-shot img { max-height: 470px; object-position: left top; }
+  .finding-shot figcaption { font-size: 10px; }
+  .case-page .finding-caption { font-size: 14px; max-width: 70ch; }
+  .evidence-strip { grid-column: 1; grid-row: 3; margin: 12px 0 0; }
+  .finding-repro { grid-column: 2; grid-row: 3; }
+  .case-page .finding-repro h4 { margin-top: 12px; font-size: 11px; }
+  .finding-repro ol, .finding-repro dd { font-size: 14px; }
+  .finding-repro dt { font-size: 10px; }
+  .case-page .evidence-strip-label, .case-page .evidence-strip-axes { font-size: 10px; }
+  .evidence-lane, .evidence-access > div { grid-template-columns: 72px minmax(0, 1fr); }
+  .evidence-lane > span, .evidence-access > div > span, .evidence-flows { font-size: 10px; }
+  .evidence-lane i { height: 16px; }
+  .case-page .case-next-deck { grid-column: 1; font-size: clamp(28px, 2.4vw, 38px); }
+  /* CrossCheck desk: the telescope sits in a sighting frame, corner brackets and a faint cross line. */
+  [data-case=crosscheck] .case-inspection::before { content: ''; position: absolute; inset: 9% 4% 7%; pointer-events: none;
+    background: linear-gradient(var(--amber), var(--amber)) 0 0 / 28px 1px, linear-gradient(var(--amber), var(--amber)) 0 0 / 1px 28px,
+      linear-gradient(var(--amber), var(--amber)) 100% 0 / 28px 1px, linear-gradient(var(--amber), var(--amber)) 100% 0 / 1px 28px,
+      linear-gradient(var(--amber), var(--amber)) 0 100% / 28px 1px, linear-gradient(var(--amber), var(--amber)) 0 100% / 1px 28px,
+      linear-gradient(var(--amber), var(--amber)) 100% 100% / 28px 1px, linear-gradient(var(--amber), var(--amber)) 100% 100% / 1px 28px,
+      linear-gradient(90deg, transparent, rgb(48 58 80 / .8) 20%, rgb(48 58 80 / .8) 80%, transparent) 0 50% / 100% 1px,
+      linear-gradient(transparent, rgb(48 58 80 / .8) 20%, rgb(48 58 80 / .8) 80%, transparent) 50% 0 / 1px 100%;
+    background-repeat: no-repeat; opacity: .75; }
+  [data-case=crosscheck] .case-inspection::after { content: 'Sightline · Chromium · Firefox · WebKit'; position: absolute; left: 4%; bottom: calc(7% - 22px); color: var(--muted); font: 10px 'JetBrains Mono', monospace; letter-spacing: .08em; text-transform: uppercase; pointer-events: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition-duration: 0s !important; scroll-behavior: auto !important; }
   .scan-line { display: none; }

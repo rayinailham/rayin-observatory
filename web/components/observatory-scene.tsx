@@ -10,7 +10,7 @@ import Sky from './sky';
 import { buildObservatory } from './observatory-model';
 import { buildInstrument, type BuiltInstrument } from './instrument-models';
 import PlanetaryJourney from './planetary-journey';
-import { caseFiles, type CaseComponent, type CaseView } from '@/lib/cases';
+import { apertureScreen, caseFiles, type CaseComponent, type CaseView } from '@/lib/cases';
 
 useGLTF.setDecoderPath('/draco/');
 
@@ -30,6 +30,8 @@ type SceneProps = {
 
 // BrandWall's detector state is shown in the chapter hint; the page owns the markup.
 const showObserver = (observed: boolean) => document.getElementById('observer-readout')?.setAttribute('data-observed', String(observed));
+// CrossCheck's lens sweep drives the lane strip in its chapter (Phase 7A).
+const showScan = (lane: string) => document.querySelector('.observatory')?.setAttribute('data-scan', lane);
 
 // Leader endpoint: the node's origin, or the centre of its child mesh whose material name
 // contains `part` (a moving planet, a dish feed, the prism), so the line follows the rig.
@@ -64,7 +66,7 @@ function Instruments({ viewsRef, groupsRef, onInstrumentTap }: {
 }) {
   const loaded = useMemo(() => instruments.map(item => {
     const built = buildInstrument(item.id);
-    return { view: built.object, materials: built.materials, built, rig: rigInstrument(item.id, built.object, built.materials, showObserver) };
+    return { view: built.object, materials: built.materials, built, rig: rigInstrument(item.id, built.object, built.materials, showObserver, showScan) };
   }), []);
   // Layout effect: World's frame loop must see the views before these groups render once.
   useLayoutEffect(() => {
@@ -180,7 +182,27 @@ function World({ entered, reducedMotion, progress, planetProgress, chapter, case
       domeRef.current.rotation.set(.14 + scroll * .10, -.30 + scroll * .65, 0);
       if (domeRef.current.visible) observatory.update(time, scroll);
     }
+    // Aperture: where a lens sits on screen, so the shell can open and close the case through it.
+    // Kept in a shared object, not a CSS variable on the root: the lens swings every frame, and a
+    // custom property there restyles the whole page each time (Phase 7A Testing: 60 → ~35 fps at 4x CPU).
+    const apertureIndex = caseFiles.findIndex((file, i) => file.aperture && instrumentRefs.current[i]?.visible);
+    const apertureModel = views.current[apertureIndex];
+    if (apertureModel) {
+      const lens = apertureModel.view.getObjectByName(caseFiles[apertureIndex].aperture!);
+      if (lens) {
+        state.camera.updateMatrixWorld();
+        instrumentRefs.current[apertureIndex]?.updateWorldMatrix(true, true);
+        lens.getWorldPosition(projected).project(state.camera);
+        apertureScreen.x = size.left + (projected.x + 1) * size.width / 2;
+        apertureScreen.y = size.top + (1 - projected.y) * size.height / 2;
+      }
+    }
     const caseModel = views.current[caseIndex];
+    const leaders = stage && stageRect && mix > .99 && caseModel ? 'live' : undefined;
+    if (stage && stage.dataset.leaders !== leaders) {
+      if (leaders) stage.dataset.leaders = leaders;
+      else delete stage.dataset.leaders;
+    }
     if (stageRect && mix > .99 && caseModel) {
       state.camera.updateMatrixWorld();
       instrumentRefs.current[caseIndex]?.updateWorldMatrix(true, true);
