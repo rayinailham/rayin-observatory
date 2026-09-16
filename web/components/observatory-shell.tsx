@@ -240,16 +240,59 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
     else lenis.current?.stop();
   }, [entered, menuOpen, flying, reducedMotion]);
 
+  // Pointer parallax on the gate. The eased value is written as a CSS variable, so every gate
+  // layer reads the same pointer with its own depth multiplier instead of its own listener.
+  useEffect(() => {
+    const element = gate.current;
+    if (entered || reducedMotion || !element) return;
+    if (!window.matchMedia('(min-width: 1024px) and (hover: hover) and (pointer: fine)').matches) return;
+    const target = { x: 0, y: 0 };
+    const eased = { x: 0, y: 0 };
+    const move = (event: PointerEvent) => {
+      target.x = (event.clientX / window.innerWidth - .5) * 2;
+      target.y = (event.clientY / window.innerHeight - .5) * 2;
+    };
+    const tick = () => {
+      eased.x += (target.x - eased.x) * .055;
+      eased.y += (target.y - eased.y) * .055;
+      element.style.setProperty('--gate-px', eased.x.toFixed(4));
+      element.style.setProperty('--gate-py', eased.y.toFixed(4));
+    };
+    window.addEventListener('pointermove', move, { passive: true });
+    gsap.ticker.add(tick);
+    // The last offset stays on the element: clearing it here would snap the layers back to centre
+    // exactly as the exit timeline starts.
+    return () => {
+      window.removeEventListener('pointermove', move);
+      gsap.ticker.remove(tick);
+    };
+  }, [entered, reducedMotion]);
+
   useEffect(() => {
     if (!entered) return;
+    // Measure while the gate still covers everything: a refresh during the hand-off can shift
+    // the hero mid-fade, which is exactly what makes the entry feel like a cut.
+    ScrollTrigger.refresh();
+    const wide = window.matchMedia('(min-width: 1024px)').matches;
     const context = gsap.context(() => {
-      gsap.to(gate.current, { opacity: 0, yPercent: reducedMotion ? 0 : -4, duration: reducedMotion ? 0 : .7, ease: 'power2.inOut',
-        onComplete: () => { if (gate.current) gate.current.hidden = true; } });
-      if (document.querySelector('.hero-copy')) gsap.fromTo('.hero-copy', { y: reducedMotion ? 0 : 24, opacity: 0 }, { y: 0, opacity: 1, duration: reducedMotion ? 0 : 1.1, delay: reducedMotion ? 0 : .3, ease: 'power3.out' });
+      const hide = () => { if (gate.current) gate.current.hidden = true; };
+      const exit = gsap.timeline({ onComplete: hide });
+      // Wide screens leave in layers: controls lift away first, the field opens past the camera.
+      // The scene's own arrival damp runs underneath, so something is always moving.
+      if (reducedMotion) exit.to(gate.current, { opacity: 0, duration: 0 });
+      else if (wide) exit
+        .to('.gate-main > *', { y: -34, opacity: 0, duration: .5, ease: 'power2.in', stagger: { each: .045, from: 'end' } }, 0)
+        .to('.gate-byline, .gate-note', { opacity: 0, duration: .4, ease: 'power2.in' }, 0)
+        .to('.gate-rings', { scale: 1.5, opacity: 0, duration: 1.15, ease: 'power2.inOut' }, 0)
+        .to('.gate-stars', { scale: 1.3, opacity: 0, duration: 1.15, ease: 'power2.inOut' }, 0)
+        .to(gate.current, { opacity: 0, duration: .8, ease: 'sine.inOut' }, .16);
+      else exit.to(gate.current, { opacity: 0, yPercent: -4, duration: .7, ease: 'power2.inOut' });
+      // The hero lands as the gate clears, on the same curve as the camera settling behind it.
+      if (document.querySelector('.hero-copy')) gsap.fromTo('.hero-copy', { y: reducedMotion ? 0 : wide ? 34 : 24, opacity: 0 },
+        { y: 0, opacity: 1, duration: reducedMotion ? 0 : wide ? 1.15 : 1.1, delay: reducedMotion ? 0 : wide ? .5 : .3, ease: 'power3.out' });
     }, root);
     const timer = window.setTimeout(() => {
       (document.getElementById('case-heading') ?? document.getElementById('hero-heading'))?.focus({ preventScroll: true });
-      ScrollTrigger.refresh();
     }, reducedMotion ? 0 : 750);
     return () => { context.revert(); window.clearTimeout(timer); };
   }, [entered, reducedMotion]);
@@ -418,6 +461,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
     </div>
 
     <div ref={gate} className="entry-gate" data-ready={ready} data-fallback={failed} inert={entered} aria-label="Enter Rayin Observatory">
+      <div className="gate-field" aria-hidden="true"><span className="gate-stars" /><span className="gate-rings" /><span className="gate-horizon" /></div>
       <p className="gate-byline">A portfolio by Rayina Ilham</p>
       <div className="gate-main">
         <div className="calibration-orbit" aria-hidden="true"><span /><i /><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" pathLength="100" strokeDasharray="100" strokeDashoffset={100 - loaded} /></svg></div>

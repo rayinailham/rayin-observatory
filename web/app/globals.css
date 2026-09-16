@@ -77,6 +77,21 @@ button { transition: color .18s, background-color .18s, scale .12s ease-out; }
 .gate-note { color: var(--muted); font-size: 10px; line-height: 1.7; margin: 0; }
 .loading-help { font-size: 12px; color: var(--muted); line-height: 1.6; }
 .loading-help button { min-height: 44px; color: var(--amber); text-decoration: underline; }
+/* Depth layers behind the gate. Wide screens only; the phone gate keeps its approved flat field. */
+.gate-field { display: none; position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.gate-field > * { position: absolute; display: block; }
+.gate-stars { inset: -90px; opacity: .55;
+  background-image: radial-gradient(1px 1px at 37px 29px, #fff, transparent), radial-gradient(1.5px 1.5px at 129px 83px, #CFE0FF, transparent), radial-gradient(1px 1px at 211px 47px, #FFE2B8, transparent), radial-gradient(1.5px 1.5px at 74px 187px, #fff, transparent), radial-gradient(1px 1px at 248px 151px, #fff, transparent);
+  background-size: 281px 233px; -webkit-mask-image: linear-gradient(#000 6%, transparent 52%); mask-image: linear-gradient(#000 6%, transparent 52%); }
+.gate-rings { left: 50%; top: 46%; width: min(74vw, 940px); aspect-ratio: 1; border: 1px solid rgb(48 58 80 / .5); border-radius: 50%; }
+.gate-rings::before, .gate-rings::after { content: ''; position: absolute; border: 1px solid rgb(48 58 80 / .45); border-radius: 50%; }
+.gate-rings::before { inset: 13%; }
+.gate-rings::after { inset: 24% 6%; border-color: rgb(242 165 65 / .12); animation: gate-orbit-drift 72s linear infinite; }
+.gate-horizon { left: 50%; bottom: -46vh; width: 150vw; height: 88vh; translate: -50% 0; border-radius: 50%;
+  background: radial-gradient(50% 50% at 50% 50%, rgb(26 39 84 / .55), transparent 70%); }
+@keyframes gate-orbit-drift { to { transform: rotate(360deg); } }
+@keyframes gate-arrive { from { opacity: 0; transform: translateY(24px); } }
+@keyframes gate-field-arrive { from { opacity: 0; } }
 .control-dialog { color: var(--ivory); border: 1px solid var(--line); padding: 27px 24px; background: var(--ink); max-width: 430px; width: calc(100% - 24px); }
 .control-dialog::backdrop { background: rgb(11 16 32 / .85); backdrop-filter: blur(5px); }
 .navigation-dialog { margin: 0 auto; width: 100%; height: 100dvh; max-height: none; border: 0; }
@@ -289,19 +304,42 @@ button { transition: color .18s, background-color .18s, scale .12s ease-out; }
   .proof-reading small { font-size: 10px; }
   .case-button { min-height: 56px; font-size: 14px; }
   .orbit-hint { font-size: 10px; margin-top: 18px; }
-  .entry-gate { padding: 40px var(--page-gutter); }
-  .gate-byline { font-size: 13px; }
-  .gate-main { width: 100%; max-width: 1200px; align-self: center; display: grid; grid-template-columns: 1fr 360px; column-gap: 80px; align-content: center; position: relative; }
-  .gate-main h1 { grid-column: 1; grid-row: 2 / 7; font-size: clamp(78px, 7.5vw, 118px); margin: 0; }
-  .gate-kicker { grid-column: 1; grid-row: 1; margin-bottom: 24px; }
-  .calibration-orbit { position: absolute; right: 128px; top: -150px; width: 105px; height: 105px; }
-  .calibration-orbit span { inset: 32px; }
-  .calibration-status { grid-column: 2; grid-row: 2; align-self: end; font-size: 10px; }
-  .calibration-track { grid-column: 2; grid-row: 3; }
-  .enter-button { grid-column: 2; grid-row: 4; }
-  .silent-button { grid-column: 2; grid-row: 5; }
-  .loading-help { grid-column: 2; grid-row: 6; }
-  .gate-note { font-size: 11px; }
+  /* Hand-off: the page chrome only starts fading up once the gate is mostly gone, so the header
+     and readouts never ghost through a half-transparent gate. */
+  .site-content { transition: opacity .8s cubic-bezier(.33, 1, .68, 1) .3s; }
+  /* Wide gate: one centred column on a parallax field. --gate-px/--gate-py are the eased pointer,
+     written by the shell; each layer picks its own depth from them. */
+  .entry-gate { padding: 40px var(--page-gutter); --gate-px: 0; --gate-py: 0; text-align: center; }
+  .gate-field { display: block; animation: gate-field-arrive 1.8s ease-out backwards; }
+  .gate-stars { translate: calc(var(--gate-px) * 15px) calc(var(--gate-py) * 12px); }
+  .gate-rings { translate: calc(-50% + var(--gate-px) * 26px) calc(-50% + var(--gate-py) * 20px); }
+  .gate-horizon { translate: calc(-50% + var(--gate-px) * 8px) calc(var(--gate-py) * 6px); }
+  .gate-byline { font-size: 13px; text-align: left; }
+  .gate-main { width: 100%; max-width: 780px; margin: 0 auto; align-self: center; padding: 0; position: relative;
+    display: flex; flex-direction: column; align-items: center;
+    translate: calc(var(--gate-px) * -17px) calc(var(--gate-py) * -12px); }
+  .gate-main h1 { font-size: clamp(74px, 7.4vw, 116px); margin: 0 0 46px; }
+  .gate-kicker { margin: 0 0 18px; font-size: 11px; letter-spacing: .3em; }
+  .calibration-orbit { position: relative; width: 128px; height: 128px; margin: 0 0 34px; }
+  .calibration-orbit span { inset: 39px; }
+  .calibration-status { width: min(100%, 420px); font-size: 10px; margin-bottom: 14px; }
+  .calibration-track { width: min(100%, 420px); margin-bottom: 30px; }
+  .enter-button { width: min(100%, 420px); height: 60px; justify-content: center; gap: 22px; padding: 0 26px; }
+  .silent-button { margin: 12px 0 0; font-size: 12px; }
+  .loading-help { max-width: 420px; margin-top: 18px; }
+  .gate-note { font-size: 11px; text-align: left; }
+  /* Arrival stagger. `backwards` keeps the fill off the element once it lands, so the GSAP exit
+     timeline is free to take the same transforms over. */
+  .gate-byline, .gate-note, .gate-main > * { animation: gate-arrive 1.05s cubic-bezier(.23, 1, .32, 1) backwards; }
+  .gate-byline { animation-delay: .06s; }
+  .calibration-orbit { animation-delay: .14s; }
+  .gate-kicker { animation-delay: .22s; }
+  .gate-main h1 { animation-delay: .28s; }
+  .calibration-status { animation-delay: .4s; }
+  .calibration-track { animation-delay: .46s; }
+  .enter-button { animation-delay: .52s; }
+  .silent-button { animation-delay: .58s; }
+  .gate-note { animation-delay: .64s; }
   .text-section { padding: 120px var(--page-gutter); }
   .section-kicker { font-size: 11px; }
   .text-section h2 { font-size: clamp(48px, 4.5vw, 72px); }
@@ -380,6 +418,17 @@ button { transition: color .18s, background-color .18s, scale .12s ease-out; }
   .observatory[data-route=case][data-scene=fallback] .case-page { padding-top: 120px; }
 }
 @keyframes case-signal-wide { from { left: 0; opacity: 0; } 20%, 75% { opacity: 1; } to { left: 100%; opacity: 0; } }
+/* Short laptop screens: the centred gate must still land inside one viewport, no inner scroll. */
+@media (min-width: 1024px) and (max-height: 860px) {
+  .entry-gate { padding: 28px var(--page-gutter); }
+  .calibration-orbit { width: 96px; height: 96px; margin-bottom: 24px; }
+  .calibration-orbit span { inset: 29px; }
+  .gate-kicker { margin-bottom: 14px; }
+  .gate-main h1 { font-size: clamp(58px, 5.6vw, 88px); margin-bottom: 30px; }
+  .calibration-status { margin-bottom: 12px; }
+  .calibration-track { margin-bottom: 22px; }
+  .enter-button { height: 56px; }
+}
 
 /* Phase 7: calibration, short tactile responses and inspection feedback. */
 .calibration-orbit svg { position: absolute; inset: -1px; width: calc(100% + 2px); height: calc(100% + 2px); overflow: visible; transform: rotate(-90deg); }

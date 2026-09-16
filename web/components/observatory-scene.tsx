@@ -119,7 +119,10 @@ function World({ entered, reducedMotion, progress, planetProgress, chapter, case
   useFrame((state, delta) => {
     if (++frames.current === 2) onReady();
     const step = Math.min(delta, 0.05);
-    revealed.current = MathUtils.damp(revealed.current, entered ? 1 : 0, 2.2, step);
+    revealed.current = reducedMotion ? 1 : MathUtils.damp(revealed.current, entered ? 1 : 0, desktop ? 1.6 : 2.2, step);
+    // Arrival: 1 while the gate stands, easing to 0 after Enter. The camera keeps travelling
+    // underneath the fading gate, so the hero is handed over by motion, not by a cut.
+    const arrival = desktop ? 1 - revealed.current : 0;
     pointScale.value = state.gl.getPixelRatio();
     const time = reducedMotion ? 0 : state.clock.elapsedTime;
     heroScroll.current = MathUtils.damp(heroScroll.current, progress.current, 6, step);
@@ -130,10 +133,10 @@ function World({ entered, reducedMotion, progress, planetProgress, chapter, case
     const { mix, index: caseIndex } = caseView.current;
     const baseAngle = (index > 0 || from !== undefined) && transition < 1 ? MathUtils.lerp(-.95, .55, transition) : (.55 - orbit * 1.5) * reveal;
     cameraAngle.current = MathUtils.damp(cameraAngle.current, reducedMotion ? .35 : MathUtils.lerp(baseAngle, .55, mix), 9, step);
-    const angle = cameraAngle.current;
-    const elevation = MathUtils.lerp(.25 * reveal, .25, mix);
+    const angle = cameraAngle.current + arrival * .2;
+    const elevation = MathUtils.lerp(.25 * reveal, .25, mix) + arrival * .07;
     const distance = MathUtils.lerp(16, 10, mix);
-    const zoom = MathUtils.lerp(100, 130, mix);
+    const zoom = MathUtils.lerp(100, 130, mix) * (1 - arrival * .055);
     if (state.camera instanceof OrthographicCamera && state.camera.zoom !== zoom) {
       state.camera.zoom = zoom;
       state.camera.updateProjectionMatrix();
@@ -170,10 +173,10 @@ function World({ entered, reducedMotion, progress, planetProgress, chapter, case
     });
     if (domeRef.current) {
       domeRef.current.visible = reveal < .7 && mix < .01;
-      const scale = (desktop ? Math.min(viewport.width * .63, viewport.height * .98) : viewport.width * .92) / 5.65 * (0.9 + revealed.current * .1 - scroll * .14);
+      const scale = (desktop ? Math.min(viewport.width * .63, viewport.height * .98) : viewport.width * .92) / 5.65 * (0.9 + revealed.current * .1 - scroll * .14) * (1 - arrival * .05);
       domeRef.current.scale.setScalar(scale);
       domeRef.current.position.copy(cameraRight).multiplyScalar(desktop ? viewport.width * MathUtils.lerp(.19, -.14, MathUtils.smootherstep(scroll, .1, 1)) : 0);
-      domeRef.current.position.y = -viewport.height * ((desktop ? .10 : .20) - scroll * .06) - (1 - revealed.current) * .45 + reveal * viewport.height * 1.4;
+      domeRef.current.position.y = -viewport.height * ((desktop ? .10 : .20) - scroll * .06) - (1 - revealed.current) * .45 - arrival * .7 + reveal * viewport.height * 1.4;
       domeRef.current.rotation.set(.14 + scroll * .10, -.30 + scroll * .65, 0);
       if (domeRef.current.visible) observatory.update(time, scroll);
     }

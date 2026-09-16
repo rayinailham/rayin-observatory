@@ -41,7 +41,7 @@ REGRESSIONS = {
 }
 
 ITEMS = {
-    'gate': 'Gate (1440×900): two-column entry, title left, calibration + Enter right; Enter without sound works',
+    'gate': 'Gate (1440×900): centred entry on a parallax field, Enter centred under the title; Enter without sound works',
     'hero': 'Hero: text rail left, dome + Saturn on the right of a full-width Canvas; header shows Work / About / Contact instead of Menu',
     'headerNav': 'Header navigation: Work / About / Contact scroll to their sections, on the homepage and from a case file',
     'chapters': 'Five chapters: copy + reading rail left, instrument on the right, camera orbits on scroll, no overlap',
@@ -153,12 +153,23 @@ async def main_flow(browser, checks, text):
         overflows.append(await overflow(page))
         await page.screenshot(path=str(OUT / name))
 
-    # Gate: two columns, Enter enabled after calibration.
+    # Gate: one centred column on the parallax field, Enter enabled after calibration.
     await page.goto(URL)
     await page.wait_for_function("!document.querySelector('.silent-button').disabled", timeout=30000)
     await page.wait_for_timeout(400)
     await snap('01-gate.png')
     title, button = await bbox(page, '.gate-main h1'), await bbox(page, '.enter-button')
+    # The gate is fixed, so its own box is the centring reference: W still counts the scrollbar.
+    gate_box = await bbox(page, '.entry-gate')
+    axis = gate_box['x'] + gate_box['width'] / 2
+    layers = await page.evaluate("""async () => {
+        const gate = document.querySelector('.entry-gate');
+        const read = () => getComputedStyle(document.querySelector('.gate-rings')).translate;
+        const start = read();
+        window.dispatchEvent(new PointerEvent('pointermove', {clientX: innerWidth, clientY: 0}));
+        await new Promise(r => setTimeout(r, 900));
+        return {start, moved: read(), px: gate.style.getPropertyValue('--gate-px')};
+    }""")
     await page.locator('.silent-button').click()
     await page.wait_for_selector('.entry-gate[hidden]', state='attached')
     await idle(page)
@@ -167,9 +178,11 @@ async def main_flow(browser, checks, text):
         new MutationObserver(() => window.__flight && window.__flight.push(document.querySelector('.observatory').dataset.flight))
           .observe(document.querySelector('.observatory'), {attributes: true, attributeFilter: ['data-flight']});
     """)
+    centred = abs((button['x'] + button['width'] / 2) - axis) <= 2 and abs((title['x'] + title['width'] / 2) - axis) <= 2
     checks['gate'] = {
-        'pass': box_right(title) < button['x'] and button['x'] > W / 2 and await page.locator('.observatory').get_attribute('data-scene') == 'ready',
-        'detail': f"title right edge {round(box_right(title))} px < Enter x {round(button['x'])} px; entered silently, scene ready",
+        'pass': centred and button['y'] > box_bottom(title) and layers['start'] != layers['moved'] and await page.locator('.observatory').get_attribute('data-scene') == 'ready',
+        'detail': f"title and Enter centred on the gate axis {round(axis)} px (Enter centre {round(button['x'] + button['width'] / 2)} px), Enter below the title; "
+                  f"pointer parallax moved the ring layer {layers['start']} → {layers['moved']}; entered silently, scene ready",
         'screenshot': '01-gate.png',
     }
 

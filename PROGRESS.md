@@ -12,9 +12,9 @@
 | Fase aktif | **Fase 8 — Launch ready** · Development |
 | Status fase | `todo` |
 | Bagian PLAN.md yang relevan | §12 (target Fase 8), §11 (target performa), §3 Q39 (gate Fase 7), §3 Q40 (tes di URL Vercel) |
-| Blocker | Tidak ada |
+| Blocker | Rig tes: `verify_desktop.py` / `verify_mobile.py` di venv `crosscheck` (Playwright 1.62) gagal — canvas R3F tetap 300×150, `data-scene=loading`, Chrome for Testing 149/151, headless + headed; direproduksi pada kode lama, perlu re-provision engine |
 | Preview sesi ini | Revisi planet: `http://127.0.0.1:8780/` · preview produksi lokal (`next start`) |
-| Revisi terakhir | Merkurius → Neptunus satu per tahap; progres scroll utuh, orbit berulang, kamera/fade sinkron; revisi siap review |
+| Revisi terakhir | Gerbang desktop: satu kolom di tengah, Enter di sumbu tengah, field parallax berlapis + arrival/exit berlapis (HP tidak berubah); siap review |
 | Langkah berikut | Sesi Development Fase 8 (Codex utama / Claude Code): meta + share card + favicon, **deploy ke Vercel produksi** + instruksi domain → `ready-for-test`. Testing lalu memakai URL Vercel (Q40). Vercel CLI sudah login 2026-09-16 (user `chhrone`, scope `chhrones-projects`); `web/` belum `vercel link` |
 
 ## Ringkasan fase
@@ -383,6 +383,29 @@ Testing (Claude Code / Antigravity) — **semua tes memakai URL Vercel, bukan pr
 > Entri terbaru di atas. Singkat, 1–2 baris: tanggal · harness · fase — apa yang dikerjakan,
 > verifikasi, berikutnya. Detail teknis taruh di CODEMAP / folder bukti, bukan di sini.
 
+- **2026-09-16 · Claude Code · revisi gerbang desktop** — Atas permintaan pemilik: gerbang ≥1024px jadi satu kolom di tengah
+  (dial → kicker → judul → status → track → Enter → tanpa suara), tombol Enter di sumbu tengah, bukan lagi rail kanan.
+  Ditambah field parallax berlapis (`.gate-field`: bintang, cincin orbit, horizon) yang digerakkan pointer lewat
+  `--gate-px/--gate-py` (lerp di `gsap.ticker`, hanya desktop + pointer halus), arrival stagger CSS (`gate-arrive`,
+  `animation-fill-mode: backwards` supaya timeline GSAP tetap boleh ambil alih transform), exit berlapis saat Enter
+  (kontrol terangkat dari bawah ke atas, cincin + bintang mengembang, gerbang memudar). HP tidak disentuh.
+  Diukur di Chrome 149 (Playwright MCP, 1440×900 + 1280×720 + 390×844): Enter di sumbu 715,8 px = sumbu gerbang
+  (selisih 0 px; `innerWidth/2` = 720 px karena scrollbar), lapisan cincin +25,8 px vs `.gate-main` −16,9 px pada
+  pointer sama (parallax nyata), exit 0→hidden ±1,05 dtk dengan judul −34 px dan cincin 1,0→1,49, Lenis aktif
+  (`html.lenis-smooth`, wheel 600 → 549 px lalu 1193 px), gerbang muat tanpa scroll dalam di 1280×720 dan 1440×900.
+  **Revisi 2 (serah-terima gerbang → hero):** pemilik menilai transisi masih kasar. Adegan 3D kini ikut bergerak
+  menembus fade — `revealed` di `observatory-scene.tsx` didamp lebih lambat (1,6 desktop, 2,2 HP tak berubah) dan
+  dipakai sebagai `arrival` (desktop saja) untuk sudut kamera +0,2 rad, elevasi +0,07, zoom −5,5%, kubah turun 0,7
+  unit + kecil 5%, semuanya mereda ke nol; langit ikut bergeser karena offset bintang mengikuti sudut kamera.
+  `ScrollTrigger.refresh()` dipindah ke awal Enter (saat gerbang masih menutup) supaya tak menggeser hero di
+  tengah fade; gerbang memudar 0,16→0,96 dtk (`sine.inOut`), chrome situs mulai 0,3 dtk (`.site-content` desktop),
+  hero copy 0,5→1,65 dtk. Diukur dari piksel canvas (32×20, `drawImage` tiap frame): perubahan antar-frame
+  23,8 → 22 → 19 → 13 → 9 → 5 → 3 → 1,3 (idle) tanpa nol dan tanpa lonjakan = gerak menyambung, bukan potong;
+  overlap opacity gerbang 1→0 (1,08 dtk) vs konten 0→1 (1,2 dtk) vs hero 0→1 (1,5 dtk) bertindih tanpa celah.
+  `desktop_evidence.py` item `gate` diperbarui ke layout tengah + cek parallax. lint/typecheck/build pass (2×).
+  **Blocker tes:** `verify_desktop.py`/`verify_mobile.py` (venv `crosscheck`, Playwright 1.62) gagal karena canvas R3F
+  tak pernah di-resize (tetap 300×150, `data-scene=loading`) di Chrome for Testing 149 dan 151, headless maupun headed —
+  direproduksi juga pada kode sebelum revisi (git stash), jadi bukan akibat revisi ini. Berikutnya: review pemilik + perbaiki rig tes.
 - **2026-09-16 · Codex · revisi planet → ready-for-test** — Delapan planet berurutan, satu tiap tahap, orbit idle berulang; reset chapter dan fade shader dibenahi.
   Build/lint/typecheck, uji jalur, dan 19 cek browser lulus (0 error); foto/video di `assets/renders/planetary-motion/dev/`, preview :8780.
 - **2026-09-16 · Codex · singularity dihapus** — Shader dibuang; prompt upgrade lima instrumen disiapkan, belum dieksekusi.
