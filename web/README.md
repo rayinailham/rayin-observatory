@@ -15,6 +15,12 @@ rapid clicks are rate limited and a transition replaces previous effects. No aud
 
 The loader follows asset/font readiness without rewinding between model batches. Its dial settles
 green when ready; still-view readiness remains amber. Existing slow-load and error messages stay in use.
+Since the owner's option B (2026-09-16) Enter waits only for the hero: dome, Saturn and fonts. The
+five instrument models are requested after that and appear once loaded; a model that fails after
+Enter still switches to the labelled still view. Hero models and the Draco decoder are preloaded
+from the HTML, the 3D code ships with the first JavaScript, and fonts are served as Latin WOFF2
+subsets of the approved TTFs. Measured on DevTools Slow 4G + 4× CPU (390×844): Enter active at
+7.0 s instead of 12.5 s; 787,063 bytes before Enter instead of 1,370,869.
 Buttons press without disturbing their layout positions; pointer-only hover arrows, selected leader/card
 feedback and a short inspection/menu entrance complete the interaction pass. Navigation owns one
 departure timeline and cancels it on route changes so browser Back cannot trigger a stale route push.

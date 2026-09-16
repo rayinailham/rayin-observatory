@@ -1,6 +1,5 @@
 'use client';
 
-import dynamic from 'next/dynamic';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { caseFiles, caseIndex, type CaseView } from '@/lib/cases';
@@ -11,7 +10,9 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ObservatoryAudio } from '@/lib/ambient';
 import { instruments, type ChapterState } from '@/lib/instruments';
 
-const Scene = dynamic(() => import('./observatory-scene'), { ssr: false });
+// Static import: the 3D chunk downloads with the first JS instead of after hydration (Enter waits
+// for it). The module is SSR-safe; Canvas only renders its container on the server.
+import Scene from './observatory-scene';
 const SOUND_KEY = 'rayin-observatory:sound';
 const caseOf = (path: string) => caseIndex(path.startsWith('/work/') ? path.slice('/work/'.length) : null);
 
@@ -346,7 +347,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
 
   return <div ref={root} className={`observatory ${entered ? 'has-entered' : ''}`} data-route={isCase ? 'case' : 'home'} data-flight={flying ? 'moving' : 'idle'} data-scene={failed ? 'fallback' : sceneReady ? 'ready' : 'loading'}>
     <div className="scene-layer" aria-hidden="true">
-      {!failed && <Scene entered={entered} progress={progress} chapter={chapter} caseView={caseView} onReady={onReady} onFailure={onFailure} onInstrumentTap={onInstrumentTap} />}
+      {!failed && <Scene entered={entered} progress={progress} chapter={chapter} caseView={caseView} loadInstruments={ready} onReady={onReady} onFailure={onFailure} onInstrumentTap={onInstrumentTap} />}
       {failed && !isCase && <><div className="scene-fallback" />{instruments.map((item, i) => <div key={item.id} className={`instrument-fallback ${item.id}-fallback`} style={{ backgroundImage: `url('/images/${item.id}-fallback.png')`, transform: `translateY(calc(var(--instrument-${i}-offset, 2) * 100svh))` }} />)}</>}
     </div>
     <div ref={content} inert={!entered} className="site-content" onClickCapture={event => {

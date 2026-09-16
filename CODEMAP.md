@@ -4,7 +4,8 @@
 > menunjuknya dan berkas akan diubah. Update setiap berkas dibuat/diubah/dipindah/dihapus.
 > Entri tidak cocok dengan kode = bug; perbaiki saat ditemukan.
 
-**Terakhir diperbarui:** 2026-09-15 · Claude Code · Fase 7 Testing: `showpiece_evidence.py` + paket `assets/renders/showpiece/evidence/` (13/13 pass, MP4 bersuara, performa PLAN §11); fix tes `verify_desktop.position` → `awaiting-gate`. Kode situs tidak diubah. 2026-09-16: pemilik pilih opsi B (Enter lebih cepat) → Fase 7 `in-dev`; spesifikasi di PROGRESS, belum dikerjakan.
+**Terakhir diperbarui:** 2026-09-16 · Claude Code · Fase 7 **Testing ulang** setelah fix "Enter aktif lebih cepat": item bukti baru `enterEarly` di `showpiece_evidence.py` (14 item) membuktikan lima GLB instrumen baru diminta sesudah Enter aktif dan chapter/case aman selama jeda. Paket bukti diperbarui 14/14 pass; diukur ulang: gate 1.41 dtk, Enter aktif **6.39 dtk** (dulu 12.2), transfer sebelum Enter 787,063 B, instrumen selesai +3.0 dtk. Enam suite regresi diulang `passed`. **Gate Fase 7 lolos 2026-09-16** (jeda instrumen ±3 dtk diterima apa adanya) → Fase 7 `done`, berikutnya Fase 8 Launch ready.
+Sebelumnya (Development hari yang sama): Enter menunggu hero saja (kubah + Saturnus + font), preload GLB/Draco dari HTML, Scene diimpor statis, font WOFF2 subset; tes fallback menunggu `data-scene=fallback`.
 
 ## 1. Ringkasan arsitektur
 
@@ -41,7 +42,7 @@ Semua dari root project kecuali disebut lain.
 
 | Perintah | Fungsi |
 |---|---|
-| `cd web/scripts && timeout 1500 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python showpiece_evidence.py` | Paket bukti Testing Fase 7 → `assets/renders/showpiece/evidence/`: 13 item, MP4 390×844 **dengan audio asli situs**, performa PLAN §11 (gate slow 4G + CPU 4×, fps 4×/6×, GLB, DPR), contact sheet, `evidence.json`; exit 1 bila ada fail. Jalankan setelah 6 suite regresi (item `phones` membaca JSON-nya). Server :8767 aktif. |
+| `cd web/scripts && timeout 1500 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python showpiece_evidence.py` | Paket bukti Testing Fase 7 → `assets/renders/showpiece/evidence/`: 14 item (termasuk `enterEarly`: urutan unduh instrumen sesudah Enter + scroll/case dini), MP4 390×844 **dengan audio asli situs**, performa PLAN §11 (gate slow 4G + CPU 4×, fps 4×/6×, GLB, DPR), contact sheet, `evidence.json`; exit 1 bila ada fail. Jalankan setelah 6 suite regresi (item `phones` membaca JSON-nya). Server :8767 aktif. |
 | `node web/scripts/verify_audio.mjs` | Fase 7: 9 tes lifecycle audio (resume race, batas voice, hidden, mute, cleanup) → `showpiece/dev/audio-verification.json`. |
 | `timeout 600 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python web/scripts/verify_showpiece.py` | Fase 7 Development: tiga HP, Web Audio nyata, loader, lima pitch, chain/return/history/fallback → `showpiece/dev/`. Server :8767 aktif; suite GPU dijalankan bergantian. |
 | `npm ci --prefix web` | Instal versi terkunci dari package-lock. |
@@ -98,7 +99,7 @@ Rayin Observatory/
 │   ├── .gitignore                 excludes generated output / local env
 │   ├── README.md                  run, gate, provenance, scope, verification
 │   ├── app/
-│   │   ├── layout.tsx             root persistent shell, fonts CSS, metadata
+│   │   ├── layout.tsx             root persistent shell, fonts CSS, metadata, hero asset preloads
 │   │   ├── page.tsx               hero + five chapters + Skills/About/Contact, approved copy
 │   │   ├── work/[slug]/page.tsx   five prerendered case routes → client CaseFile
 │   │   └── globals.css            locked tokens, mobile + desktop composition, gate/menu
@@ -130,7 +131,7 @@ Rayin Observatory/
 │   └── public/
 │       ├── videos/<slug>-explainer.mp4  five original silent English demos (byte-identical copies)
 │       ├── models/                dome/ambient + five instrument GLBs, Draco
-│       ├── fonts/                 approved 3 TTF + 3 OFL copies
+│       ├── fonts/                 3 WOFF2 subset (served) + approved 3 TTF (source) + 3 OFL copies
 │       ├── images/                dome + five fallback PNGs; five demo posters; approved portrait copy
 │       └── draco/                 WASM decoder + wrapper + README.md + LICENSE.txt
 └── assets/
@@ -304,11 +305,13 @@ Rayin Observatory/
 
 ### `web/scripts/showpiece_evidence.py`
 - **Peran:** generator paket bukti Testing Fase 7 (gate pemilik), bukan tes Development.
-- **Ekspor utama:** async `run()`, `main_flow`, `perf_gate`, `perf_fps`, `dpr_cap`, `assets_check`, `hover_check`, `phones_check`, `edges_check`, `mux`, `sheets`; `ITEMS` (13), `FINDINGS`, `REGRESSIONS`, `SLOW_4G` (preset DevTools), `LIGHT_4G` (profil Fase 1), `TAP`/`STOP_REC`, `TIMING`, `FRAMES`.
+- **Ekspor utama:** async `run()`, `main_flow`, `perf_gate`, `enter_early`, `perf_fps`, `dpr_cap`, `assets_check`, `hover_check`, `phones_check`, `edges_check`, `mux`, `sheets`; `ITEMS` (14), `FINDINGS`, `REGRESSIONS`, `SLOW_4G` (preset DevTools), `LIGHT_4G` (profil Fase 1), `TAP`/`STOP_REC`, `TIMING`, `FRAMES`, `MODEL_RESOURCES`/`INSTRUMENTS_DONE` (timing resource GLB).
 - **Dipakai oleh:** agen Testing; jalankan dari `web/scripts/` (impor `verify_showpiece` sebagai `vs` + `case_files_evidence.CASES/flight/overflow/tile/top`).
 - **Bergantung pada:** server :8767, Chromium GPU ANGLE, matplotlib + Pillow + ffmpeg/ffprobe (venv CrossCheck); JSON status 6 suite regresi.
 - **State / efek samping:** hapus lalu tulis ulang `assets/renders/showpiece/evidence/`; mengalihkan `vs.OUT` ke `evidence/edges` dan `evidence/phones` agar screenshot `vs.edges`/`vs.phone` masuk paket.
-- **Catatan:** audio MP4 = output Web Audio situs sendiri (gain → destination disadap ke `MediaStreamDestination` + `MediaRecorder`), dihentikan sebelum reload lalu di-mux dengan `adelay` = selisih mulai rekaman vs mulai video. Scroll HP = touch swipe CDP `Input.dispatchTouchEvent` (`synthesizeScrollGesture` tidak menggulir halaman ini). FPS = interval rAF (beban main thread); GPU host tidak di-throttle → bukan klaim GPU HP. Jebakan: Lenis (`syncTouch`, nav header/menu) masih mengayun setelah cek jarak < 3 px; `scrollTo` native saat itu ditimpa → `settle_to` mengulang sampai mendarat (jangan menunggu kelas `lenis-scrolling`, bisa bertahan). Setelah rantai, Return ke `#<slug>` memfokus `h2` chapter (bukan tombol Open case file; itu hanya bila kembali ke posisi scroll tersimpan).
+- **Catatan:** 2026-09-16 (Testing ulang): item `enterEarly` = dua context slow 4G + CPU 4×. (1) homepage: Enter diklik begitu aktif lalu langsung scroll ke `#crosscheck` → sebelum Enter hanya `dome.glb`+`ambient.glb` terunduh, lima GLB instrumen `startTime` ≥ waktu Enter aktif, copy chapter kebaca tanpa model, lalu model muncul (diff piksel `difference()`); (2) direct `/work/crosscheck`: heading kebaca, `[data-hotspot-line] x2` `50%` → nilai piksel saat model mendarat. Bukti `15a`–`15d` + strip `15-enter-early.png`. Jebakan: `x2` default `50%` (string persen) — bandingkan apa adanya, jangan `float()` sebelum model ada.
+  2026-09-16 (Development opsi B): teks `perfGate` detail + `FINDINGS.perfGate` kini menyebut Enter menunggu kubah + Saturnus + font (angka lama 12.2 s / 1.37 MB sebagai pembanding); logika ukur tidak diubah. Byte `transferredBytes` = resource selesai sampai Enter aktif.
+  audio MP4 = output Web Audio situs sendiri (gain → destination disadap ke `MediaStreamDestination` + `MediaRecorder`), dihentikan sebelum reload lalu di-mux dengan `adelay` = selisih mulai rekaman vs mulai video. Scroll HP = touch swipe CDP `Input.dispatchTouchEvent` (`synthesizeScrollGesture` tidak menggulir halaman ini). FPS = interval rAF (beban main thread); GPU host tidak di-throttle → bukan klaim GPU HP. Jebakan: Lenis (`syncTouch`, nav header/menu) masih mengayun setelah cek jarak < 3 px; `scrollTo` native saat itu ditimpa → `settle_to` mengulang sampai mendarat (jangan menunggu kelas `lenis-scrolling`, bisa bertahan). Setelah rantai, Return ke `#<slug>` memfokus `h2` chapter (bukan tombol Open case file; itu hanya bila kembali ke posisi scroll tersimpan).
 
 ### `assets/renders/showpiece/dev/`
 - **Peran:** foto dan hasil uji Development Fase 7; terpisah dari paket Testing.
@@ -321,12 +324,13 @@ Rayin Observatory/
 ### `assets/renders/showpiece/evidence/`
 - **Peran:** paket bukti gate Fase 7 untuk penilaian pemilik.
 - **Ekspor utama:** `showpiece-walkthrough.mp4` (H.264 + AAC, 390×844, ±112 dtk, audio asli situs mulai ±13.4 dtk saat Enter); `contact-sheet.jpg` (24 frame);
-  `01-loader.png`, `05-flight-in.png`, `11-perf-gate.png`, `12-perf-fps.png` (grafik frame 4×/6×), `13-micro.png`, `14-sound-control.png` + PNG sumber `01a`…`11b`;
-  `phones/` (`vs.phone` 360×740/430×932 + `phones-sheet.jpg`), `edges/` (loader stall/fallback, audio unavailable); `evidence.json` (13 item + `measurements`).
+  `01-loader.png`, `05-flight-in.png`, `11-perf-gate.png`, `12-perf-fps.png` (grafik frame 4×/6×), `13-micro.png`, `14-sound-control.png`,
+  `15-enter-early.png` (strip `15a` chapter tanpa model → `15b` instrumen tiba → `15c` case dini → `15d` leader tersambung) + PNG sumber `01a`…`11b`, `15a`…`15d`;
+  `phones/` (`vs.phone` 360×740/430×932 + `phones-sheet.jpg`), `edges/` (loader stall/fallback, audio unavailable); `evidence.json` (14 item + `measurements`).
 - **Dipakai oleh:** pemilik saat gate; PROGRESS.
 - **Bergantung pada:** `showpiece_evidence.py`.
 - **State / efek samping:** generated; jangan edit tangan.
-- **Catatan:** hasil 2026-09-15: gate FCP 1.43 s (DevTools Slow 4G + CPU 4×), Enter aktif 12.2 s (temuan pemilik), transfer 1,370,869 B; fps 4× 56.3–60; GLB 737,440 B; canvas 1.5× di DPR 2/3. Status `verify_desktop` di JSON = rerun 1440×900 + 1920×1080 saja (390/1366 lolos dua run sebelumnya hari itu; suite penuh >10 menit, run background dibunuh saat memori rendah).
+- **Catatan:** hasil 2026-09-16 (Testing ulang, 14/14 pass): gate FCP 1,408 ms, Enter aktif 6,394 ms, transfer sebelum Enter 787,063 B (JS 507 KB, 3D 139 KB, Draco 64 KB, font 60 KB, HTML/CSS 17 KB); instrumen selesai +3.0 s; fps 4× 56–60; GLB 737,440 B; canvas 1.5× di DPR 2/3; MP4 105.9 s H.264+AAC. Arsip 2026-09-15: Enter aktif 12.2 s, transfer 1,370,869 B. Status `verify_desktop` di JSON = run 1440×900 + 1920×1080 (390×844/1366×768 lolos di run terpisah hari itu; JSON hanya memuat run terakhir).
 
 ### `web/scripts/verify_desktop.py`
 - **Peran:** verifikasi Development Fase 6, HP 390×844 dahulu lalu 1366×768, 1440×900, 1920×1080.
@@ -344,6 +348,7 @@ Rayin Observatory/
 - **Bergantung pada:** `verify_desktop.py`; baseline/smoke via Playwright sementara (`/tmp/observatory_baseline.py`, `/tmp/observatory_review.py`). `review-{hero,crosscheck,brief,inspection}-1440x900.png` adalah smoke awal, bukan hasil final. Dua smoke salah posisi (`review-about-1440x900.png`, `review-contact-1440x900.png`) dihapus; bukti section yang benar bernama `about-*`/`contact-*`.
 - **State / efek samping:** hasil generated ditulis ulang saat rerun; jangan edit manual.
 - **Catatan:** Chromium emulasi; paket video/foto gate akan ditaruh Testing di `assets/renders/desktop/evidence/`.
+  2026-09-16: suite dijalankan dua run (`--sizes 390x844,1366x768` lalu `1440x900,1920x1080`, masing-masing <10 menit); `verification.json` hanya memuat ukuran run terakhir.
 
 ### `web/scripts/verify_case.py`
 - **Peran:** tes fokus Development Fase 4, bukan paket gate Testing.
@@ -395,10 +400,10 @@ Rayin Observatory/
 
 ### `web/app/layout.tsx`
 - **Peran:** root layout App Router; mempertahankan shell/Canvas di luar halaman.
-- **Ekspor utama:** `RootLayout`, `metadata`, `viewport`.
+- **Ekspor utama:** `RootLayout`, `metadata`, `viewport`; `HERO_ASSETS` (dome/ambient GLB + wrapper/wasm Draco).
 - **Dipakai oleh:** Next.js untuk semua route.
-- **Bergantung pada:** `ObservatoryShell`, `globals.css`, CSS Lenis.
-- **State / efek samping:** tidak ada server state; metadata preview noindex, English `lang`.
+- **Bergantung pada:** `ObservatoryShell`, `globals.css`, CSS Lenis, `preload` react-dom.
+- **State / efek samping:** tidak ada server state; metadata preview noindex, English `lang`. `preload(href, {as:'fetch', crossOrigin:'anonymous'})` → `<link rel=preload>` di head; cocok dengan request FileLoader three (cors + same-origin credentials) sehingga dipakai ulang (waterfall: satu request per berkas). Ganti path model/decoder → ubah daftar ini juga.
 - **Catatan:** title memakai Rayina Ilham / Rayin Observatory; meta launch lengkap Fase 8.
 
 ### `web/app/page.tsx`
@@ -429,6 +434,7 @@ Rayin Observatory/
   Fase 5: posisi `.hotspot-<i>` inline dari data (aturan `.hotspot-0..2` dihapus); `.case-instrument-still` tanpa url (gambar inline per slug);
   `.contact-dialog` dihapus bersama dialog preview.
   Fase 6: `--page-gutter`, breakpoint 1024px; hero/chapter rail kiri, gate dua kolom, Skills/About/Contact grid; case brief dua kolom, `.case-inspection` kanan, kartu kiri, flow horizontal, readings dua kolom dan tools tiga kolom. Fallback mengikuti area objek.
+  `@font-face` memuat WOFF2 subset (Fase 7 Enter lebih cepat); TTF approved tetap sebagai sumber.
   Fase 7: dial SVG progres dan beacon loader; status ready hijau / fallback amber; press memakai `scale` terpisah (transform posisi tetap), hover arrow hanya pointer fine; border/leader kartu aktif, menu entrance singkat.
   Testing Fase 6: `#skills` + `.about-section` `grid-template-rows: auto auto auto 1fr` — accordion/portrait yang span semua baris dulu meregangkan baris teks (paragraf About berjarak ±115px).
   `.email-cta` sekarang `<a>`; `.contact-links a` baris 58px, nilai mono amber.
@@ -447,7 +453,7 @@ Rayin Observatory/
   berubah. Menu menghentikan Lenis; menu scroll memulai Lenis sebelum scrollTo, fokus heading
   saat selesai. Skill links menambah `.skill-highlight`. Delegasi klik: `[data-home-target]` → leaveCase,
   `[data-case-target]` → chainCase, `[data-open-case]` → openCase (dialog preview dihapus Fase 5).
-- **Catatan:** Fase 7: subscribe progress drei dengan high-water mark antar batch; Enter tetap menunggu tujuh model + font settle, tanpa minimum loading delay. Dial `data-ready` / `data-fallback`; error → lima still view berlabel. Audio gesture entry/welcome, hotspot/close/menu/summary click, fly-in/out/Next sweep. Satu `flight` timeline mencakup departure + sweep; dibatalkan saat pathname berubah/unmount (Back saat terbang tidak boleh push route lama).
+- **Catatan:** Fase 7: subscribe progress drei dengan high-water mark antar batch; Enter menunggu hero (kubah + Saturnus render frame ke-2) + font settle, tanpa minimum loading delay. `ready` diteruskan ke Scene sebagai `loadInstruments` (lima GLB baru diminta sesudahnya; opsi B pemilik 2026-09-16). Scene diimpor statis (dulu `dynamic ssr:false`) supaya chunk three ikut unduhan JS pertama, bukan sesudah hidrasi. Dial `data-ready` / `data-fallback`; error → lima still view berlabel. Audio gesture entry/welcome, hotspot/close/menu/summary click, fly-in/out/Next sweep. Satu `flight` timeline mencakup departure + sweep; dibatalkan saat pathname berubah/unmount (Back saat terbang tidak boleh push route lama).
   Contact sekarang section, bukan dialog placeholder Fase 1–2. Fase 4 memisahkan lifecycle Lenis root dari trigger per pathname; homeScroll/homeChapter/homeTarget, `CaseView` mix, `data-route` / `data-flight`, root `pageContent` fade + inert. Focus dipulihkan sesudah inert dilepas. Cleanup trigger/ticker/observer/audio.
   Fase 5: `isCase` = `/work/<slug>` dikenal; layout effect set `caseView.index` + chapter case. `chainCase`: mix 1→0 (mundur), chapter
   `{index: next, from: prev, transition 0→1}` (sapuan), lalu push → arrival terbang masuk; homeScroll/homeChapter di-null supaya Return → `#<slug>` case aktif.
@@ -459,8 +465,8 @@ Rayin Observatory/
 
 ### `web/components/observatory-scene.tsx`
 - **Peran:** satu Canvas R3F, tujuh GLB, kamera orbit + transisi masuk/keluar lima group instrumen.
-- **Ekspor utama:** `ObservatoryScene`, `World`, `SceneBoundary`; props memakai `ChapterState`.
-- **Dipakai oleh:** shell dynamic (SSR off).
+- **Ekspor utama:** `ObservatoryScene`, `World`, `Instruments`, `SceneBoundary`; props memakai `ChapterState` + `loadInstruments`.
+- **Dipakai oleh:** shell (import statis; server hanya me-render container Canvas, modul aman SSR).
 - **Bergantung pada:** R3F/drei/three, instruments.ts, tujuh GLB, decoder lokal. Node kontrak:
   `OpticsPivot`, `Lens1Glow..Lens3Glow`; `DishPivot0..3`; `NeedlePivot`, `PaperFeed`,
   `RollerPivot0..1`; `OrbitPivot0..2`; `PrismPivot`, `SpectrumPivot`.
@@ -469,7 +475,8 @@ Rayin Observatory/
   `instrument-motion.ts` (`rig.update` hanya saat group terlihat). Klik di chapter BrandWall (bukan
   tombol/link/dialog; hanya `#brandwall .instrument-stage` / `.case-inspection`, sudah entered, flight idle) → `rig.observe()` + prop `onInstrumentTap(4)`; status detektor → `#observer-readout[data-observed]`.
   `pointScale` = DPR tiap frame. Satu environment lokal, DPR 1–1.5.
-- **Catatan:** langit = `<Sky>` (titik bintang lama dihapus); Saturnus (`saturn()` rig) tetap ditambat ke kamera, wobble + skala .072. Kubah approved tetap utuh.
+- **Catatan:** Muat bertahap (Fase 7, opsi B): `World` memuat `dome.glb` + `ambient.glb` dalam SATU `useGLTF([...])` (dua panggilan = suspend serial) → frame ke-2 `onReady`. `<Instruments>` di `<Suspense>` sendiri, di-mount hanya bila `loadInstruments`; ia meng-clone lima view, mengisi ref `views` lewat `useLayoutEffect` (kosong = belum ada model), memiliki handler tap BrandWall, dan me-render group `visible={false}` sampai frame loop `World` menempatkannya. Frame loop + leader aman saat `views.current` kosong (chapter/case sementara tanpa model, termasuk direct `/work/<slug>`). Model instrumen gagal sesudah Enter → error naik ke `SceneBoundary` → still view + notice seperti biasa.
+  langit = `<Sky>` (titik bintang lama dihapus); Saturnus (`saturn()` rig) tetap ditambat ke kamera, wobble + skala .072. Kubah approved tetap utuh.
   SceneBoundary gagal satu model → still view menyeluruh; semua chapter tetap dapat dibaca. `CaseView` mix menginterpolasi sudut, jarak, zoom ortografis; model `caseView.index` mengikuti bounds `#case-instrument` (skala case = min(w·.62, h·.33)/fit, fit 4.4 CrossCheck / 3.5 lain). Canvas tetap root.
   Fase 6: breakpoint 1024px sama dengan CSS. Kamera menempatkan instrumen di kanan dan membatasi skala terhadap tinggi/lebar; dome/Saturnus ikut dikomposisi. Case mengikuti bounds `.case-inspection`; x2 leader dikurangi posisi pane relatif Canvas (penting saat Canvas HP terpusat di tablet).
   Fase 5: `anchor()` = origin node, atau pusat bounding sphere child mesh yang nama materialnya memuat `part`, → proyeksi ke SVG `[data-hotspot-line=<id>]`
@@ -518,6 +525,7 @@ Rayin Observatory/
   reverse navigation, semua skill href dan lima klik project, scan clip berbeda, About, Contact
   (`CONTACTS` href persis, tap ≥44, noopener), readout 100%, touch swipe 390px, block BrandWall →
   lima fallback + notice tidak menimpa copy (`fallback-verification.json`); nol `.draft-label`; grup "Daily work" = 3 item tanpa link.
+  Sejak Fase 7 (instrumen dimuat sesudah Enter) cabang model-diblok menunggu `.observatory[data-scene="fallback"]`, bukan membaca atribut langsung setelah Enter; sama di `verify_case.py`, `verify_cases.py`, `case_files_evidence.py`.
   Bukan tahap Testing atau klaim FPS/4G HP fisik.
 
 ### `web/scripts/full_observatory_evidence.py`
@@ -580,6 +588,7 @@ Rayin Observatory/
 - **Catatan:** fokus Automation Engineer dari klarifikasi pemilik; copy approved Fase 3; skill harian terpasang
   dinyatakan; kontak asli tercatat. Perintah paket bukti Testing ada di Verification.
   Fase 7 menambah kontrak suara/loader/transisi, perintah dua tes fokus, batas Development vs pengukuran performa Testing. Fase 6 gate sudah passed.
+  2026-09-16: paragraf Enter lebih cepat (opsi B) + angka ukur sebelum/sesudah di bagian Phase 7.
   Script bukti Fase 1–2 diarsipkan, bukan acceptance Fase 3.
 
 ### `web/lib/instruments.ts`
@@ -714,10 +723,13 @@ Rayin Observatory/
 
 ### `web/public/fonts/`, `web/public/images/dome-fallback.png`, `web/public/draco/`
 - **Peran:** aset lokal font, fallback, dan decoder; tidak membutuhkan CDN.
-- **Ekspor utama:** `fraunces.ttf`, `inter.ttf`, `jetbrains-mono.ttf`, masing-masing
+- **Ekspor utama:** `fraunces.woff2`, `inter.woff2`, `jetbrains-mono.woff2` (disajikan; 17,960 / 21,092 / 19,772 B);
+  `fraunces.ttf`, `inter.ttf`, `jetbrains-mono.ttf` (sumber approved, tidak lagi dirujuk CSS; dipakai label `full_observatory_evidence.py`), masing-masing
   `*-LICENSE.txt`; `dome-fallback.png`; `draco_decoder.wasm`, `draco_wasm_wrapper.js`,
   `README.md` upstream dan `LICENSE.txt` Apache 2.0.
-- **Dipakai oleh:** CSS / useGLTF.
+- **Dipakai oleh:** CSS (WOFF2) / useGLTF / preload layout (Draco).
+- **Catatan WOFF2 (Fase 7):** `pyftsubset <ttf> --unicodes=U+0020-007E,U+00A0-00FF,U+0131,U+0152-0153,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2190-21FF,U+2212,U+2215,U+221D --layout-features='*' --name-IDs='*' --name-languages='*' --flavor=woff2`
+  (lewat `uv run --no-project --with fonttools --with brotli`). Semua karakter non-ASCII situs (§²³·×–’“”…↑→↗↙−∝) tetap tercakup sama seperti TTF; fitur hilang hanya `ccmp`/`mark`/`mkmk` (tanda gabung, tak dipakai). Copyright name ID 0 tetap. Lisensi OFL tanpa Reserved Font Name. Copy baru dengan karakter di luar rentang → regenerasi subset.
 - **Bergantung pada:** salinan aset style-lock/render; decoder distribusi three 0.186.0;
   teks lisensi Apache dari apache.org/licenses/LICENSE-2.0.txt.
 - **State / efek samping:** hanya download/cache browser; salinan vendor tidak diedit.
@@ -846,7 +858,7 @@ Rayin Observatory/
   tahap Development (Codex/Claude Code) lalu Testing (Claude Code/Antigravity, paket bukti di
   `assets/renders/<slug-fase>/evidence/`); lihat PLAN §12 dan `PROMPT.md`.
 - **State / efek samping:** diperbarui setiap sesi; tidak menandai fase done tanpa gate pemilik.
-- **Catatan:** Fase 0 `done` 2026-09-14; Fase 1 `done` 2026-09-15; Fase 2 `done` 2026-09-15; Fase 3 `done` 2026-09-15. Fase 4 `done` 2026-09-15 (copy case approved). Fase 5 `done` 2026-09-15 (gate lolos, seluruh copy approved, DRAFT dilepas, opsi 1 DueWatch). Fase 6 (Desktop) `done` 2026-09-15 (gate dari video bukti desktop). Fase 7 `in-dev` (Testing 13/13; pemilik pilih opsi B "Enter lebih cepat" 2026-09-16, dikerjakan sesi berikut). `assets/` tidak dilacak git sejak 2026-09-15 (tetap lokal; riwayat commit lama masih memuatnya). Log sesi dijaga ringkas.
+- **Catatan:** Fase 0 `done` 2026-09-14; Fase 1 `done` 2026-09-15; Fase 2 `done` 2026-09-15; Fase 3 `done` 2026-09-15. Fase 4 `done` 2026-09-15 (copy case approved). Fase 5 `done` 2026-09-15 (gate lolos, seluruh copy approved, DRAFT dilepas, opsi 1 DueWatch). Fase 6 (Desktop) `done` 2026-09-15 (gate dari video bukti desktop). Fase 7 `ready-for-test` (Testing 13/13; opsi B "Enter lebih cepat" dikerjakan 2026-09-16, menunggu Testing ulang + gate). `assets/` tidak dilacak git sejak 2026-09-15 (tetap lokal; riwayat commit lama masih memuatnya). Log sesi dijaga ringkas.
 
 ## 5. Aset
 
@@ -879,14 +891,18 @@ Ukuran byte aset Fase 0 diukur 2026-09-14; aset Fase 1 pada 2026-09-15.
 | `rayina-duotone.png` | crop + imagegen | — | 1700824 | portrait review |
 | `mobile-390x844.png` | Playwright | — | 87502 | bukti gate |
 | `style-review-mobile.png` | Playwright | — | 355265 | bukti gate |
-| `fraunces.ttf` | Google Fonts | — | 71580 | heading |
-| `inter.ttf` | Google Fonts | — | 324820 | body |
-| `jetbrains-mono.ttf` | Google Fonts | — | 112172 | readout |
+| `fraunces.ttf` | Google Fonts | — | 71580 | sumber subset (dulu heading) |
+| `inter.ttf` | Google Fonts | — | 324820 | sumber subset (dulu body) |
+| `jetbrains-mono.ttf` | Google Fonts | — | 112172 | sumber subset; label bukti Fase 3 |
+| `fraunces.woff2` | `pyftsubset` dari TTF (2026-09-16) | — | 17960 | heading |
+| `inter.woff2` | `pyftsubset` dari TTF (2026-09-16) | — | 21092 | body |
+| `jetbrains-mono.woff2` | `pyftsubset` dari TTF (2026-09-16) | — | 19772 | readout |
 
 ## 6. Alur penting
 
 Fase 7:
-1. Loader subscribe tiga.js/drei → progres tidak mundur; tujuh GLB + font settle → dial ready, tombol aktif.
+1. HTML preload dome/ambient/Draco + WOFF2 dari CSS + JS (termasuk three) paralel → loader subscribe drei, progres tidak mundur;
+   hero render frame ke-2 + font settle → dial ready, tombol aktif → `loadInstruments` → lima GLB dimuat di belakang hero.
 2. Enter gesture → resume hum + welcome sweep bila sound on; silent/remembered off tidak membuat AudioContext.
 3. Hotspot/close/BrandWall tap → klik instrumen; open/return/Next → sweep; semua lewat master dan guard visibility/mute.
 4. Departure timeline → route arrival; cleanup pathname membatalkan callback navigasi basi; kartu pointer WAAPI 180ms dapat diinterupsi.

@@ -1,6 +1,6 @@
-@font-face { font-family: Fraunces; src: url('/fonts/fraunces.ttf') format('truetype'); font-display: swap; font-weight: 400; }
-@font-face { font-family: Inter; src: url('/fonts/inter.ttf') format('truetype'); font-display: swap; font-weight: 400; }
-@font-face { font-family: 'JetBrains Mono'; src: url('/fonts/jetbrains-mono.ttf') format('truetype'); font-display: swap; font-weight: 400; }
+@font-face { font-family: Fraunces; src: url('/fonts/fraunces.woff2') format('woff2'); font-display: swap; font-weight: 400; }
+@font-face { font-family: Inter; src: url('/fonts/inter.woff2') format('woff2'); font-display: swap; font-weight: 400; }
+@font-face { font-family: 'JetBrains Mono'; src: url('/fonts/jetbrains-mono.woff2') format('woff2'); font-display: swap; font-weight: 400; }
 :root { --ink: #0B1020; --panel: #141B2E; --amber: #F2A541; --signal-ok: #5BE49B; --signal-alarm: #FF5A5F; --ivory: #EDE8DC; --muted: #A5AEC2; --line: #303A50; color-scheme: dark; }
 * { box-sizing: border-box; }
 html, body { margin: 0; background: var(--ink); color: var(--ivory); font-family: Inter, sans-serif; }

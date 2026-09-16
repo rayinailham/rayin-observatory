@@ -499,6 +499,8 @@ async def fallback_check(browser, checks):
     page = await context.new_page()
     await page.route('**/models/surgeline.glb', lambda route: route.abort())
     await enter(page, '/work/surgeline')
+    # Instruments load behind the hero (Phase 7), so a blocked model can fail after Enter.
+    await page.wait_for_selector('.observatory[data-scene="fallback"]', state='attached', timeout=30000)
     scene = await page.locator('.observatory').get_attribute('data-scene')
     await page.evaluate('(y)=>scrollTo(0,y)', await top(page, '#case-instrument'))
     await page.wait_for_timeout(600)

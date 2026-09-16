@@ -167,7 +167,8 @@ async def run():
                 await page.route('**/models/crosscheck.glb', lambda route: route.abort())
             await enter(page, '/work/crosscheck')
             if fallback:
-                assert await page.locator('.observatory').get_attribute('data-scene') == 'fallback'
+                # Instruments load behind the hero, so a blocked model can fail after Enter.
+                await page.wait_for_selector('.observatory[data-scene="fallback"]', state='attached', timeout=30000)
                 await scroll_to(page, '#case-instrument')
                 assert await page.locator('.case-instrument-still').is_visible()
                 notice = await page.locator('.fallback-notice').bounding_box()

@@ -32,7 +32,7 @@ from playwright.async_api import async_playwright, expect  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import verify_showpiece as vs  # noqa: E402
-from case_files_evidence import CASES, flight, overflow, tile, top  # noqa: E402
+from case_files_evidence import CASES, difference, flight, overflow, tile, top  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'assets/renders/showpiece/evidence'
@@ -66,6 +66,7 @@ ITEMS = {
     'microInteractions': 'Micro-interactions: buttons press (scale), active marker + leader + amber card border, menu panel slides in, hover effects only for mouse pointers',
     'transitions': 'Transitions: fly-in to a case (text fades, scroll locked), Next sweep through all five cases, Return lands on the chapter with focus, Back during a departure cancels cleanly',
     'perfGate': 'PLAN §11: gate with Enter shown in < 2.5 s on slow 4G + 4x CPU throttle',
+    'enterEarly': 'Owner option B: Enter turns active on the hero alone (dome + Saturn + fonts); the five instrument models are only requested after that, and scrolling to a chapter or opening a case before they land stays readable and error-free — the instrument appears when it arrives',
     'perfAssets': 'PLAN §11: 3D assets on the homepage ≤ 8 MB total and each .glb ≤ 1.5 MB, Draco compressed',
     'perfFps': 'PLAN §11: under 4x CPU throttle, hero / five-chapter scroll / fly-in / inspection / Next sweep / Return hold ≥ 45 fps (target ~60)',
     'dprCap': 'PLAN §11: 3D pixel ratio capped on phones (canvas ≤ 1.5x at device pixel ratio 2 and 3)',
@@ -113,6 +114,11 @@ TIMING = """(() => {
  }).observe(document, {subtree: true, childList: true, attributes: true});
 })();"""
 FRAMES = "(() => { window.__frames = []; const f = t => { window.__frames.push(t); requestAnimationFrame(f); }; requestAnimationFrame(f); })();"
+# Which .glb the page has actually asked for, and when — the proof that the instruments load behind the hero.
+MODEL_RESOURCES = ("performance.getEntriesByType('resource').filter(e=>e.name.includes('/models/'))"
+                   ".map(e=>({file:e.name.split('/').pop(), startMs:Math.round(e.startTime), endMs:Math.round(e.responseEnd)}))")
+INSTRUMENTS_DONE = (r"performance.getEntriesByType('resource')"
+                    r".filter(e=>/\/models\/(crosscheck|surgeline|driftwatch|duewatch|brandwall)\.glb$/.test(e.name.split('?')[0]) && e.responseEnd>0).length===5")
 
 
 def scale(value):
@@ -419,14 +425,104 @@ async def perf_gate(browser, checks, meta):
     checks['perfGate'] = {
         'pass': 0 < main['firstContentfulPaintMs'] < 2500 and main['enterVisibleAt2500ms'],
         'detail': f"DevTools Slow 4G + {CPU}x CPU: gate painted at {main['firstContentfulPaintMs']} ms with Enter on screen at 2.5 s={main['enterVisibleAt2500ms']}; "
-                  f"Enter becomes active at {main['enterEnabledMs']} ms (all seven models + fonts, {main['transferredBytes']:,} bytes). "
+                  f"Enter becomes active at {main['enterEnabledMs']} ms (dome + Saturn + fonts; the five instruments load after, {main['transferredBytes']:,} bytes before Enter). "
                   f"Lighter 150 ms profile: paint {runs['light-slow-4g']['firstContentfulPaintMs']} ms, active {runs['light-slow-4g']['enterEnabledMs']} ms",
         'screenshot': '11-perf-gate.png',
     }
-    FINDINGS['perfGate'] = (f"For the owner, not an automatic fail: the gate and a (disabled) Enter button appear in {main['firstContentfulPaintMs']/1000:.1f} s, "
-                            f"but Enter only becomes tappable after {main['enterEnabledMs']/1000:.1f} s on slow 4G (it waits for all seven models and fonts; "
-                            f"{main['transferredBytes']/1e6:.2f} MB). Options: accept, or back to Development to let Enter open earlier "
-                            "(e.g. after the dome only, loading the instruments behind the hero).")
+    # Phase 7 rework (owner option B, 2026-09-16): Enter waits only for the hero; before it, 12.2 s / 1,370,869 B.
+    FINDINGS['perfGate'] = (f"For the owner: the gate and a (disabled) Enter button appear in {main['firstContentfulPaintMs']/1000:.1f} s; "
+                            f"Enter becomes tappable after {main['enterEnabledMs']/1000:.1f} s on slow 4G (dome + Saturn + fonts, "
+                            f"{main['transferredBytes']/1e6:.2f} MB), previously 12.2 s / 1.37 MB. The five instruments load behind the hero.")
+
+
+async def enter_early(browser, checks, meta):
+    """Owner option B (2026-09-16): Enter waits for the hero only. Proves the five instrument
+    models are requested after Enter turns active, and that a visitor who scrolls to a chapter or
+    opens a case before they land sees no error — the instrument simply appears when it arrives."""
+    errors, bad = [], []
+
+    def watch(page):
+        page.on('pageerror', lambda e: errors.append(str(e)))
+        page.on('console', lambda m: errors.append(m.text) if m.type == 'error' else None)
+        page.on('response', lambda r: bad.append({'url': r.url, 'status': r.status}) if r.status >= 400 else None)
+
+    async def slow_page(context):
+        page = await context.new_page()
+        cdp = await context.new_cdp_session(page)
+        await cdp.send('Network.enable')
+        await cdp.send('Network.setCacheDisabled', {'cacheDisabled': True})
+        await cdp.send('Network.emulateNetworkConditions', SLOW_4G)
+        await cdp.send('Emulation.setCPUThrottlingRate', {'rate': CPU})
+        watch(page)
+        return page
+
+    # 1. Homepage: Enter the moment it turns active, then go straight to a chapter.
+    context = await phone_context(browser)
+    await context.add_init_script(TIMING)
+    page = await slow_page(context)
+    await page.goto(URL, wait_until='commit', timeout=90000)
+    await expect(page.locator('.enter-button')).to_be_enabled(timeout=180000)
+    enter_ms = round(await page.evaluate('window.__t.enter'))
+    before_enter = await page.evaluate(MODEL_RESOURCES)
+    await page.locator('.silent-button').click()
+    await expect(page.locator('.entry-gate')).to_be_hidden(timeout=10000)
+    await page.evaluate('(y)=>scrollTo(0,y)', await top(page, '#crosscheck') + 260)
+    await page.wait_for_timeout(600)
+    early = await page.screenshot(path=str(OUT / '15a-early-chapter.png'))
+    chapter_copy = await page.locator('#crosscheck h2').is_visible()
+    await page.wait_for_function(INSTRUMENTS_DONE, timeout=180000, polling=250)
+    arrived_ms = round(await page.evaluate('performance.now()'))
+    await page.wait_for_timeout(2500)
+    arrived = await page.screenshot(path=str(OUT / '15b-instruments-arrived.png'))
+    models = await page.evaluate(MODEL_RESOURCES)
+    scene = await page.locator('.observatory').get_attribute('data-scene')
+    await context.close()
+
+    # 2. Direct case URL: the leader line connects to the 3D node once the model lands (x2 leaves its 50% default).
+    context = await phone_context(browser)
+    page = await slow_page(context)
+    await page.goto(f'{URL}/work/crosscheck', wait_until='commit', timeout=90000)
+    await expect(page.locator('.enter-button')).to_be_enabled(timeout=180000)
+    await page.locator('.silent-button').click()
+    await expect(page.locator('.entry-gate')).to_be_hidden(timeout=10000)
+    await page.evaluate('(y)=>scrollTo(0,y)', await top(page, '#case-instrument'))
+    await page.wait_for_timeout(600)
+    await page.screenshot(path=str(OUT / '15c-case-early.png'))
+    case_heading = await page.locator('#case-heading').is_visible()
+    x2_early = await page.locator('[data-hotspot-line]').first.get_attribute('x2')
+    await page.wait_for_function(INSTRUMENTS_DONE, timeout=180000, polling=250)
+    await page.wait_for_timeout(2500)
+    await page.locator('.hotspot-0').click()
+    await page.wait_for_timeout(500)
+    await page.screenshot(path=str(OUT / '15d-case-connected.png'))
+    x2_late = await page.locator('[data-hotspot-line]').first.get_attribute('x2')
+    await context.close()
+
+    instrument_files = {f"{case['id']}.glb" for case in CASES}
+    after = [m for m in models if m['file'] in instrument_files]
+    ordered = len(after) == 5 and all(m['startMs'] >= enter_ms - 150 for m in after)
+    hero_only = {m['file'] for m in before_enter} <= {'dome.glb', 'ambient.glb'}
+    try:
+        connected = x2_early == '50%' and float(x2_late) > 0
+    except (TypeError, ValueError):
+        connected = False
+    gap = round((arrived_ms - enter_ms) / 1000, 1)
+    changed = difference(early, arrived)
+    meta['enterEarly'] = {'enterEnabledMs': enter_ms, 'instrumentsReadyMs': arrived_ms, 'gapSeconds': gap,
+                          'beforeEnter': before_enter, 'instrumentRequests': after, 'pixelDelta': changed,
+                          'leaderX2': {'early': x2_early, 'loaded': x2_late}}
+    checks['enterEarly'] = {
+        'pass': ordered and hero_only and connected and chapter_copy and case_heading and scene == 'ready' and not errors and not bad,
+        'detail': f"before Enter only {sorted(m['file'] for m in before_enter)} are fetched; the five instrument models start at "
+                  f"{sorted(m['startMs'] for m in after)} ms, after Enter turns active at {enter_ms} ms, and finish {gap} s later on slow 4G + {CPU}x CPU. "
+                  f"Scrolled to the CrossCheck chapter in that window: copy readable={chapter_copy}, no model yet, then the instrument appears "
+                  f"(screen difference {changed}); scene state after={scene}. Case opened direct in the same window: heading readable={case_heading}, "
+                  f"leader line x2 {x2_early} → {x2_late} once the model lands. Page/console errors={errors or 0}, responses ≥400={bad or 0}",
+        'screenshot': '15-enter-early.png',
+    }
+    FINDINGS['enterEarly'] = (f"For the owner: Enter now opens on the hero alone, so a visitor who scrolls to a chapter or opens a case within about "
+                              f"{gap} s of entering (slow 4G) sees the text and the sky but no instrument yet; it fades in when it arrives. "
+                              "A model that fails after Enter still falls back to the labelled still view.")
 
 
 async def perf_fps(browser, checks, meta):
@@ -623,6 +719,8 @@ def sheets():
     strip([('11a-perf-gate-2.5s.png', 'Slow 4G + 4x CPU · 2.5 s'), ('11b-perf-gate-enter.png', 'Enter active')], OUT / '11-perf-gate.png')
     strip([('01a-loader-calibrating.png', 'Calibrating · dial filling'), ('01b-loader-ready.png', 'Calibrated · green'),
            ('edges/loader-pending-390x844.png', 'Model stalled · incomplete'), ('edges/loader-fallback-390x844.png', 'Still view · amber')], OUT / '01-loader.png')
+    strip([('15a-early-chapter.png', 'Entered early · no model yet'), ('15b-instruments-arrived.png', 'Instruments arrived'),
+           ('15c-case-early.png', 'Case opened early'), ('15d-case-connected.png', 'Leader connected to the model')], OUT / '15-enter-early.png')
     strip([('06-crosscheck-inspection.png', 'Marker pressed · leader · card'), ('04-menu.png', 'Menu slides in')], OUT / '13-micro.png')
     strip([('10-muted.png', 'Muted'), ('edges/audio-unavailable-390x844.png', 'Audio unavailable notice')], OUT / '14-sound-control.png')
     size = (390, 844)
@@ -659,6 +757,8 @@ def sheets():
         ('10-muted.png', 'Muted · silent'),
         ('11a-perf-gate-2.5s.png', 'Slow 4G · 2.5 s'),
         ('11b-perf-gate-enter.png', 'Slow 4G · Enter active'),
+        ('15a-early-chapter.png', 'Chapter before instruments'),
+        ('15b-instruments-arrived.png', 'Instruments arrived behind the hero'),
     ]
     cols, tsize = 6, (390, 844)
     rows = (len(labeled) + cols - 1) // cols
@@ -687,6 +787,8 @@ async def run():
             hover = await hover_check(browser)
             print('perf gate', flush=True)
             await perf_gate(browser, checks, meta)
+            print('enter early (instruments behind the hero)', flush=True)
+            await enter_early(browser, checks, meta)
             print('perf fps', flush=True)
             await perf_fps(browser, checks, meta)
             await dpr_cap(browser, checks)
@@ -758,7 +860,8 @@ async def run():
                   'streams': probe['streams'], 'audio': sound,
                   'note': "Audio track = the site's own Web Audio output captured in the browser (not re-created); aligned to the video within ~0.1-0.3 s"},
         'contactSheet': 'contact-sheet.jpg',
-        'sheets': ['01-loader.png', '05-flight-in.png', '11-perf-gate.png', '12-perf-fps.png', '13-micro.png', '14-sound-control.png', 'phones/phones-sheet.jpg'],
+        'sheets': ['01-loader.png', '05-flight-in.png', '11-perf-gate.png', '12-perf-fps.png', '13-micro.png', '14-sound-control.png',
+                   '15-enter-early.png', 'phones/phones-sheet.jpg'],
     }
     (OUT / 'evidence.json').write_text(json.dumps(report, indent=2, ensure_ascii=False) + '\n')
     for key, check in report['items'].items():

@@ -1,11 +1,11 @@
 'use client';
 
-import { Component, Suspense, useEffect, useMemo, useRef, type ReactNode, type MutableRefObject } from 'react';
+import { Component, Suspense, useEffect, useLayoutEffect, useMemo, useRef, type ReactNode, type MutableRefObject } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Center, Environment, Lightformer, useGLTF } from '@react-three/drei';
 import { Group, MathUtils, Mesh, MeshStandardMaterial, OrthographicCamera, Vector3, type Material, type Object3D } from 'three';
 import { instruments, type ChapterState } from '@/lib/instruments';
-import { pointScale, rigInstrument, saturn } from './instrument-motion';
+import { pointScale, rigInstrument, saturn, type Rig } from './instrument-motion';
 import Sky from './sky';
 import { caseFiles, type CaseComponent, type CaseView } from '@/lib/cases';
 
@@ -16,6 +16,8 @@ type SceneProps = {
   progress: MutableRefObject<number>;
   chapter: MutableRefObject<ChapterState>;
   caseView: MutableRefObject<CaseView>;
+  /** Request the five instrument models; the shell sets it once the hero and fonts are ready. */
+  loadInstruments: boolean;
   onReady: () => void;
   onFailure: () => void;
   onInstrumentTap: (index: number) => void;
@@ -45,11 +47,17 @@ class SceneBoundary extends Component<{ onFailure: () => void; children: ReactNo
   render() { return this.state.failed ? null : this.props.children; }
 }
 
-function World({ entered, progress, chapter, caseView, onReady, onInstrumentTap }: SceneProps) {
-  const dome = useGLTF('/models/dome.glb');
-  const ambient = useGLTF('/models/ambient.glb');
+type InstrumentView = { view: Object3D; materials: MeshStandardMaterial[]; rig: Rig };
+
+// The five instruments load behind the hero: Enter waits only for the dome, Saturn and fonts.
+// Until they arrive `views` stays empty, so chapters and cases briefly show no model.
+function Instruments({ viewsRef, groupsRef, onInstrumentTap }: {
+  viewsRef: MutableRefObject<InstrumentView[]>;
+  groupsRef: MutableRefObject<(Group | null)[]>;
+  onInstrumentTap: (index: number) => void;
+}) {
   const models = useGLTF(instruments.map(item => `/models/${item.id}.glb`));
-  const views = useMemo(() => models.map((model, i) => {
+  const loaded = useMemo(() => models.map((model, i) => {
     const view = model.scene.clone(true);
     const materials: MeshStandardMaterial[] = [];
     view.traverse(object => {
@@ -66,12 +74,19 @@ function World({ entered, progress, chapter, caseView, onReady, onInstrumentTap 
     });
     return { view, materials, rig: rigInstrument(instruments[i].id, view, materials, showObserver) };
   }), [models]);
-  useEffect(() => () => views.forEach(item => {
-    item.rig.dispose();
-    item.materials.forEach(material => material.dispose());
-  }), [views]);
+  // Layout effect: World's frame loop must see the views before these groups render once.
+  useLayoutEffect(() => {
+    viewsRef.current = loaded;
+    return () => {
+      viewsRef.current = [];
+      loaded.forEach(item => {
+        item.rig.dispose();
+        item.materials.forEach(material => material.dispose());
+      });
+    };
+  }, [loaded, viewsRef]);
   useEffect(() => {
-    const brandwall = views[instruments.findIndex(item => item.id === 'brandwall')];
+    const brandwall = loaded[instruments.findIndex(item => item.id === 'brandwall')];
     const tap = (event: MouseEvent) => {
       const shell = document.querySelector('.observatory.has-entered[data-flight=idle]');
       if (shell?.getAttribute('data-chapter') !== 'brandwall') return;
@@ -82,7 +97,15 @@ function World({ entered, progress, chapter, caseView, onReady, onInstrumentTap 
     };
     window.addEventListener('click', tap);
     return () => window.removeEventListener('click', tap);
-  }, [views, onInstrumentTap]);
+  }, [loaded, onInstrumentTap]);
+  // Hidden until World's frame loop places them, so they never flash at the origin.
+  return <>{loaded.map((item, i) => <group key={instruments[i].id} visible={false} ref={group => { groupsRef.current[i] = group; }}><Center><primitive object={item.view} /></Center></group>)}</>;
+}
+
+function World({ entered, progress, chapter, caseView, loadInstruments, onReady, onInstrumentTap }: SceneProps) {
+  // One call loads both in parallel (two calls suspend one after the other). The layout preloads them.
+  const [dome, ambient] = useGLTF(['/models/dome.glb', '/models/ambient.glb']);
+  const views = useRef<InstrumentView[]>([]);
   const planet = useMemo(() => saturn(ambient.scene), [ambient.scene]);
   useEffect(() => () => planet.dispose(), [planet]);
   const domeView = useMemo(() => {
@@ -151,7 +174,7 @@ function World({ entered, progress, chapter, caseView, onReady, onInstrumentTap 
     state.camera.lookAt(0, 0, 0);
     cameraUp.set(0, 1, 0).applyQuaternion(state.camera.quaternion);
     cameraRight.set(1, 0, 0).applyQuaternion(state.camera.quaternion);
-    views.forEach((moving, i) => {
+    views.current.forEach((moving, i) => {
       const group = instrumentRefs.current[i];
       if (!group) return;
       const incoming = i === index;
@@ -191,12 +214,13 @@ function World({ entered, progress, chapter, caseView, onReady, onInstrumentTap 
       planetRef.current.scale.setScalar((desktop ? Math.min(viewport.width * .45, viewport.height * .7) : viewport.width) * .072 * MathUtils.lerp(1, .78, moon));
       planet.update(time);
     }
-    if (stageRect && mix > .99) {
+    const caseModel = views.current[caseIndex];
+    if (stageRect && mix > .99 && caseModel) {
       state.camera.updateMatrixWorld();
       instrumentRefs.current[caseIndex]?.updateWorldMatrix(true, true);
       caseFiles[caseIndex].components.forEach(item => {
         const line = document.querySelector<SVGLineElement>(`[data-hotspot-line="${item.id}"]`);
-        if (!line || !anchor(views[caseIndex].view, item, projected)) return;
+        if (!line || !anchor(caseModel.view, item, projected)) return;
         projected.project(state.camera);
         line.setAttribute('x2', String((projected.x + 1) * size.width / 2 - stageLeft));
         line.setAttribute('y2', String((1 - projected.y) * size.height / 2 - stageRect.top));
@@ -217,7 +241,7 @@ function World({ entered, progress, chapter, caseView, onReady, onInstrumentTap 
     </Environment>
     <group ref={planetRef}><primitive object={planet.object} /></group>
     <group ref={domeRef}><Center><primitive object={domeView} /></Center></group>
-    {views.map((item, i) => <group key={instruments[i].id} ref={group => { instrumentRefs.current[i] = group; }}><Center><primitive object={item.view} /></Center></group>)}
+    {loadInstruments && <Suspense fallback={null}><Instruments viewsRef={views} groupsRef={instrumentRefs} onInstrumentTap={onInstrumentTap} /></Suspense>}
   </>;
 }
 
