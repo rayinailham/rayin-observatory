@@ -14,7 +14,7 @@
 | Bagian PLAN.md yang relevan | §3 Q41, §5.1 (CrossCheck), §7 (kontrak isi), §8.1–§8.2 (visual/motion/mobile → desktop), §10 (copy), §11 (performa), §12 (fase personalisasi) |
 | Blocker | Rig tes: `verify_desktop.py` / `verify_mobile.py` di venv `crosscheck` (Playwright 1.62) gagal — canvas R3F tetap 300×150, `data-scene=loading`, Chrome for Testing 149/151, headless + headed; direproduksi pada kode lama, perlu re-provision engine |
 | Preview sesi ini | Revisi planet: `http://127.0.0.1:8780/` · preview produksi lokal (`next start`) |
-| Revisi terakhir | Skills jadi deck kartu (drag/swipe, 12 grup, deskripsi grup + per tool + "same job, other tools"); di-approve pemilik 2026-09-16. Revisi gerbang desktop sebelumnya tetap siap review |
+| Revisi terakhir | Skills deck kartu: 13 grup / 37 tool, tiap tool dijelaskan, link case file pindah ke footer kartu, grup baru "Scripting & glue". Revisi gerbang desktop sebelumnya tetap siap review |
 | Langkah berikut | Development 7A: baca dossier CrossCheck lokal, susun brief personal, bangun chapter + case **mobile dulu**, lalu poles desktop sebagai tampilan utama; verifikasi → `ready-for-test`. Pulihkan rig browser sebelum mengklaim hasil visual lulus |
 | Launch | Fase 8 menunggu gate 7A–7F. Catatan deployment terdahulu: Vercel CLI login 2026-09-16 (`chhrone`, scope `chhrones-projects`), `web/` belum `vercel link`; verifikasi lagi saat Fase 8. Testing produksi tetap mengikuti Q40 |
 
@@ -418,6 +418,19 @@ Testing (Claude Code / Antigravity) — **semua tes memakai URL Vercel, bukan pr
 
 > Entri terbaru di atas. Singkat, 1–2 baris: tanggal · harness · fase — apa yang dikerjakan,
 > verifikasi, berikutnya. Detail teknis taruh di CODEMAP / folder bukti, bukan di sini.
+
+- **2026-09-16 · Claude Code · isi kartu Skills dijelaskan** — Permintaan pemilik lanjutan: tiap tool dijelaskan
+  "itu apa dan gimana pakainya" (n8n, unittest, Playwright, dst), link project **tidak lagi per tool** tapi satu baris
+  footer per kartu (`PROVEN IN`), dan tambah tools scripting yang gampang dipakai AI. Hasil: `lib/skills.ts` jadi 13 grup /
+  37 tool; grup baru **Scripting & glue** (requests, BeautifulSoup, pandas, Typer/argparse, python-dotenv, rich) plus
+  PyAutoGUI di Workflow automation dan pdfplumber di Reporting — tool baru ini **belum punya case file**, jadi kartunya
+  sengaja tanpa baris `PROVEN IN` (sama seperti Daily work). Setiap `note` ditulis ulang jadi penjelasan 15–25 kata.
+  Komponen: `proofOf(group)` menggabungkan project seluruh grup, dirender di footer sebagai link `data-skill-project`.
+  Cek bukti `full_observatory_evidence.py` diubah dari per-item ke per-kartu (link nyasar, grup tanpa case file,
+  tool tanpa deskripsi); `UNCONFIRMED` dikosongkan karena Go/MySQL/TiDB/Redis sudah dikonfirmasi pemilik 2026-09-15.
+  Diukur di Chrome 149: 13 kartu / 37 tool, 0 tool tanpa deskripsi, 0 link nyasar, 0 link tersisa di dalam daftar tool,
+  klik link footer → `#crosscheck` top 0 + highlight + heading fokus, 0 kartu terpotong, overflow 0 (1440×900 & 390×844).
+  lint/typecheck/build pass. Berikutnya: review pemilik.
 
 - **2026-09-16 · Claude Code · Skills jadi deck kartu** — Atas permintaan pemilik (dropdown dinilai berat sebelah ke kanan):
   `#skills` tidak lagi accordion `<details>` dua kolom. Komponen baru `web/components/skill-deck.tsx` menampilkan 12 grup

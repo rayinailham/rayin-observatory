@@ -43,7 +43,7 @@ export default function Home() {
       <section id="skills" className="text-section" aria-labelledby="skills-heading">
         <p className="section-kicker">The toolkit</p>
         <h2 id="skills-heading" tabIndex={-1}>Skills, with proof.</h2>
-        <p className="section-intro">Drag the deck, or pick a project beside a skill to explore the work behind it.</p>
+        <p className="section-intro">Drag the deck. Each card explains its tools, then links to the case files that prove them.</p>
         <SkillDeck />
       </section>
       <section id="about" className="text-section about-section" aria-labelledby="about-heading">

@@ -36,13 +36,15 @@ CONTACTS = ['mailto:rayinailham9@gmail.com', 'https://www.linkedin.com/in/rayina
 # PLAN §9: internal agent skill names never appear; unconfirmed daily-work tools are not published.
 FORBIDDEN = ['drift-alarm', 'qa-sweep', 'oracle-target', 'durable-queue-worker', 'bulk-form-runner', 'visual-brand-qa',
              'triage-engine', 'evidence-guard', 'scheduled-ops', 'unattended-run', 'web-recon', 'scraper-forge', 'Amazon', 'Rayin Ailham']
-UNCONFIRMED = {'Go', 'MySQL', 'TiDB', 'MySQL/TiDB', 'Redis'}
+# Go / MySQL / TiDB / Redis were confirmed by the owner on 2026-09-15 and are published under
+# 'Daily work'; this set stays as the guard for any tool added without that confirmation.
+UNCONFIRMED: set[str] = set()
 ITEMS = {
     'assets': 'Blender + .glb: antenna array, seismograph, orrery, prism spectrograph (Draco, size budget)',
     'order': 'Five chapters in PLAN §5 order',
     **{f'chapter-{s}': f'Chapter {NAMES[s]}: pinned, orbit, idle motion, reading, Open case file preview' for s in SLUGS},
     'numbers': 'Every homepage reading traces to its dossier',
-    'skills': 'Skills grouped into deck cards (PLAN §9), every item linked to a proving project, no internal/unconfirmed names',
+    'skills': 'Skills grouped into deck cards (PLAN §9), every tool described, each card linked to its proving projects, no internal/unconfirmed names',
     'skill-link': 'Choosing a project beside a skill returns to that instrument and highlights it',
     'about': 'About: stylised portrait, scan reveal, first-person DRAFT copy',
     'contact': 'Contact: Email CTA + Email / LinkedIn / GitHub / Upwork links',
@@ -231,14 +233,22 @@ async def main_flow(browser, ev):
         await page.locator('.deck-arrow').last.click()
         await page.wait_for_timeout(900)
         shot = await ev.shot(page, 'skills-open')
-        items = await page.locator('.skill-card li').evaluate_all(
-            '(els)=>els.map(li=>({name:li.querySelector("h4").textContent,links:[...li.querySelectorAll("a")].map(a=>a.getAttribute("href"))}))')
-        unlinked = [i['name'] for i in items if not i['links'] or any(h not in [f'#{s}' for s in SLUGS] for h in i['links'])]
-        unconfirmed = [i['name'] for i in items if i['name'] in UNCONFIRMED]
-        names = [i['name'] for i in items]
+        # Each card proves its whole group in one footer row, so the link check is per card, not per tool.
+        cards = await page.locator('.skill-card').evaluate_all(
+            '(els)=>els.map(card=>({group:card.querySelector("h3").textContent,'
+            'tools:[...card.querySelectorAll("h4")].map(h=>h.textContent),'
+            'notes:[...card.querySelectorAll(".skill-note")].map(p=>p.textContent.trim()),'
+            'links:[...card.querySelectorAll(".card-proof a")].map(a=>a.getAttribute("href"))}))')
+        names = [tool for card in cards for tool in card['tools']]
+        stray = [c['group'] for c in cards if any(h not in [f'#{s}' for s in SLUGS] for h in c['links'])]
+        # Groups with no case file behind them are named here on purpose; anything else must link out.
+        unproven = sorted({c['group'] for c in cards if not c['links']} - {'Daily work', 'Scripting & glue'})
+        undescribed = [tool for card in cards for tool, note in zip(card['tools'], card['notes']) if not note]
+        unconfirmed = [tool for tool in names if tool in UNCONFIRMED]
         core = all(any(k in n for n in names) for k in ['Python', 'Playwright', 'pytest', 'httpx', 'n8n'])
-        ev.check('skills', count >= 10 and not unlinked and not unconfirmed and core,
-                 f'{count} groups, {len(items)} skills, unlinked={unlinked}, unconfirmed published={unconfirmed}, '
+        ev.check('skills', count >= 10 and not stray and not unproven and not undescribed and not unconfirmed and core,
+                 f'{count} group cards, {len(names)} tools, each with a description (missing={undescribed}); '
+                 f'stray links={stray}, groups without a case file={unproven}, unconfirmed published={unconfirmed}, '
                  f'Python/testing/scraping/workflow core present={core}', shot)
     await ev.step('skills', skills())
 

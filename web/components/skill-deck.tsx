@@ -7,7 +7,9 @@ import { useReducedMotion } from './use-reduced-motion';
 
 const pad = (value: number) => String(value).padStart(2, '0');
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
-const projectName = (id: string) => instruments.find(item => item.id === id)?.name;
+/** The case files a group proves, in instrument order: one footer row instead of a link per tool. */
+const proofOf = (group: { items: { projects: string[] }[] }) =>
+  instruments.filter(item => group.items.some(skill => skill.projects.includes(item.id)));
 
 /** Deck geometry lives in CSS so each breakpoint tunes its own fan; JS only reads it. */
 type Metrics = { spread: number; drop: number; tilt: number; scale: number; step: number };
@@ -159,10 +161,10 @@ export default function SkillDeck() {
         <ul>{group.items.map(skill => <li key={skill.name}>
           <h4>{skill.name}</h4>
           <p className="skill-note">{skill.note}</p>
-          {skill.projects.length > 0 && <div className="skill-projects">{skill.projects.map(id => <a key={id} href={`#${id}`}
-            data-skill-project={id} tabIndex={enhanced && index !== active ? -1 : undefined}
-            aria-label={`${skill.name}: explore ${projectName(id)}`}>{projectName(id)}<span aria-hidden="true">↗</span></a>)}</div>}
         </li>)}</ul>
+        {proofOf(group).length > 0 && <p className="card-proof"><span>Proven in</span>{proofOf(group).map(item => <a key={item.id}
+          href={`#${item.id}`} data-skill-project={item.id} tabIndex={enhanced && index !== active ? -1 : undefined}
+          aria-label={`${group.name}: explore ${item.name}`}>{item.name}<span aria-hidden="true">↗</span></a>)}</p>}
         <p className="card-swaps"><span>Same job, other tools</span>{group.swaps.map(tool => <b key={tool}>{tool}</b>)}</p>
       </article>)}
     </div>
