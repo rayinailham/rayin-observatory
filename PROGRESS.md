@@ -13,8 +13,8 @@
 | Status fase | `todo` |
 | Bagian PLAN.md yang relevan | §12 (target Fase 8), §11 (target performa), §3 Q39 (gate Fase 7), §3 Q40 (tes di URL Vercel) |
 | Blocker | Tidak ada |
-| Preview sesi ini | Revisi lima instrumen: `http://127.0.0.1:8776/` · preview produksi lokal (`next start`) |
-| Revisi terakhir | Lima instrumen dibangun ulang prosedural (`web/components/instrument-models.ts`), sekelas observatorium; GLB instrumen tak lagi dimuat |
+| Preview sesi ini | Revisi planet: `http://127.0.0.1:8780/` · preview produksi lokal (`next start`) |
+| Revisi terakhir | Merkurius → Neptunus satu per tahap; progres scroll utuh, orbit berulang, kamera/fade sinkron; revisi siap review |
 | Langkah berikut | Sesi Development Fase 8 (Codex utama / Claude Code): meta + share card + favicon, **deploy ke Vercel produksi** + instruksi domain → `ready-for-test`. Testing lalu memakai URL Vercel (Q40). Vercel CLI sudah login 2026-09-16 (user `chhrone`, scope `chhrones-projects`); `web/` belum `vercel link` |
 
 ## Ringkasan fase
@@ -383,6 +383,8 @@ Testing (Claude Code / Antigravity) — **semua tes memakai URL Vercel, bukan pr
 > Entri terbaru di atas. Singkat, 1–2 baris: tanggal · harness · fase — apa yang dikerjakan,
 > verifikasi, berikutnya. Detail teknis taruh di CODEMAP / folder bukti, bukan di sini.
 
+- **2026-09-16 · Codex · revisi planet → ready-for-test** — Delapan planet berurutan, satu tiap tahap, orbit idle berulang; reset chapter dan fade shader dibenahi.
+  Build/lint/typecheck, uji jalur, dan 19 cek browser lulus (0 error); foto/video di `assets/renders/planetary-motion/dev/`, preview :8780.
 - **2026-09-16 · Codex · singularity dihapus** — Shader dibuang; prompt upgrade lima instrumen disiapkan, belum dieksekusi.
   Build/TypeScript/lint lulus; preview tetap :8769.
 - **2026-09-16 · Codex · revisi observatorium → ready-for-test** — Kubah detail bergerak, planet/parallax desktop, horizon, reduced motion.

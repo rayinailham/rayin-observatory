@@ -1,5 +1,7 @@
 # CODEMAP — Peta kode Rayin Observatory
 
+Revisi terbaru 2026-09-16 · Codex: urutan delapan planet + perbaikan gerak/fade; lihat “Revisi urutan planet”.
+
 > **Tujuan:** baca peta ini, bukan pindai seluruh kode. Buka berkas kode hanya jika peta
 > menunjuknya dan berkas akan diubah. Update setiap berkas dibuat/diubah/dipindah/dihapus.
 > Entri tidak cocok dengan kode = bug; perbaiki saat ditemukan.
@@ -447,9 +449,9 @@ Rayin Observatory/
 - **Ekspor utama:** `ObservatoryShell`; `scrollFromMenu`, `returnToDome`, `goToWork`, `openContact`, `openCase(index)`,
   `chainCase(index)`, `leaveCase(target)`; `caseOf(path)`; `measure`/`syncChapters` di efek GSAP.
 - **Dipakai oleh:** root layout.
-- **Bergantung pada:** Scene dynamic, instruments, drei useProgress, GSAP/ScrollTrigger, Lenis, audio.
+- **Bergantung pada:** Scene import statis, instruments, drei useProgress, GSAP/ScrollTrigger, Lenis, audio.
 - **State / efek samping:** satu ticker Lenis; main trigger menulis readout dan chapter ref
-  (`index`, `transition`, `reveal`, `orbit`, `outro`) dari bounds section. Hero trigger terpisah;
+  (`index`, `transition`, `reveal`, `orbit`, `outro`) dari bounds section. `planetProgress` terpisah = scrollY / rentang scroll homepage (diukur ulang saat resize); tidak reset saat chapter berganti. Hero trigger terpisah;
   dua trigger portrait untuk clip + scan-line. ResizeObserver main merefresh bounds saat accordion
   berubah. Menu menghentikan Lenis; menu scroll memulai Lenis sebelum scrollTo, fokus heading
   saat selesai. Skill links menambah `.skill-highlight`. Delegasi klik: `[data-home-target]` → leaveCase,
@@ -480,7 +482,7 @@ Rayin Observatory/
   (dulu `roughness>=.5`, `metalness<=.55` untuk menjinakkan ekspor Blender); nilai ditulis langsung di model.
 - **Catatan:** Muat bertahap (Fase 7, opsi B): `World` membangun kubah lewat `buildObservatory()` dan memuat `ambient.glb` → frame ke-2 `onReady`. `<Instruments>` di `<Suspense>` sendiri, di-mount hanya bila `loadInstruments`; ia membangun lima instrumen lewat `buildInstrument()`, mengisi ref `views` lewat `useLayoutEffect` (kosong = belum ada model), memiliki handler tap BrandWall, dan me-render group `visible={false}` sampai frame loop `World` menempatkannya. Frame loop + leader aman saat `views.current` kosong (chapter/case sementara tanpa model, termasuk direct `/work/<slug>`). Instrumen kini prosedural, jadi satu-satunya model yang masih bisa gagal memuat adalah `ambient.glb`;
   kegagalannya naik ke `SceneBoundary` → still view + notice seperti biasa (skrip verifikasi memblokir model itu).
-  langit = `<Sky>` (titik bintang lama dihapus); Saturnus (`saturn()` rig) ditambat ke kamera; lintasan berubah dengan scroll. Kubah baru bergerak ke kiri saat hero keluar.
+  langit = `<Sky>` (titik bintang lama dihapus); rig Saturnus diserahkan ke `PlanetaryJourney`, hanya tampil pada urutan keenam. `World.useFrame` prioritas -1 memperbarui kamera sebelum posisi planet (prioritas 0), mencegah selisih kamera satu frame. Kubah baru bergerak ke kiri saat hero keluar.
   SceneBoundary gagal satu model → still view menyeluruh; semua chapter tetap dapat dibaca. `CaseView` mix menginterpolasi sudut, jarak, zoom ortografis; model `caseView.index` mengikuti bounds `#case-instrument` (skala case = min(w·.62, h·.33)/fit, fit 4.4 CrossCheck / 3.5 lain). Canvas tetap root.
   Fase 6: breakpoint 1024px sama dengan CSS. Kamera menempatkan instrumen di kanan dan membatasi skala terhadap tinggi/lebar; dome/Saturnus ikut dikomposisi. Case mengikuti bounds `.case-inspection`; x2 leader dikurangi posisi pane relatif Canvas (penting saat Canvas HP terpusat di tablet).
   Fase 5: `anchor()` = origin node, atau pusat bounding sphere child mesh yang nama materialnya memuat `part`, → proyeksi ke SVG `[data-hotspot-line=<id>]`
@@ -489,8 +491,7 @@ Rayin Observatory/
 ### Revisi observatorium + scroll (2026-09-16)
 - `observatory-model.ts`: bangunan prosedural; panel, rel, balkon, jendela, tangga, teleskop/finder.
   Geometri statis digabung per material/pivot: 20 mesh, 45.132 segitiga. Dispose dimiliki rig.
-- `planetary-journey.tsx`: tiga planet shader; lintasan desktop memakai progres hero/chapter,
-  posisi disimpan di ref. Planet tambahan disembunyikan pada mobile, reduced motion, dan case file.
+- `planetary-journey.tsx`: delapan planet (Merkurius → Neptunus), satu group terlihat tiap tahap pada desktop dan HP. Membaca progres homepage tunggal; damping tanpa overshoot, keluar kanan-atas sebelum planet berikut masuk kanan-bawah. Orbit elips idle hanya memakai waktu, terpisah dari scroll. Quaternion mengikuti kamera pada frame yang sama; shader/material opacity untuk handoff, rig Saturnus lama digunakan ulang. Reduced motion menonaktifkan perpindahan/idle, pilihan planet tetap mengikuti scroll. Semua planet disembunyikan pada case file.
 - `use-reduced-motion.ts`: media query reaktif; shell menghentikan smooth wheel/parallax,
   mempersingkat transisi, scene membekukan gerak idle. Scroll sentuh memakai perilaku native.
 - Shell: GSAP matchMedia untuk parallax hero + reveal heading; cleanup saat route/breakpoint berubah.
@@ -498,6 +499,13 @@ Rayin Observatory/
 - Upgrade lima instrumen (`INSTRUMENT-DETAIL-PROMPT.md`) dieksekusi 2026-09-16 → `instrument-models.ts`.
 - Verifikasi: `OBSERVATORY_URL=http://localhost:8769 timeout 180 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python web/scripts/verify_observatory_motion.py`.
   Bukti: `assets/renders/observatory-motion/dev/` (PNG, WebM, JSON). Preview produksi lokal: port 8769.
+
+### Revisi urutan planet (2026-09-16)
+- `web/lib/planetary-motion.ts`: `planets` (delapan nama, warna, shader, ukuran tampilan, kemiringan/rotasi) dan `samplePlanetJourney(progress, time, desktop, reducedMotion)`; fungsi murni, tanpa DOM/Three. Scroll menentukan planet/transit, waktu menentukan orbit elips tertutup dengan arah sama. Ini koreografi dekoratif, bukan skala astronomi.
+- `web/scripts/verify_planetary_motion.mjs`: `node web/scripts/verify_planetary_motion.mjs`; uji urutan 10.001 sampel scroll, kedua sisi batas hilang, 16 orbit tertutup desktop/HP, arah konsisten, seam, reduced motion, clamp ujung.
+- `web/scripts/verify_planetary_browser.py`: Chromium membaca group R3F nyata melalui hook DevTools khusus test, tanpa debug API aplikasi. Urutan delapan planet maju/mundur di 390×844 dan 1440×900, wheel bolak-balik (maksimal satu planet/frame), idle, resize 360/430/1024/1920, reduced motion, case → home. PNG, WebM, JSON ke `assets/renders/planetary-motion/dev/`; bukan klaim performa HP fisik.
+- Hasil: build/TypeScript/lint + uji jalur + 19 cek Chromium lulus, 0 error. Frame wheel 1500 px diverifikasi tidak berbalik arah/bertumpuk; ini bukan jaminan FPS. R3F 9.7 mempertahankan wrapper uniform sendiri, jadi animasi menulis `material.uniforms` melalui ref (mutasi object props saja tidak bekerja).
+- Preview produksi revisi: `http://127.0.0.1:8780/`. Jalankan `OBSERVATORY_URL=http://127.0.0.1:8780 timeout 360 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python web/scripts/verify_planetary_browser.py`.
 
 ### `web/components/sky.tsx`
 - **Peran:** mesh layar penuh (renderOrder -10, tanpa depth) dengan shader langit: zenith hitam → ink → horizon biru,

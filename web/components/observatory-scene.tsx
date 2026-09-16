@@ -18,6 +18,7 @@ type SceneProps = {
   entered: boolean;
   reducedMotion: boolean;
   progress: MutableRefObject<number>;
+  planetProgress: MutableRefObject<number>;
   chapter: MutableRefObject<ChapterState>;
   caseView: MutableRefObject<CaseView>;
   /** Request the five instrument models; the shell sets it once the hero and fonts are ready. */
@@ -93,7 +94,7 @@ function Instruments({ viewsRef, groupsRef, onInstrumentTap }: {
   return <>{loaded.map((item, i) => <group key={instruments[i].id} visible={false} ref={group => { groupsRef.current[i] = group; }}><Center><primitive object={item.view} /></Center></group>)}</>;
 }
 
-function World({ entered, reducedMotion, progress, chapter, caseView, loadInstruments, onReady, onInstrumentTap }: SceneProps) {
+function World({ entered, reducedMotion, progress, planetProgress, chapter, caseView, loadInstruments, onReady, onInstrumentTap }: SceneProps) {
   // The dome is procedural; only Saturn's source model is needed before entering.
   const ambient = useGLTF('/models/ambient.glb');
   const views = useRef<InstrumentView[]>([]);
@@ -105,7 +106,6 @@ function World({ entered, reducedMotion, progress, chapter, caseView, loadInstru
   const cameraAngle = useRef(0);
   const domeRef = useRef<Group>(null);
   const instrumentRefs = useRef<(Group | null)[]>([]);
-  const planetRef = useRef<Group>(null);
   const revealed = useRef(0);
   const { size } = useThree();
   const viewport = { width: size.width / 100, height: size.height / 100 };
@@ -115,7 +115,6 @@ function World({ entered, reducedMotion, progress, chapter, caseView, loadInstru
   const frames = useRef(0);
   const cameraUp = useMemo(() => new Vector3(), []);
   const cameraRight = useMemo(() => new Vector3(), []);
-  const cameraBack = useMemo(() => new Vector3(), []);
 
   useFrame((state, delta) => {
     if (++frames.current === 2) onReady();
@@ -178,20 +177,6 @@ function World({ entered, reducedMotion, progress, chapter, caseView, loadInstru
       domeRef.current.rotation.set(.14 + scroll * .10, -.30 + scroll * .65, 0);
       if (domeRef.current.visible) observatory.update(time, scroll);
     }
-    if (planetRef.current) {
-      planetRef.current.visible = mix < .9;
-      // Screen-anchored so the orbiting camera never sweeps it across the instrument;
-      // in the chapter it settles beside the heading as a small moon.
-      const moon = MathUtils.smoothstep(reveal, .35, .9);
-      cameraRight.set(1, 0, 0).applyQuaternion(state.camera.quaternion);
-      cameraBack.set(0, 0, -1).applyQuaternion(state.camera.quaternion).multiplyScalar(4);
-      planetRef.current.position.copy(cameraBack)
-        .addScaledVector(cameraRight, viewport.width * (desktop && !reducedMotion ? MathUtils.lerp(.32 - scroll * .35, .30 + Math.sin((index + transition + orbit) * .9) * .12, moon) : MathUtils.lerp(.31, .38, moon)))
-        .addScaledVector(cameraUp, viewport.height * MathUtils.lerp(desktop ? .32 + Math.sin(scroll * Math.PI) * .05 : .015, .32, moon) + Math.sin(time * .14) * .05);
-      planetRef.current.rotation.set(.4 + Math.sin(time * .21) * .05, .15 + time * .015, -.38 + Math.sin(time * .17) * .04);
-      planetRef.current.scale.setScalar((desktop ? Math.min(viewport.width * .45, viewport.height * .7) : viewport.width) * .072 * MathUtils.lerp(1, .78, moon));
-      planet.update(time);
-    }
     const caseModel = views.current[caseIndex];
     if (stageRect && mix > .99 && caseModel) {
       state.camera.updateMatrixWorld();
@@ -204,11 +189,11 @@ function World({ entered, reducedMotion, progress, chapter, caseView, loadInstru
         line.setAttribute('y2', String((1 - projected.y) * size.height / 2 - stageRect.top));
       });
     }
-  });
+  }, -1); // Camera first; screen-anchored decoration reads this frame’s transform.
 
   return <>
     <Sky progress={progress} chapter={chapter} reducedMotion={reducedMotion} />
-    <PlanetaryJourney progress={progress} chapter={chapter} caseView={caseView} reducedMotion={reducedMotion} />
+    <PlanetaryJourney progress={planetProgress} caseView={caseView} reducedMotion={reducedMotion} saturnRig={planet} />
     <ambientLight intensity={.6} />
     <directionalLight position={[3, 6, 5]} intensity={.65} color="#cadcff" />
     <directionalLight position={[-4, 1, 3]} intensity={.55} color="#F2A541" />
@@ -218,7 +203,6 @@ function World({ entered, reducedMotion, progress, chapter, caseView, loadInstru
       <Lightformer intensity={1.3} color="#F2A541" position={[-5, 1, 2]} rotation={[0, Math.PI / 2, 0]} scale={[4, 8, 1]} />
       <Lightformer intensity={1.8} color="#a1b6e7" position={[5, 3, 1]} rotation={[0, -Math.PI / 2, 0]} scale={[5, 7, 1]} />
     </Environment>
-    <group ref={planetRef}><primitive object={planet.object} /></group>
     <group ref={domeRef}><primitive object={observatory.object} /></group>
     {loadInstruments && <Suspense fallback={null}><Instruments viewsRef={views} groupsRef={instrumentRefs} onInstrumentTap={onInstrumentTap} /></Suspense>}
   </>;

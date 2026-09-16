@@ -2,15 +2,16 @@
 
 import { useMemo, useRef, type MutableRefObject } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Color, Group, MathUtils, ShaderMaterial, Vector3 } from 'three';
-import type { ChapterState } from '@/lib/instruments';
+import { Color, Group, MathUtils, Mesh, Vector3, type Material, type Object3D, type ShaderMaterial } from 'three';
+import { planets, samplePlanetJourney } from '@/lib/planetary-motion';
+import type { Rig } from './instrument-motion';
 import type { CaseView } from '@/lib/cases';
 
 const vertexShader = `varying vec3 vNormal; varying vec3 vPosition;
 void main() { vNormal = normalize(normalMatrix * normal); vPosition = position;
 gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.); }`;
 const fragmentShader = `
-uniform vec3 uColor; uniform float uKind; uniform float uTime;
+uniform vec3 uColor; uniform float uKind; uniform float uTime; uniform float uOpacity;
 varying vec3 vNormal; varying vec3 vPosition;
 float hash(vec3 p) { return fract(sin(dot(p, vec3(127.1,311.7,74.7))) * 43758.5453); }
 float noise(vec3 p) {
@@ -30,49 +31,76 @@ void main() {
  color*=.13+light*.95;
  float rim=pow(1.-max(n.z,0.),3.)*max(dot(n,normalize(vec3(-.8,.3,.6))),0.);
  color+=uColor*rim*.6;
- gl_FragColor=vec4(color,1.);
+ gl_FragColor=vec4(color,uOpacity);
  #include <colorspace_fragment>
 }`;
 
-function Planet({ kind, color }: { kind: number; color: string }) {
-  const uniforms = useMemo(() => ({ uColor: { value: new Color(color) }, uKind: { value: kind }, uTime: { value: 0 } }), [color, kind]);
-  return <mesh><sphereGeometry args={[1, 48, 32]} /><shaderMaterial uniforms={uniforms} vertexShader={vertexShader} fragmentShader={fragmentShader} /></mesh>;
+type PlanetUniforms = { uColor: { value: Color }; uKind: { value: number }; uTime: { value: number }; uOpacity: { value: number } };
+
+function Planet({ uniforms, materialRef }: { uniforms: PlanetUniforms; materialRef: (material: ShaderMaterial | null) => void }) {
+  return <mesh><sphereGeometry args={[1, 48, 32]} /><shaderMaterial ref={materialRef} uniforms={uniforms} vertexShader={vertexShader} fragmentShader={fragmentShader} transparent depthWrite={false} /></mesh>;
 }
 
-/** Decorative planetary flybys stay in the margins, behind the instruments and copy. */
-export default function PlanetaryJourney({ progress, chapter, caseView, reducedMotion }: {
-  progress: MutableRefObject<number>; chapter: MutableRefObject<ChapterState>;
-  caseView: MutableRefObject<CaseView>; reducedMotion: boolean;
+/** One screen-anchored planet, with independent scroll passage and idle orbit. */
+export default function PlanetaryJourney({ progress, caseView, reducedMotion, saturnRig }: {
+  progress: MutableRefObject<number>; caseView: MutableRefObject<CaseView>;
+  reducedMotion: boolean; saturnRig: Rig & { object: Object3D };
 }) {
   const groups = useRef<(Group | null)[]>([]);
-  const journey = useRef(0);
+  const bodies = useRef<(Group | null)[]>([]);
+  const materials = useRef<(ShaderMaterial | null)[]>([]);
+  const journey = useRef<number | null>(null);
+  const elapsed = useRef(0);
   const axes = useMemo(() => ({ right: new Vector3(), up: new Vector3(), back: new Vector3() }), []);
+  const uniforms = useMemo(() => planets.map(planet => ({ uColor: { value: new Color(planet.color) }, uKind: { value: planet.kind }, uTime: { value: 0 }, uOpacity: { value: 1 } })), []);
+  const saturnMaterials = useMemo(() => {
+    const materials = new Set<Material>();
+    saturnRig.object.traverse(child => {
+      if (child instanceof Mesh) (Array.isArray(child.material) ? child.material : [child.material]).forEach(material => materials.add(material));
+    });
+    return [...materials].map(material => {
+      material.transparent = true;
+      return { material, opacity: material.opacity };
+    });
+  }, [saturnRig]);
+
   useFrame((state, delta) => {
-    const { reveal, index, transition, orbit, outro } = chapter.current;
-    const desktop = state.size.width >= 1024;
-    const target = progress.current + reveal + Math.max(0, index - 1 + transition) + orbit * .55;
-    journey.current = reducedMotion ? 0 : MathUtils.damp(journey.current, target, 5, Math.min(delta, .05));
-    const t = journey.current;
+    const step = Math.min(delta, .05);
+    if (!reducedMotion) elapsed.current += step;
+    // Lenis already smooths wheel input. A short, non-overshooting settle also handles
+    // native touch, history restoration and scrollbar jumps without chapter resets.
+    journey.current = journey.current === null || reducedMotion || caseView.current.active
+      ? progress.current : MathUtils.damp(journey.current, progress.current, 12, step);
+    const pose = samplePlanetJourney(journey.current, elapsed.current, state.size.width >= 1024, reducedMotion);
+    const zoom = 'zoom' in state.camera ? Number(state.camera.zoom) : 100;
+    const width = state.size.width / zoom, height = state.size.height / zoom;
     axes.right.set(1, 0, 0).applyQuaternion(state.camera.quaternion);
     axes.up.set(0, 1, 0).applyQuaternion(state.camera.quaternion);
     axes.back.set(0, 0, -6).applyQuaternion(state.camera.quaternion);
     groups.current.forEach((group, i) => {
       if (!group) return;
-      group.visible = desktop && !reducedMotion && caseView.current.mix < .01 && outro < .99;
+      group.visible = i === pose.index && pose.opacity > .001 && !caseView.current.active && caseView.current.mix < .01;
       if (!group.visible) return;
-      const arrival = MathUtils.smootherstep(t, .15 + i * .65, .9 + i * .65);
-      // Earth rises on the right; Jupiter and Mars cross the upper margin at different depths.
-      const x = i === 0 ? .435 - Math.sin(t * .8) * .025 : i === 1 ? -.02 + Math.sin(t * .52) * .07 : -.32 + Math.cos(t * .62) * .055;
-      const y = i === 0 ? -.66 + arrival * .53 + Math.sin(t * .75) * .11 : .74 - arrival * .41 + Math.sin(t * .7 + i) * .045;
-      group.position.copy(axes.back).addScaledVector(axes.right, state.size.width / 100 * x)
-        .addScaledVector(axes.up, state.size.height / 100 * y);
-      const radius = [ .055, .035, .017 ][i] * state.size.height / 100;
-      group.scale.setScalar(radius * (1 - outro * .8));
-      group.rotation.y = state.clock.elapsedTime * .025 + t * .16;
-      group.traverse(child => {
-        if ('material' in child && child.material instanceof ShaderMaterial) child.material.uniforms.uTime.value = state.clock.elapsedTime;
-      });
+      group.position.copy(axes.back).addScaledVector(axes.right, width * pose.x).addScaledVector(axes.up, height * pose.y);
+      // Cancel the instrument camera's orbit before applying the planet's own axial tilt.
+      group.quaternion.copy(state.camera.quaternion);
+      group.scale.setScalar(Math.min(height * .047, width * .052) * planets[i].size);
+      bodies.current[i]?.rotation.set(.15, elapsed.current * planets[i].spin, planets[i].tilt, 'ZYX');
+      // R3F preserves its own uniform wrappers; mutate the mounted material, not props.
+      const material = materials.current[i];
+      if (material) {
+        material.uniforms.uTime.value = elapsed.current;
+        material.uniforms.uOpacity.value = pose.opacity;
+      }
+      if (i === 5) {
+        saturnMaterials.forEach(({ material, opacity }) => { material.opacity = opacity * pose.opacity; });
+        saturnRig.update(elapsed.current);
+      }
     });
   });
-  return <>{['#6aa9d6', '#d6ae80', '#c57551'].map((color, i) => <group key={color} name={`JourneyPlanet${i}`} visible={false} ref={group => { groups.current[i] = group; }}><Planet kind={i} color={color} /></group>)}</>;
+  return <>{planets.map((planet, i) => <group key={planet.name} name={`JourneyPlanet-${planet.name}`} visible={false} ref={group => { groups.current[i] = group; }}>
+    <group ref={group => { bodies.current[i] = group; }}>
+      {i === 5 ? <primitive object={saturnRig.object} /> : <Planet uniforms={uniforms[i]} materialRef={material => { materials.current[i] = material; }} />}
+    </group>
+  </group>)}</>;
 }

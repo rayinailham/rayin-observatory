@@ -45,6 +45,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
   const menu = useRef<HTMLDialogElement>(null);
   const readout = useRef<HTMLOutputElement>(null);
   const progress = useRef(0);
+  const planetProgress = useRef(0);
   const chapter = useRef<ChapterState>({ reveal: 0, orbit: 0, index: 0, transition: 0, outro: 0 });
   const lenis = useRef<Lenis | null>(null);
   const audio = useRef<ObservatoryAudio | null>(null);
@@ -168,16 +169,19 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
     const homeSections = sections as HTMLElement[];
     let positions: { top: number; height: number }[] = [];
     let skillsTop = 0;
+    let journeyEnd = 1;
     // A route change can refresh or scroll before React cleans up this trigger; the homepage
     // DOM is already gone then, so its stale sections must not measure or rewrite chapter state.
     const live = () => homeSections[0].isConnected;
     const measure = () => {
       positions = homeSections.map(section => ({ top: section.getBoundingClientRect().top + window.scrollY, height: section.offsetHeight }));
       skillsTop = document.getElementById('skills')!.getBoundingClientRect().top + window.scrollY;
+      journeyEnd = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
     };
     const clamp = (n: number) => Math.max(0, Math.min(1, n));
     const syncChapters = () => {
       const y = window.scrollY;
+      planetProgress.current = clamp(y / journeyEnd);
       const height = homeSections[0].querySelector<HTMLElement>('.instrument-stage')!.offsetHeight;
       let index = 0;
       positions.forEach((pos, i) => { if (y >= pos.top - height) index = i; });
@@ -366,7 +370,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
 
   return <div ref={root} className={`observatory ${entered ? 'has-entered' : ''}`} data-motion={reducedMotion ? 'reduced' : 'full'} data-route={isCase ? 'case' : 'home'} data-flight={flying ? 'moving' : 'idle'} data-scene={failed ? 'fallback' : sceneReady ? 'ready' : 'loading'}>
     <div className="scene-layer" aria-hidden="true">
-      {!failed && <Scene reducedMotion={reducedMotion} entered={entered} progress={progress} chapter={chapter} caseView={caseView} loadInstruments={ready} onReady={onReady} onFailure={onFailure} onInstrumentTap={onInstrumentTap} />}
+      {!failed && <Scene reducedMotion={reducedMotion} entered={entered} progress={progress} planetProgress={planetProgress} chapter={chapter} caseView={caseView} loadInstruments={ready} onReady={onReady} onFailure={onFailure} onInstrumentTap={onInstrumentTap} />}
       {failed && !isCase && <><div className="scene-fallback" />{instruments.map((item, i) => <div key={item.id} className={`instrument-fallback ${item.id}-fallback`} style={{ backgroundImage: `url('/images/${item.id}-fallback.png')`, transform: `translateY(calc(var(--instrument-${i}-offset, 2) * 100svh))` }} />)}</>}
     </div>
     <div ref={content} inert={!entered} className="site-content" onClickCapture={event => {
