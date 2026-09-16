@@ -2,7 +2,8 @@
 
 import { useMemo, useRef, type MutableRefObject } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { ShaderMaterial, Vector2 } from 'three';
+import { MathUtils, ShaderMaterial, Vector2 } from 'three';
+import type { ChapterState } from '@/lib/instruments';
 
 // Full-screen night sky: pitch black zenith easing into the ink horizon, procedural
 // twinkling stars in three depths and a faint nebula band. Decoration, not astronomy data.
@@ -57,16 +58,19 @@ void main() {
   gl_FragColor = vec4(color, 1.);
 }`;
 
-export default function Sky({ progress }: { progress: MutableRefObject<number> }) {
+export default function Sky({ progress, chapter, reducedMotion }: { progress: MutableRefObject<number>; chapter: MutableRefObject<ChapterState>; reducedMotion: boolean }) {
   const material = useRef<ShaderMaterial>(null);
   const uniforms = useMemo(() => ({ uTime: { value: 0 }, uOffset: { value: new Vector2() }, uRes: { value: new Vector2(1, 1) }, uDpr: { value: 1 } }), []);
-  useFrame(state => {
+  useFrame((state, delta) => {
     if (!material.current) return;
     const { uTime, uOffset, uRes, uDpr } = material.current.uniforms;
-    uTime.value = state.clock.elapsedTime;
+    uTime.value = reducedMotion ? 0 : state.clock.elapsedTime;
     // Stars drift against the camera orbit and the hero rise, deeper layers slower.
     const angle = Math.atan2(state.camera.position.x, state.camera.position.z);
-    uOffset.value.set(angle * 240, progress.current * 70 + state.camera.position.y * 14);
+    const travel = chapter.current.index + chapter.current.transition + chapter.current.orbit;
+    const targetY = reducedMotion ? 0 : progress.current * 150 + travel * 55 + state.camera.position.y * 14;
+    uOffset.value.x = MathUtils.damp(uOffset.value.x, reducedMotion ? 0 : angle * 240, 5, Math.min(delta, .05));
+    uOffset.value.y = MathUtils.damp(uOffset.value.y, targetY, 5, Math.min(delta, .05));
     state.gl.getDrawingBufferSize(uRes.value);
     uDpr.value = state.gl.getPixelRatio();
   });

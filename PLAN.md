@@ -74,6 +74,7 @@ observatorium. Dikerjakan **mobile-first**, desktop menyusul, dalam 10 fase bert
 | Q36 | Gate Fase 6 (Desktop) | (2026-09-15) Gate Fase 6 lolos dari video bukti desktop ("okay semuanya lolos catat"); layar pertama case file desktop (brief dua kolom, instrumen di bawah lipatan) diterima apa adanya |
 | Q37 | Enter lebih cepat | (2026-09-16) Temuan Testing Fase 7 (Enter baru aktif ±12 dtk di slow 4G): pemilik pilih opsi B — Enter aktif setelah hero siap (kubah + planet + font), lima instrumen dimuat di belakang hero. Fase 7 kembali ke Development; dikerjakan sesi berikut (spesifikasi di PROGRESS Fase 7) |
 | Q39 | Gate Fase 7 (Showpiece) | (2026-09-16) Gate Fase 7 lolos dari paket bukti Testing ulang 14/14 ("lolos commit dan push"); Enter aktif 6.39 dtk di slow 4G. Temuan jeda ±3 dtk (chapter/case tampil tanpa model, garis penunjuk case sempat bertemu di ruang kosong) **diterima apa adanya**. Berikutnya Fase 8 Launch ready |
+| Q40 | Tes Fase 8 di URL Vercel | (2026-09-16) Tahap Testing Fase 8 dijalankan terhadap **URL produksi Vercel**, bukan preview lokal: Development deploy dulu, lalu QA lintas browser + paket bukti + tes HP fisik pemilik semuanya memakai link Vercel. Vercel CLI 54.9.1 sudah terpasang di device (dicatat di `RULES.md`); `vercel login` dilakukan pemilik sendiri. Domain/DNS tetap di luar cakupan agent |
 | Q38 | Commit + push akhir fase | (2026-09-16) Setiap akhir fase (gate lolos → `done`) **wajib** git commit + push ke `origin main` (akun personal). Di luar akhir fase tetap hanya atas permintaan pemilik. Aturan di `PROMPT.md` |
 
 ---

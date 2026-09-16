@@ -161,7 +161,7 @@ async def viewport(browser, width, height):
 
 async def fallback(browser):
     context = await browser.new_context(viewport={'width': 1440, 'height': 900})
-    await context.route('**/models/brandwall.glb', lambda route: route.abort())
+    await context.route('**/models/ambient.glb', lambda route: route.abort())
     page = await context.new_page()
     await page.goto(URL + '/work/brandwall')
     await page.get_by_role('button', name='Enter without sound', exact=True).click(timeout=30000)

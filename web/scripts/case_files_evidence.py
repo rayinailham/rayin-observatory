@@ -497,7 +497,7 @@ async def fallback_check(browser, checks):
     """Model blocked fallback: labeled still view, component cards, and return work."""
     context = await browser.new_context(viewport={'width': W, 'height': H}, device_scale_factor=2, is_mobile=True, has_touch=True)
     page = await context.new_page()
-    await page.route('**/models/surgeline.glb', lambda route: route.abort())
+    await page.route('**/models/ambient.glb', lambda route: route.abort())
     await enter(page, '/work/surgeline')
     # Instruments load behind the hero (Phase 7), so a blocked model can fail after Enter.
     await page.wait_for_selector('.observatory[data-scene="fallback"]', state='attached', timeout=30000)

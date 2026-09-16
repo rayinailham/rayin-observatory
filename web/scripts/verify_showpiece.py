@@ -226,14 +226,15 @@ async def edges(browser):
     assert not errors, errors
     await context.close()
 
-    # Stalled GLB: visible incomplete loader, then the existing still-view escape after 15s.
+    # Stalled GLB (Saturn is the one model still fetched): visible incomplete loader, then
+    # the existing still-view escape after 15s.
     context = await browser.new_context(viewport={'width': 390, 'height': 844})
     page = await context.new_page()
     release = asyncio.Event()
     async def stall(route):
         await release.wait()
         await route.abort()
-    await page.route('**/models/dome.glb', stall)
+    await page.route('**/models/ambient.glb', stall)
     await page.goto(URL, wait_until='domcontentloaded')
     await expect(page.locator('.enter-button')).to_be_disabled()
     await page.wait_for_timeout(1500)

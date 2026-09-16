@@ -329,7 +329,7 @@ async def viewports(browser, ev):
 async def fallback(browser, ev):
     context = await browser.new_context(viewport={'width': W, 'height': H}, device_scale_factor=2, is_mobile=True, has_touch=True)
     page = await context.new_page()
-    await page.route('**/models/brandwall.glb', lambda route: route.abort())
+    await page.route('**/models/ambient.glb', lambda route: route.abort())
     await enter(page)
     scene = await page.locator('.observatory').get_attribute('data-scene')
     await jump(page, await top_of(page, '#surgeline') + 2)
@@ -339,7 +339,7 @@ async def fallback(browser, ev):
     shot = await ev.shot(page, 'fallback-still-view')
     await context.close()
     ev.check('fallback', scene == 'fallback' and notice['y'] + notice['height'] <= copy['y'] and 0 < image['y'],
-             f'brandwall.glb blocked -> scene={scene}; notice bottom={notice["y"] + notice["height"]:.1f} <= copy top={copy["y"]:.1f}', shot)
+             f'ambient.glb blocked -> scene={scene}; notice bottom={notice["y"] + notice["height"]:.1f} <= copy top={copy["y"]:.1f}', shot)
 
 
 def contact_sheet(paths, target, columns=6, label_dir=False):

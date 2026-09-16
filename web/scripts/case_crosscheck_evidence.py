@@ -340,7 +340,7 @@ async def main_flow(browser, checks, dossier):
 async def fallback(browser, checks):
     context = await browser.new_context(viewport={'width': W, 'height': H}, device_scale_factor=2, is_mobile=True, has_touch=True)
     page = await context.new_page()
-    await page.route('**/models/crosscheck.glb', lambda route: route.abort())
+    await page.route('**/models/ambient.glb', lambda route: route.abort())
     await enter(page, '/work/crosscheck')
     scene = await page.locator('.observatory').get_attribute('data-scene')
     await page.evaluate('(y)=>scrollTo(0,y)', await top(page, '#case-instrument'))

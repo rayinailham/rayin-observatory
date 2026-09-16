@@ -164,10 +164,10 @@ async def run():
             context = await browser.new_context(viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True)
             page = await context.new_page()
             if fallback:
-                await page.route('**/models/crosscheck.glb', lambda route: route.abort())
+                await page.route('**/models/ambient.glb', lambda route: route.abort())
             await enter(page, '/work/crosscheck')
             if fallback:
-                # Instruments load behind the hero, so a blocked model can fail after Enter.
+                # ambient.glb is the one model still fetched; blocking it fails the scene.
                 await page.wait_for_selector('.observatory[data-scene="fallback"]', state='attached', timeout=30000)
                 await scroll_to(page, '#case-instrument')
                 assert await page.locator('.case-instrument-still').is_visible()

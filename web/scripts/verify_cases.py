@@ -186,7 +186,7 @@ async def run():
         await context.close()
         context = await browser.new_context(viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True)
         page = await context.new_page()
-        await page.route('**/models/surgeline.glb', lambda route: route.abort())
+        await page.route('**/models/ambient.glb', lambda route: route.abort())
         await enter(page, '/work/duewatch')
         # Instruments load behind the hero, so a blocked model can fail after Enter.
         await page.wait_for_selector('.observatory[data-scene="fallback"]', state='attached', timeout=30000)

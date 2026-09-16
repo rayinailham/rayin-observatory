@@ -11,11 +11,11 @@
 |---|---|
 | Fase aktif | **Fase 8 — Launch ready** · Development |
 | Status fase | `todo` |
-| Bagian PLAN.md yang relevan | §12 (target Fase 8), §11 (target performa), §3 Q39 (gate Fase 7) |
+| Bagian PLAN.md yang relevan | §12 (target Fase 8), §11 (target performa), §3 Q39 (gate Fase 7), §3 Q40 (tes di URL Vercel) |
 | Blocker | Tidak ada |
-| Preview sesi ini | Lokal `http://127.0.0.1:8767/` (build 2026-09-16); paket bukti Fase 7 (14/14 pass) di `assets/renders/showpiece/evidence/` |
-| Revisi terakhir | Fase 7 lolos gate: Enter aktif **6.39 dtk** di slow 4G + CPU 4× (dulu 12.2); jeda instrumen ±3 dtk diterima apa adanya |
-| Langkah berikut | Sesi Development Fase 8 (Codex utama / Claude Code): meta + share card + favicon, deploy Vercel + instruksi domain → `ready-for-test` |
+| Preview sesi ini | Revisi lima instrumen: `http://127.0.0.1:8776/` · preview produksi lokal (`next start`) |
+| Revisi terakhir | Lima instrumen dibangun ulang prosedural (`web/components/instrument-models.ts`), sekelas observatorium; GLB instrumen tak lagi dimuat |
+| Langkah berikut | Sesi Development Fase 8 (Codex utama / Claude Code): meta + share card + favicon, **deploy ke Vercel produksi** + instruksi domain → `ready-for-test`. Testing lalu memakai URL Vercel (Q40). Vercel CLI sudah login 2026-09-16 (user `chhrone`, scope `chhrones-projects`); `web/` belum `vercel link` |
 
 ## Ringkasan fase
 
@@ -342,10 +342,11 @@ Bahan gate Fase 7 (Testing, 2026-09-15 — arsip; diulang setelah fix Enter): fo
 ### Fase 8 — Launch ready
 Development (Codex / Claude Code):
 - [ ] Meta, share card (preview WhatsApp/LinkedIn), favicon
-- [ ] Deploy Vercel; instruksi sambung domain untuk pemilik → `ready-for-test`
+- [ ] Deploy Vercel (produksi); instruksi sambung domain untuk pemilik → `ready-for-test`
 
-Testing (Claude Code / Antigravity):
-- [ ] QA lintas browser (Chromium/Firefox/WebKit) + viewport HP/tablet/desktop
+Testing (Claude Code / Antigravity) — **semua tes memakai URL Vercel, bukan preview lokal (Q40)**:
+- [ ] QA lintas browser (Chromium/Firefox/WebKit) + viewport HP/tablet/desktop di URL Vercel
+- [ ] Cek preview share (WhatsApp/LinkedIn) dari URL Vercel
 - [ ] Paket bukti `assets/renders/launch/evidence/` dikirim
 - [ ] Tes manual pemilik di HP fisik (satu-satunya; rasa scroll, fps, suara, 4G)
 - [ ] Gate
@@ -375,18 +376,41 @@ Testing (Claude Code / Antigravity):
 | 2026-09-16 | Temuan Testing Fase 7: pemilik pilih opsi B ("B dong buat lebih cepat") — Enter aktif setelah hero siap, instrumen dimuat di belakang. Fase 7 kembali ke Development; dikerjakan sesi berikut, bukan sesi ini. Disalin ke PLAN §3 Q37 | Pemilik, chat sesi Claude Code |
 | 2026-09-16 | Setiap akhir fase (gate lolos) wajib git commit + push ke `origin main`; ditulis di `PROMPT.md` (langkah tutup sesi no. 4). Disalin ke PLAN §3 Q38 | Pemilik, chat sesi Claude Code |
 | 2026-09-16 | Gate Fase 7 lolos dari paket bukti Testing ulang 14/14 ("lolos commit dan push"); jeda instrumen ±3 dtk diterima apa adanya. Disalin ke PLAN §3 Q39 | Pemilik, chat sesi Claude Code |
+| 2026-09-16 | Testing Fase 8 dijalankan di **URL produksi Vercel** (deploy dulu, baru tes), bukan preview lokal. Vercel CLI 54.9.1 terpasang + dicatat di `RULES.md` agar semua harness pakai. Disalin ke PLAN §3 Q40 | Pemilik, chat sesi Claude Code |
 
 ## Log sesi
 
 > Entri terbaru di atas. Singkat, 1–2 baris: tanggal · harness · fase — apa yang dikerjakan,
 > verifikasi, berikutnya. Detail teknis taruh di CODEMAP / folder bukti, bukan di sini.
 
+- **2026-09-16 · Codex · singularity dihapus** — Shader dibuang; prompt upgrade lima instrumen disiapkan, belum dieksekusi.
+  Build/TypeScript/lint lulus; preview tetap :8769.
+- **2026-09-16 · Codex · revisi observatorium → ready-for-test** — Kubah detail bergerak, planet/parallax desktop, horizon, reduced motion.
+  Build/lint/typecheck + regresi desktop/mobile + 8 cek motion lulus; preview :8769, foto/video di `assets/renders/observatory-motion/dev/`. Berikutnya: review visual revisi.
 - **2026-09-16 · Claude Code · Fase 7 → done** — Pemilik nyatakan lolos; jeda instrumen ±3 dtk diterima. Commit + push ke `origin main`.
   Berikutnya: Fase 8 Development (meta/share card/favicon, deploy Vercel).
 - **2026-09-16 · Claude Code · Fase 7 → awaiting-gate** — Testing ulang: item bukti baru `enterEarly`, paket bukti 14/14 pass
   (Enter aktif 6.39 dtk), 6 suite regresi + lint/typecheck diulang pass. Berikutnya: gate pemilik.
 - **2026-09-16 · Claude Code · Fase 7 → ready-for-test** — Enter lebih cepat: instrumen dimuat di belakang hero, preload, font WOFF2.
   Diukur: slow 4G 12.46 → 7.01 dtk; lint/typecheck/build + 6 suite regresi pass. Berikutnya: Testing ulang + gate.
+- **2026-09-16 · Claude Code · revisi lima instrumen** — Atas permintaan pemilik: kelima instrumen dibangun ulang
+  secara prosedural di `web/components/instrument-models.ts` memakai kit/palet yang sama dengan observatorium
+  (perak, navy, kuningan terkendali, lampu amber, kaca optik). Bentuk baru: CrossCheck tiga kanal berbafel + kolar
+  fokus berputar; SurgeLine empat reflektor parabola bersegmen + feed horn di tiga strut, bearing dan penggerak;
+  DriftWatch sasis termesin dengan jalur kertas nyata (gulungan suplai, rol penggerak bergigi, pemandu tegangan);
+  DueWatch tiga lintasan bergigi di bidang berbeda + rangkaian roda gigi terlihat; BrandWall bangku optik berel
+  bergraduasi (lampu, kolimator, panggung prisma berputar, cincin detektor, layar penerima). Anchor `cases.ts` dan
+  nama material rig dipertahankan; rig DueWatch memakai `PlanetPivot{i}`, CrossCheck memakai `FocusPivot{i}`.
+  Bug ditemukan+diperbaiki: geometri statis hasil merge sempat mendarat di root sehingga leader line `*Mount`
+  diam-diam gagal — sekarang tiap mount jadi target merge sendiri dan geometri mount diurut sebelum pivot anaknya.
+  Delapan skrip verifikasi yang memicu fallback dengan memblokir GLB instrumen dialihkan ke `ambient.glb`
+  (satu-satunya model yang masih diunduh). Ukur: model 580 KB → 34 KB; segitiga CrossCheck 118k → 50k, SurgeLine
+  34k → 51k, DueWatch 30k → 41k; draw call naik (mis. SurgeLine 39 → 70); frame 16,70 ms median / 16,8 ms p95
+  sebelum dan sesudah (tanpa regresi terukur); waktu sampai gerbang Enter tertutup ±1,74 dtk → ±1,89 dtk (+150 ms,
+  JS +24 KB). lint/typecheck/build + `verify_instruments` (baru, before+after) + `verify_observatory_motion` +
+  `verify_cases`/`verify_case`/`verify_mobile`/`verify_desktop`/`verify_showpiece`/`verify_audio` semua pass.
+  Bukti: `assets/renders/instrument-detail/` (before/after, `compare-*.jpg`, `walkthrough.webm`, `frame-cost-*.json`).
+  Berikutnya: Fase 8 Development.
 - **2026-09-16 · Claude Code · Fase 7 → in-dev** — Pemilik pilih opsi B (Enter lebih cepat). Belum dikerjakan atas permintaan pemilik;
   spesifikasi + data ukur ditulis di checklist Fase 7 Development. Aturan baru: commit + push wajib tiap akhir fase (PROMPT).
   Commit + push kerja Fase 7 atas permintaan pemilik. Berikutnya: sesi Development khusus item itu.

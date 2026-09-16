@@ -107,6 +107,7 @@ Rayin Observatory/
 │   │   ├── case-file.tsx           case template: brief, hotspots, flow, readings, tools, video, Next
 │   │   ├── observatory-shell.tsx  entry/loading/audio/menu/scroll ownership
 │   │   ├── observatory-scene.tsx  one Canvas, dome/Saturn + five instrument groups
+│   │   ├── instrument-models.ts   procedural build of the five instruments (shared kit + palette)
 │   │   ├── instrument-motion.ts   per-instrument idle rigs + Saturn rig (moons, ring dust)
 │   │   └── sky.tsx                full-screen sky shader: gradient, stars, nebula
 │   ├── lib/cases.ts                five approved case files + CaseView
@@ -464,44 +465,80 @@ Rayin Observatory/
   homepage tapi sebelum cleanup React → dulu TypeError `#skills` null; kini onRefresh/onUpdate diabaikan bila section homepage terlepas.
 
 ### `web/components/observatory-scene.tsx`
-- **Peran:** satu Canvas R3F, tujuh GLB, kamera orbit + transisi masuk/keluar lima group instrumen.
+- **Peran:** satu Canvas R3F, kubah + lima instrumen prosedural, satu GLB (Saturnus), kamera orbit + transisi masuk/keluar lima group instrumen.
 - **Ekspor utama:** `ObservatoryScene`, `World`, `Instruments`, `SceneBoundary`; props memakai `ChapterState` + `loadInstruments`.
 - **Dipakai oleh:** shell (import statis; server hanya me-render container Canvas, modul aman SSR).
-- **Bergantung pada:** R3F/drei/three, instruments.ts, tujuh GLB, decoder lokal. Node kontrak:
-  `OpticsPivot`, `Lens1Glow..Lens3Glow`; `DishPivot0..3`; `NeedlePivot`, `PaperFeed`,
-  `RollerPivot0..1`; `OrbitPivot0..2`; `PrismPivot`, `SpectrumPivot`.
+- **Bergantung pada:** R3F/drei/three, instruments.ts, `instrument-models.ts`, `ambient.glb` (satu-satunya GLB
+  yang masih diunduh), decoder lokal. Node kontrak: `OpticsPivot`, `FocusPivot0..2`, `Lens1..Lens3`,
+  `Lens1Glow..Lens3Glow`; `DishPivot0..3`; `NeedlePivot`, `RollerPivot0..1`; `OrbitPivot0..2`,
+  `PlanetPivot0..2`; `PrismPivot`, `SpectrumPivot`; plus grup mount `<id>Mount` yang dipakai `cases.ts`.
 - **State / efek samping:** clone material + disposal; useFrame membaca ref, tidak state React scroll.
   Aktif dan pendahulunya terlihat saat transisi; kamera interpolasi orbit. Idle per instrumen di
   `instrument-motion.ts` (`rig.update` hanya saat group terlihat). Klik di chapter BrandWall (bukan
   tombol/link/dialog; hanya `#brandwall .instrument-stage` / `.case-inspection`, sudah entered, flight idle) → `rig.observe()` + prop `onInstrumentTap(4)`; status detektor → `#observer-readout[data-observed]`.
-  `pointScale` = DPR tiap frame. Satu environment lokal, DPR 1–1.5.
-- **Catatan:** Muat bertahap (Fase 7, opsi B): `World` memuat `dome.glb` + `ambient.glb` dalam SATU `useGLTF([...])` (dua panggilan = suspend serial) → frame ke-2 `onReady`. `<Instruments>` di `<Suspense>` sendiri, di-mount hanya bila `loadInstruments`; ia meng-clone lima view, mengisi ref `views` lewat `useLayoutEffect` (kosong = belum ada model), memiliki handler tap BrandWall, dan me-render group `visible={false}` sampai frame loop `World` menempatkannya. Frame loop + leader aman saat `views.current` kosong (chapter/case sementara tanpa model, termasuk direct `/work/<slug>`). Model instrumen gagal sesudah Enter → error naik ke `SceneBoundary` → still view + notice seperti biasa.
-  langit = `<Sky>` (titik bintang lama dihapus); Saturnus (`saturn()` rig) tetap ditambat ke kamera, wobble + skala .072. Kubah approved tetap utuh.
+  `pointScale` = DPR tiap frame. Satu environment lokal, DPR 1–1.5. Material instrumen tidak lagi di-clamp
+  (dulu `roughness>=.5`, `metalness<=.55` untuk menjinakkan ekspor Blender); nilai ditulis langsung di model.
+- **Catatan:** Muat bertahap (Fase 7, opsi B): `World` membangun kubah lewat `buildObservatory()` dan memuat `ambient.glb` → frame ke-2 `onReady`. `<Instruments>` di `<Suspense>` sendiri, di-mount hanya bila `loadInstruments`; ia membangun lima instrumen lewat `buildInstrument()`, mengisi ref `views` lewat `useLayoutEffect` (kosong = belum ada model), memiliki handler tap BrandWall, dan me-render group `visible={false}` sampai frame loop `World` menempatkannya. Frame loop + leader aman saat `views.current` kosong (chapter/case sementara tanpa model, termasuk direct `/work/<slug>`). Instrumen kini prosedural, jadi satu-satunya model yang masih bisa gagal memuat adalah `ambient.glb`;
+  kegagalannya naik ke `SceneBoundary` → still view + notice seperti biasa (skrip verifikasi memblokir model itu).
+  langit = `<Sky>` (titik bintang lama dihapus); Saturnus (`saturn()` rig) ditambat ke kamera; lintasan berubah dengan scroll. Kubah baru bergerak ke kiri saat hero keluar.
   SceneBoundary gagal satu model → still view menyeluruh; semua chapter tetap dapat dibaca. `CaseView` mix menginterpolasi sudut, jarak, zoom ortografis; model `caseView.index` mengikuti bounds `#case-instrument` (skala case = min(w·.62, h·.33)/fit, fit 4.4 CrossCheck / 3.5 lain). Canvas tetap root.
   Fase 6: breakpoint 1024px sama dengan CSS. Kamera menempatkan instrumen di kanan dan membatasi skala terhadap tinggi/lebar; dome/Saturnus ikut dikomposisi. Case mengikuti bounds `.case-inspection`; x2 leader dikurangi posisi pane relatif Canvas (penting saat Canvas HP terpusat di tablet).
   Fase 5: `anchor()` = origin node, atau pusat bounding sphere child mesh yang nama materialnya memuat `part`, → proyeksi ke SVG `[data-hotspot-line=<id>]`
   tiap frame (planet DueWatch bergerak → leader ikut). Outgoing = `chapter.from ?? index-1` supaya sapuan rantai (termasuk BrandWall → CrossCheck) benar.
 
+### Revisi observatorium + scroll (2026-09-16)
+- `observatory-model.ts`: bangunan prosedural; panel, rel, balkon, jendela, tangga, teleskop/finder.
+  Geometri statis digabung per material/pivot: 20 mesh, 45.132 segitiga. Dispose dimiliki rig.
+- `planetary-journey.tsx`: tiga planet shader; lintasan desktop memakai progres hero/chapter,
+  posisi disimpan di ref. Planet tambahan disembunyikan pada mobile, reduced motion, dan case file.
+- `use-reduced-motion.ts`: media query reaktif; shell menghentikan smooth wheel/parallax,
+  mempersingkat transisi, scene membekukan gerak idle. Scroll sentuh memakai perilaku native.
+- Shell: GSAP matchMedia untuk parallax hero + reveal heading; cleanup saat route/breakpoint berubah.
+- Efek singularity/accretion disk dihapus atas permintaan pemilik; langit, bintang, dan planet tetap.
+- Upgrade lima instrumen (`INSTRUMENT-DETAIL-PROMPT.md`) dieksekusi 2026-09-16 → `instrument-models.ts`.
+- Verifikasi: `OBSERVATORY_URL=http://localhost:8769 timeout 180 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python web/scripts/verify_observatory_motion.py`.
+  Bukti: `assets/renders/observatory-motion/dev/` (PNG, WebM, JSON). Preview produksi lokal: port 8769.
+
 ### `web/components/sky.tsx`
 - **Peran:** mesh layar penuh (renderOrder -10, tanpa depth) dengan shader langit: zenith hitam → ink → horizon biru,
   bintang prosedural (kelip, warna, parallax), jalur nebula tipis, dither. Revisi 3 pemilik: kepadatan setara
   bintang gate, 2 lapis penuh hanya di 30% atas layar (`reach` smoothstep .62–.74); 70% bawah 1 lapis sangat jarang + redup.
-- **Ekspor utama:** default `Sky({ progress })`.
+- **Ekspor utama:** default `Sky({ progress, chapter, reducedMotion })`.
 - **Dipakai oleh:** `World` di scene.
-- **State / efek samping:** uniform `uOffset` dari sudut kamera + progres hero + tinggi kamera; resolusi/DPR tiap frame.
+- **State / efek samping:** uniform `uOffset` dari sudut kamera + progres hero/chapter + tinggi kamera; interpolasi damping. Reduced motion membekukan langit. Resolusi/DPR tiap frame.
 - **Catatan:** dekorasi, bukan data astronomi. Warna shader ditulis langsung sebagai sRGB (tanpa colorspace chunk).
 
+### `web/components/instrument-models.ts`
+- **Peran:** membangun kelima instrumen secara prosedural dari satu "machine shop" bersama, memakai palet yang sama
+  dengan `observatory-model.ts`: logam perak, struktur navy, kuningan terkendali, lampu amber, kaca optik.
+- **Ekspor utama:** `buildInstrument(id)` → `{ object, materials, dispose }`, `DUE_ORBITS`, tipe `BuiltInstrument`.
+- **Dipakai oleh:** `observatory-scene.tsx` (geometri) dan `instrument-motion.ts` (`DUE_ORBITS`: satu tabel radius,
+  dua konsumen).
+- **Bergantung pada:** three + `mergeGeometries`; `InstrumentId` dari `lib/instruments.ts`.
+- **State / efek samping:** tiap builder memakai `shop()` — satu material per finish, satu geometri per bagian,
+  helper `box/cyl/drum/ring/hoop/ball/rod/bar/lathe/cable/teeth/studs/scale` dan `plinth()` (alas bertingkat
+  bersama: kanal layanan amber, 12 bay berlampu, geladak berpelat, skala terkalibrasi). `finalize(root, assemblies)`
+  memanggang setiap bagian statis menjadi satu mesh per material per assembly; `assemblies` = pivot bergerak
+  **dan** grup mount, sebab `cases.ts` mengakhiri leader line pada material di dalam `<id>Mount`. Mesh hasil merge
+  ditaruh **sebelum** pivot anak supaya pencarian material per nama menemukan bagian milik mount, bukan milik anaknya.
+- **Catatan:** kontrak yang tak boleh berubah tanpa memperbarui konsumen: nama node di atas + nama material
+  `Lens1Glow..Lens3Glow`, `Amber light`, `surgeline signal`, `driftwatch ceramic` (hanya kertas grafik di mount,
+  hanya drum di `RollerPivot0`), `driftwatch alarm` (hanya ujung pena), `duewatch signal/alarm/ceramic*`,
+  `brandwall ceramic` (hanya tabung kolimator), `Prism blue`, `Spectrum0..3`. GLB instrumen lama masih ada di
+  `web/public/models/` tetapi tidak dimuat lagi; sumber Blender tetap di `assets/blender/`.
+
 ### `web/components/instrument-motion.ts`
-- **Peran:** rig gerak idle per instrumen + Saturnus; objek tambahan dibuat runtime (tanpa ubah GLB/Blender).
+- **Peran:** rig gerak idle per instrumen + Saturnus; objek tambahan dibuat runtime.
 - **Ekspor utama:** `rigInstrument(id, view, materials, onObserve)`, `saturn(source)`, `pointScale`, tipe `Rig`.
 - **Dipakai oleh:** `observatory-scene.tsx`.
-- **Bergantung pada:** node/material kontrak GLB (lihat scene) + nama material `surgeline signal`, `driftwatch alarm`,
-  `duewatch signal/alarm/brass`, `Spectrum0..3`, `Amber light`, `First light / planet mineral`, `dusty rings`.
+- **Bergantung pada:** kontrak node/material dari `instrument-models.ts` (lihat scene) + nama material
+  `surgeline signal`, `driftwatch alarm`, `duewatch signal/alarm`, `Spectrum0..3`, `Amber light`,
+  `First light / planet mineral`, `dusty rings`; `DUE_ORBITS` untuk radius/presesi lintasan.
 - **State / efek samping:** CrossCheck siklus 6.6 dtk (lensa 1→2→3, lalu ketiganya hijau). SurgeLine: parameter
-  yaw/pitch/periode per piringan + 2 cincin pulsa additive per piringan. DriftWatch: `PaperFeed` lama disembunyikan,
+  yaw/pitch/periode per piringan + 2 cincin pulsa additive per piringan. DriftWatch:
   ribbon trace 150 titik dari `reading(t)` (sumbu waktu = z kertas), tick kertas bergerak, burst merah tiap 5.2 dtk.
-  DueWatch: geometri planet di-clone lalu didudukkan ke bidang cincin; `rotation.y` planet = kecepatan Kepler
-  `1.1·(0.65/r)^1.5`, cincin presesi pelan; planet merah berkedip di tanda "due". BrandWall: 64 foton/dtk
+  CrossCheck juga memutar `FocusPivot{i}` saat kanal itu membaca. DueWatch: `OrbitPivot{i}` presesi, `PlanetPivot{i}`
+  berputar dengan kecepatan Kepler `1.1·(0.65/r)^1.5` dari `DUE_ORBITS`; planet merah berkedip di tanda "due". BrandWall: 64 foton/dtk
   collimator → prisma → layar; detektor off = pola interferensi cos², on (siklus 13 dtk atau tap 5 dtk) = dua pita.
   Saturnus: clone scene + shader onBeforeCompile (pita, badai, celah Cassini), 520 debu cincin (Kepler), dua bulan.
 - **Catatan:** semua geometri/material buatan rig di-dispose lewat `rig.dispose()`; `frustumCulled=false` untuk objek dinamis.

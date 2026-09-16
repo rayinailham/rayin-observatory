@@ -13,11 +13,13 @@ import { instruments, type ChapterState } from '@/lib/instruments';
 // Static import: the 3D chunk downloads with the first JS instead of after hydration (Enter waits
 // for it). The module is SSR-safe; Canvas only renders its container on the server.
 import Scene from './observatory-scene';
+import { useReducedMotion } from './use-reduced-motion';
 const SOUND_KEY = 'rayin-observatory:sound';
 const caseOf = (path: string) => caseIndex(path.startsWith('/work/') ? path.slice('/work/'.length) : null);
 
 export default function ObservatoryShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const reducedMotion = useReducedMotion();
   const router = useRouter();
   const current = caseOf(pathname);
   const isCase = current >= 0;
@@ -84,7 +86,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
-    const scroller = new Lenis({ autoRaf: false, smoothWheel: true, syncTouch: true, lerp: .085 });
+    const scroller = new Lenis({ autoRaf: false, smoothWheel: !reducedMotion, syncTouch: false, lerp: .085 });
     lenis.current = scroller;
     scroller.stop();
     scroller.on('scroll', ScrollTrigger.update);
@@ -97,7 +99,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
       scroller.destroy();
       lenis.current = null;
     };
-  }, []);
+  }, [reducedMotion]);
 
   useLayoutEffect(() => {
     // History can interrupt a departure. Its old onComplete must never push a stale route.
@@ -119,7 +121,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
       root.current?.style.setProperty('--chapter-reveal', '1');
       scroller?.scrollTo(0, { immediate: true, force: true });
       window.scrollTo(0, 0);
-      context.add(() => gsap.to(caseView.current, { mix: 1, duration: .78, ease: 'power2.inOut' }));
+      context.add(() => gsap.to(caseView.current, { mix: 1, duration: reducedMotion ? 0 : .78, ease: 'power2.inOut' }));
     }
     if (cameFromCase) {
       const id = caseFiles[from].id;
@@ -129,14 +131,14 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
       scroller?.resize();
       scroller?.scrollTo(y, { immediate: true, force: true });
       window.scrollTo(0, y);
-      context.add(() => gsap.to(caseView.current, { mix: 0, duration: .78, ease: 'power2.inOut' }));
+      context.add(() => gsap.to(caseView.current, { mix: 0, duration: reducedMotion ? 0 : .78, ease: 'power2.inOut' }));
       frame = requestAnimationFrame(() => {
         ScrollTrigger.refresh();
         focusAfterFlight = element?.querySelector<HTMLElement>('h2') ?? document.querySelector<HTMLElement>(`[data-open-case="${id}"]`);
       });
       homeTarget.current = null;
     }
-    context.add(() => gsap.fromTo(pageContent.current, { opacity: 0 }, { opacity: 1, duration: .55, delay: .25, ease: 'power2.out',
+    context.add(() => gsap.fromTo(pageContent.current, { opacity: 0 }, { opacity: 1, duration: reducedMotion ? 0 : .55, delay: reducedMotion ? 0 : .25, ease: 'power2.out',
       onComplete: () => {
         setFlying(false);
         frame = requestAnimationFrame(() => {
@@ -146,7 +148,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
       },
     }));
     return () => { flight.current?.kill(); flight.current = null; context.revert(); cancelAnimationFrame(frame); };
-  }, [pathname, isCase, current]);
+  }, [pathname, isCase, current, reducedMotion]);
 
   useEffect(() => {
     // Scroll ownership stays in the root. Route-specific triggers are rebuilt per page.
@@ -211,11 +213,11 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
         root.current?.style.setProperty('--copy-opacity', String(Math.max(0, 1 - self.progress * 2.8)));
       },
     });
-    const scan = gsap.fromTo('.portrait-scan img', { clipPath: 'inset(0 0 100% 0)' }, {
+    const scan = gsap.fromTo('.portrait-scan img', { clipPath: reducedMotion ? 'inset(0)' : 'inset(0 0 100% 0)' }, {
       clipPath: 'inset(0 0 0% 0)', ease: 'none',
       scrollTrigger: { trigger: '.portrait-scan', start: 'top 82%', end: 'center 50%', scrub: true },
     });
-    const scanLine = gsap.fromTo('.scan-line', { top: '0%' }, { top: '100%', ease: 'none',
+    const scanLine = gsap.fromTo('.scan-line', { top: '0%' }, { top: reducedMotion ? '0%' : '100%', ease: 'none',
       scrollTrigger: { trigger: '.portrait-scan', start: 'top 82%', end: 'center 50%', scrub: true },
     });
     const observer = new ResizeObserver(() => ScrollTrigger.refresh());
@@ -227,26 +229,43 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
       scan.scrollTrigger?.kill(); scan.kill();
       scanLine.scrollTrigger?.kill(); scanLine.kill();
     };
-  }, [pathname, isCase]);
+  }, [pathname, isCase, reducedMotion]);
 
   useEffect(() => {
     if (entered && !menuOpen && !flying) lenis.current?.start();
     else lenis.current?.stop();
-  }, [entered, menuOpen, flying]);
+  }, [entered, menuOpen, flying, reducedMotion]);
 
   useEffect(() => {
     if (!entered) return;
     const context = gsap.context(() => {
-      gsap.to(gate.current, { opacity: 0, yPercent: -4, duration: .7, ease: 'power2.inOut',
+      gsap.to(gate.current, { opacity: 0, yPercent: reducedMotion ? 0 : -4, duration: reducedMotion ? 0 : .7, ease: 'power2.inOut',
         onComplete: () => { if (gate.current) gate.current.hidden = true; } });
-      if (document.querySelector('.hero-copy')) gsap.fromTo('.hero-copy', { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 1.1, delay: .3, ease: 'power3.out' });
+      if (document.querySelector('.hero-copy')) gsap.fromTo('.hero-copy', { y: reducedMotion ? 0 : 24, opacity: 0 }, { y: 0, opacity: 1, duration: reducedMotion ? 0 : 1.1, delay: reducedMotion ? 0 : .3, ease: 'power3.out' });
     }, root);
     const timer = window.setTimeout(() => {
       (document.getElementById('case-heading') ?? document.getElementById('hero-heading'))?.focus({ preventScroll: true });
       ScrollTrigger.refresh();
-    }, 750);
+    }, reducedMotion ? 0 : 750);
     return () => { context.revert(); window.clearTimeout(timer); };
-  }, [entered]);
+  }, [entered, reducedMotion]);
+
+  useLayoutEffect(() => {
+    if (!entered || isCase || reducedMotion) return;
+    const media = gsap.matchMedia();
+    media.add('(min-width: 1024px)', () => {
+      gsap.to('.hero-copy', { y: -90, ease: 'none', scrollTrigger: {
+        trigger: '#first-light', start: 'top top', end: 'bottom bottom', scrub: .8,
+      } });
+      gsap.utils.toArray<HTMLElement>('.text-section').forEach(section => {
+        gsap.fromTo(section.querySelectorAll(':scope > h2, :scope > .section-intro'),
+          { y: 32, opacity: .25 }, { y: 0, opacity: 1, ease: 'none', scrollTrigger: {
+            trigger: section, start: 'top 85%', end: 'top 45%', scrub: .65,
+          } });
+      });
+    }, root);
+    return () => media.revert();
+  }, [entered, isCase, pathname, reducedMotion]);
 
   async function setAudio(enabled: boolean, welcome = false) {
     try {
@@ -285,7 +304,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
     const element = typeof target === 'string' ? document.querySelector<HTMLElement>(target) : null;
     const destination = typeof target === 'number' ? target : element ? element.getBoundingClientRect().top + window.scrollY : null;
     if (destination === null) return;
-    lenis.current?.scrollTo(destination, { force: true, onComplete: () => {
+    lenis.current?.scrollTo(destination, { force: true, immediate: reducedMotion, onComplete: () => {
       if (typeof target === 'string') document.querySelector<HTMLElement>(`${target} h2`)?.focus({ preventScroll: true });
     } });
   }
@@ -300,8 +319,8 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
     router.prefetch(path);
     audio.current?.transition('in');
     flight.current = gsap.timeline({ onComplete: () => router.push(path, { scroll: false }) })
-      .to(pageContent.current, { opacity: 0, duration: .48, ease: 'power2.out' }, 0)
-      .to(caseView.current, { mix: 1, duration: .78, ease: 'power2.inOut' }, 0);
+      .to(pageContent.current, { opacity: 0, duration: reducedMotion ? 0 : .48, ease: 'power2.out' }, 0)
+      .to(caseView.current, { mix: 1, duration: reducedMotion ? 0 : .78, ease: 'power2.inOut' }, 0);
   }
 
   // Next instrument: the camera backs away from this instrument, sweeps to the next one as the
@@ -318,15 +337,15 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
     audio.current?.transition('out');
     const sweep = { reveal: 1, orbit: 0, outro: 0, index, from, transition: 0 };
     flight.current = gsap.timeline({ onComplete: () => router.push(path, { scroll: false }) })
-      .to(pageContent.current, { opacity: 0, duration: .4, ease: 'power2.out' }, 0)
-      .to(caseView.current, { mix: 0, duration: .65, ease: 'power2.inOut' }, 0)
+      .to(pageContent.current, { opacity: 0, duration: reducedMotion ? 0 : .4, ease: 'power2.out' }, 0)
+      .to(caseView.current, { mix: 0, duration: reducedMotion ? 0 : .65, ease: 'power2.inOut' }, 0)
       .call(() => {
         caseView.current.index = index;
         chapter.current = sweep;
         root.current?.setAttribute('data-chapter', caseFiles[index].id);
         audio.current?.transition('in');
       })
-      .to(sweep, { transition: 1, duration: .78, ease: 'power2.inOut' });
+      .to(sweep, { transition: 1, duration: reducedMotion ? 0 : .78, ease: 'power2.inOut' });
   }
 
   function leaveCase(target: number | string = 'return') {
@@ -339,15 +358,15 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
     lenis.current?.stop();
     audio.current?.transition('out');
     flight.current = gsap.timeline({ onComplete: () => router.push('/', { scroll: false }) })
-      .to(pageContent.current, { opacity: 0, duration: .28, ease: 'power2.out' });
+      .to(pageContent.current, { opacity: 0, duration: reducedMotion ? 0 : .28, ease: 'power2.out' });
   }
 
   function returnToDome() { scrollFromMenu(0); }
   function goToWork() { scrollFromMenu('#crosscheck'); }
 
-  return <div ref={root} className={`observatory ${entered ? 'has-entered' : ''}`} data-route={isCase ? 'case' : 'home'} data-flight={flying ? 'moving' : 'idle'} data-scene={failed ? 'fallback' : sceneReady ? 'ready' : 'loading'}>
+  return <div ref={root} className={`observatory ${entered ? 'has-entered' : ''}`} data-motion={reducedMotion ? 'reduced' : 'full'} data-route={isCase ? 'case' : 'home'} data-flight={flying ? 'moving' : 'idle'} data-scene={failed ? 'fallback' : sceneReady ? 'ready' : 'loading'}>
     <div className="scene-layer" aria-hidden="true">
-      {!failed && <Scene entered={entered} progress={progress} chapter={chapter} caseView={caseView} loadInstruments={ready} onReady={onReady} onFailure={onFailure} onInstrumentTap={onInstrumentTap} />}
+      {!failed && <Scene reducedMotion={reducedMotion} entered={entered} progress={progress} chapter={chapter} caseView={caseView} loadInstruments={ready} onReady={onReady} onFailure={onFailure} onInstrumentTap={onInstrumentTap} />}
       {failed && !isCase && <><div className="scene-fallback" />{instruments.map((item, i) => <div key={item.id} className={`instrument-fallback ${item.id}-fallback`} style={{ backgroundImage: `url('/images/${item.id}-fallback.png')`, transform: `translateY(calc(var(--instrument-${i}-offset, 2) * 100svh))` }} />)}</>}
     </div>
     <div ref={content} inert={!entered} className="site-content" onClickCapture={event => {

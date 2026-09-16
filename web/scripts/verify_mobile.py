@@ -54,7 +54,7 @@ async def verify_fallback(browser):
     for width, height in [(390, 844), (360, 740), (430, 932)]:
         context = await browser.new_context(viewport={'width':width,'height':height}, is_mobile=True, has_touch=True)
         page = await context.new_page()
-        await page.route('**/models/brandwall.glb', lambda route: route.abort())
+        await page.route('**/models/ambient.glb', lambda route: route.abort())
         await enter(page)
         # Instruments load behind the hero, so a blocked model can fail after Enter.
         await page.wait_for_selector('.observatory[data-scene="fallback"]', state='attached', timeout=30000)
@@ -68,7 +68,7 @@ async def verify_fallback(browser):
             copy = await page.locator('#'+slug+' .instrument-copy').bounding_box()
             assert notice['y']+notice['height'] <= copy['y'], (slug, 'fallback notice overlaps copy', notice, copy)
             await page.screenshot(path=str(OUT/f'fallback-{slug}-{width}x{height}.png'))
-        results.append({'viewport':[width,height], 'blockedBrandwallModelFallback':SLUGS, 'noticeClearOfCopy':True})
+        results.append({'viewport':[width,height], 'blockedAmbientModelFallback':SLUGS, 'noticeClearOfCopy':True})
         await context.close()
     (OUT/'fallback-verification.json').write_text(json.dumps({'status':'passed','finishedAt':datetime.now(timezone.utc).isoformat(),'results':results}, indent=2)+'\n')
     REPORT['results'].extend(results)

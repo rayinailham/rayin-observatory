@@ -7,12 +7,16 @@ import { Group, MathUtils, Mesh, MeshStandardMaterial, OrthographicCamera, Vecto
 import { instruments, type ChapterState } from '@/lib/instruments';
 import { pointScale, rigInstrument, saturn, type Rig } from './instrument-motion';
 import Sky from './sky';
+import { buildObservatory } from './observatory-model';
+import { buildInstrument, type BuiltInstrument } from './instrument-models';
+import PlanetaryJourney from './planetary-journey';
 import { caseFiles, type CaseComponent, type CaseView } from '@/lib/cases';
 
 useGLTF.setDecoderPath('/draco/');
 
 type SceneProps = {
   entered: boolean;
+  reducedMotion: boolean;
   progress: MutableRefObject<number>;
   chapter: MutableRefObject<ChapterState>;
   caseView: MutableRefObject<CaseView>;
@@ -47,33 +51,20 @@ class SceneBoundary extends Component<{ onFailure: () => void; children: ReactNo
   render() { return this.state.failed ? null : this.props.children; }
 }
 
-type InstrumentView = { view: Object3D; materials: MeshStandardMaterial[]; rig: Rig };
+type InstrumentView = { view: Object3D; materials: MeshStandardMaterial[]; built: BuiltInstrument; rig: Rig };
 
-// The five instruments load behind the hero: Enter waits only for the dome, Saturn and fonts.
-// Until they arrive `views` stays empty, so chapters and cases briefly show no model.
+// The five instruments are built behind the hero, from the same construction kit as the
+// observatory: Enter waits only for the dome, Saturn and fonts. Until the shell asks for
+// them `views` stays empty, so chapters and cases briefly show no model.
 function Instruments({ viewsRef, groupsRef, onInstrumentTap }: {
   viewsRef: MutableRefObject<InstrumentView[]>;
   groupsRef: MutableRefObject<(Group | null)[]>;
   onInstrumentTap: (index: number) => void;
 }) {
-  const models = useGLTF(instruments.map(item => `/models/${item.id}.glb`));
-  const loaded = useMemo(() => models.map((model, i) => {
-    const view = model.scene.clone(true);
-    const materials: MeshStandardMaterial[] = [];
-    view.traverse(object => {
-      if (!(object instanceof Mesh)) return;
-      const clone = (source: MeshStandardMaterial) => {
-        const material = source.clone();
-        material.roughness = Math.max(material.roughness, .5);
-        material.metalness = Math.min(material.metalness, .55);
-        materials.push(material);
-        if (/^Lens[123]Glow$/.test(material.name)) material.emissive.set('#F2A541');
-        return material;
-      };
-      object.material = Array.isArray(object.material) ? object.material.map(clone) : clone(object.material);
-    });
-    return { view, materials, rig: rigInstrument(instruments[i].id, view, materials, showObserver) };
-  }), [models]);
+  const loaded = useMemo(() => instruments.map(item => {
+    const built = buildInstrument(item.id);
+    return { view: built.object, materials: built.materials, built, rig: rigInstrument(item.id, built.object, built.materials, showObserver) };
+  }), []);
   // Layout effect: World's frame loop must see the views before these groups render once.
   useLayoutEffect(() => {
     viewsRef.current = loaded;
@@ -81,7 +72,7 @@ function Instruments({ viewsRef, groupsRef, onInstrumentTap }: {
       viewsRef.current = [];
       loaded.forEach(item => {
         item.rig.dispose();
-        item.materials.forEach(material => material.dispose());
+        item.built.dispose();
       });
     };
   }, [loaded, viewsRef]);
@@ -102,32 +93,16 @@ function Instruments({ viewsRef, groupsRef, onInstrumentTap }: {
   return <>{loaded.map((item, i) => <group key={instruments[i].id} visible={false} ref={group => { groupsRef.current[i] = group; }}><Center><primitive object={item.view} /></Center></group>)}</>;
 }
 
-function World({ entered, progress, chapter, caseView, loadInstruments, onReady, onInstrumentTap }: SceneProps) {
-  // One call loads both in parallel (two calls suspend one after the other). The layout preloads them.
-  const [dome, ambient] = useGLTF(['/models/dome.glb', '/models/ambient.glb']);
+function World({ entered, reducedMotion, progress, chapter, caseView, loadInstruments, onReady, onInstrumentTap }: SceneProps) {
+  // The dome is procedural; only Saturn's source model is needed before entering.
+  const ambient = useGLTF('/models/ambient.glb');
   const views = useRef<InstrumentView[]>([]);
   const planet = useMemo(() => saturn(ambient.scene), [ambient.scene]);
   useEffect(() => () => planet.dispose(), [planet]);
-  const domeView = useMemo(() => {
-    const view = dome.scene.clone(true);
-    view.traverse(object => {
-      if (!(object instanceof Mesh) || !(object.material instanceof MeshStandardMaterial)) return;
-      const material = object.material.clone();
-      // Broader highlights suit the small real-time view; approved color stays intact.
-      if (material.name !== 'Amber light') {
-        material.roughness = Math.max(material.roughness, .65);
-        material.metalness = Math.min(material.metalness, .45);
-        material.envMapIntensity = .4;
-      }
-      object.material = material;
-    });
-    return view;
-  }, [dome.scene]);
-  useEffect(() => () => {
-    domeView.traverse(object => {
-      if (object instanceof Mesh && object.material instanceof MeshStandardMaterial) object.material.dispose();
-    });
-  }, [domeView]);
+  const observatory = useMemo(() => buildObservatory(), []);
+  useEffect(() => () => observatory.dispose(), [observatory]);
+  const heroScroll = useRef(0);
+  const cameraAngle = useRef(0);
   const domeRef = useRef<Group>(null);
   const instrumentRefs = useRef<(Group | null)[]>([]);
   const planetRef = useRef<Group>(null);
@@ -147,14 +122,16 @@ function World({ entered, progress, chapter, caseView, loadInstruments, onReady,
     const step = Math.min(delta, 0.05);
     revealed.current = MathUtils.damp(revealed.current, entered ? 1 : 0, 2.2, step);
     pointScale.value = state.gl.getPixelRatio();
-    const time = state.clock.elapsedTime;
-    const scroll = progress.current;
+    const time = reducedMotion ? 0 : state.clock.elapsedTime;
+    heroScroll.current = MathUtils.damp(heroScroll.current, progress.current, 6, step);
+    const scroll = reducedMotion ? 0 : heroScroll.current;
     const reveal = chapter.current.reveal;
     const orbit = chapter.current.orbit;
     const { index, transition, outro, from } = chapter.current;
     const { mix, index: caseIndex } = caseView.current;
     const baseAngle = (index > 0 || from !== undefined) && transition < 1 ? MathUtils.lerp(-.95, .55, transition) : (.55 - orbit * 1.5) * reveal;
-    const angle = MathUtils.lerp(baseAngle, .55, mix);
+    cameraAngle.current = MathUtils.damp(cameraAngle.current, reducedMotion ? .35 : MathUtils.lerp(baseAngle, .55, mix), 9, step);
+    const angle = cameraAngle.current;
     const elevation = MathUtils.lerp(.25 * reveal, .25, mix);
     const distance = MathUtils.lerp(16, 10, mix);
     const zoom = MathUtils.lerp(100, 130, mix);
@@ -194,11 +171,12 @@ function World({ entered, progress, chapter, caseView, loadInstruments, onReady,
     });
     if (domeRef.current) {
       domeRef.current.visible = reveal < .7 && mix < .01;
-      const scale = (desktop ? Math.min(viewport.width * .58, viewport.height * .94) : viewport.width) / 7.4 * (0.83 + revealed.current * 0.17 + scroll * .2);
+      const scale = (desktop ? Math.min(viewport.width * .63, viewport.height * .98) : viewport.width * .92) / 5.65 * (0.9 + revealed.current * .1 - scroll * .14);
       domeRef.current.scale.setScalar(scale);
-      domeRef.current.position.copy(cameraRight).multiplyScalar(desktop ? viewport.width * .19 : 0);
-      domeRef.current.position.y = -viewport.height * ((desktop ? .035 : .135) - scroll * .12) - (1 - revealed.current) * .45 + reveal * viewport.height * 1.4;
-      domeRef.current.rotation.set(.30 + scroll * .10, -.48 + scroll * .6 + Math.sin(time * .1) * .025, 0);
+      domeRef.current.position.copy(cameraRight).multiplyScalar(desktop ? viewport.width * MathUtils.lerp(.19, -.14, MathUtils.smootherstep(scroll, .1, 1)) : 0);
+      domeRef.current.position.y = -viewport.height * ((desktop ? .10 : .20) - scroll * .06) - (1 - revealed.current) * .45 + reveal * viewport.height * 1.4;
+      domeRef.current.rotation.set(.14 + scroll * .10, -.30 + scroll * .65, 0);
+      if (domeRef.current.visible) observatory.update(time, scroll);
     }
     if (planetRef.current) {
       planetRef.current.visible = mix < .9;
@@ -208,8 +186,8 @@ function World({ entered, progress, chapter, caseView, loadInstruments, onReady,
       cameraRight.set(1, 0, 0).applyQuaternion(state.camera.quaternion);
       cameraBack.set(0, 0, -1).applyQuaternion(state.camera.quaternion).multiplyScalar(4);
       planetRef.current.position.copy(cameraBack)
-        .addScaledVector(cameraRight, viewport.width * MathUtils.lerp(.31, .38, moon))
-        .addScaledVector(cameraUp, viewport.height * MathUtils.lerp(desktop ? .30 : .015, .31, moon) + Math.sin(time * .14) * .05);
+        .addScaledVector(cameraRight, viewport.width * (desktop && !reducedMotion ? MathUtils.lerp(.32 - scroll * .35, .30 + Math.sin((index + transition + orbit) * .9) * .12, moon) : MathUtils.lerp(.31, .38, moon)))
+        .addScaledVector(cameraUp, viewport.height * MathUtils.lerp(desktop ? .32 + Math.sin(scroll * Math.PI) * .05 : .015, .32, moon) + Math.sin(time * .14) * .05);
       planetRef.current.rotation.set(.4 + Math.sin(time * .21) * .05, .15 + time * .015, -.38 + Math.sin(time * .17) * .04);
       planetRef.current.scale.setScalar((desktop ? Math.min(viewport.width * .45, viewport.height * .7) : viewport.width) * .072 * MathUtils.lerp(1, .78, moon));
       planet.update(time);
@@ -229,7 +207,8 @@ function World({ entered, progress, chapter, caseView, loadInstruments, onReady,
   });
 
   return <>
-    <Sky progress={progress} />
+    <Sky progress={progress} chapter={chapter} reducedMotion={reducedMotion} />
+    <PlanetaryJourney progress={progress} chapter={chapter} caseView={caseView} reducedMotion={reducedMotion} />
     <ambientLight intensity={.6} />
     <directionalLight position={[3, 6, 5]} intensity={.65} color="#cadcff" />
     <directionalLight position={[-4, 1, 3]} intensity={.55} color="#F2A541" />
@@ -240,7 +219,7 @@ function World({ entered, progress, chapter, caseView, loadInstruments, onReady,
       <Lightformer intensity={1.8} color="#a1b6e7" position={[5, 3, 1]} rotation={[0, -Math.PI / 2, 0]} scale={[5, 7, 1]} />
     </Environment>
     <group ref={planetRef}><primitive object={planet.object} /></group>
-    <group ref={domeRef}><Center><primitive object={domeView} /></Center></group>
+    <group ref={domeRef}><primitive object={observatory.object} /></group>
     {loadInstruments && <Suspense fallback={null}><Instruments viewsRef={views} groupsRef={instrumentRefs} onInstrumentTap={onInstrumentTap} /></Suspense>}
   </>;
 }

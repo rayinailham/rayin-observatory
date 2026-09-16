@@ -542,7 +542,7 @@ async def resize(browser, checks):
 async def fallback(browser, checks):
     W, H = DESK
     context = await browser.new_context(viewport={'width': W, 'height': H})
-    await context.route('**/models/brandwall.glb', lambda route: route.abort())
+    await context.route('**/models/ambient.glb', lambda route: route.abort())
     page = await context.new_page()
     await enter(page)
     await page.wait_for_selector('.observatory[data-scene="fallback"]')

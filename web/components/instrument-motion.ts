@@ -1,3 +1,4 @@
+import { DUE_ORBITS } from './instrument-models';
 import {
   AdditiveBlending, BufferAttribute, BufferGeometry, Color, DoubleSide, MathUtils, Mesh, MeshBasicMaterial,
   MeshStandardMaterial, Points, RingGeometry, ShaderMaterial, SphereGeometry, TorusGeometry,
@@ -63,8 +64,10 @@ function glow(radiusIn: number, radiusOut: number) {
 function disposeAll(items: (BufferGeometry | Material)[]) { items.forEach(item => item.dispose()); }
 
 // CrossCheck: the three engines light in turn, then agree together and turn green.
+// Each channel's focus collar creeps while that channel is reading.
 function crosscheck(view: Object3D, materials: MeshStandardMaterial[]): Rig {
   const lenses = [1, 2, 3].map(i => materials.filter(material => material.name === `Lens${i}Glow`));
+  const collars = [0, 1, 2].map(i => view.getObjectByName(`FocusPivot${i}`));
   const strip = materials.filter(material => material.name === 'Amber light');
   const pivot = view.getObjectByName('OpticsPivot');
   const tint = new Color();
@@ -77,6 +80,8 @@ function crosscheck(view: Object3D, materials: MeshStandardMaterial[]): Rig {
       const turn = Math.sin(MathUtils.clamp((u - j * 1.2) / 1.2, 0, 1) * Math.PI);
       const ignite = MathUtils.smoothstep(u, 3.7 + j * .1, 3.85 + j * .1) * fade;
       group.forEach(material => { material.emissive.copy(tint); material.emissiveIntensity = .05 + turn ** 2 * 2 + ignite * 2.6; });
+      const collar = collars[j];
+      if (collar) collar.rotation.y = Math.sin(time * .22 + j * 2.1) * .16 + turn * .9;
     });
     strip.forEach(material => { material.emissive.copy(amber).lerp(ok, all * .85); material.emissiveIntensity = .6 + all * 1.6; });
     if (pivot) pivot.rotation.set(Math.sin(time * .65) * .022, Math.sin(time * .27) * .12 * (1 - all), 0);
@@ -200,33 +205,20 @@ function driftwatch(view: Object3D, materials: MeshStandardMaterial[]): Rig {
 
 // DueWatch: each planet runs its tilted track at a Kepler speed (period² ∝ radius³, so
 // outer worlds are slower) while the tracks themselves slowly precess.
+const ORBIT_SPEED = (radius: number) => 1.1 * (.65 / radius) ** 1.5;
+
 function duewatch(view: Object3D, materials: MeshStandardMaterial[]): Rig {
-  const made: BufferGeometry[] = [];
   const sun = materials.filter(material => material.name === 'duewatch signal');
   const alarms = materials.filter(material => material.name === 'duewatch alarm');
-  const orbits = [0, 1, 2].map(i => {
-    const pivot = view.getObjectByName(`OrbitPivot${i}`);
-    const meshes = meshesUnder(pivot);
-    const ring = meshes.find(mesh => materialName(mesh).includes('brass'));
-    const planet = meshes.find(mesh => !materialName(mesh).includes('brass'));
-    let radius = 1;
-    if (ring && planet) {
-      // Two planets were modeled beside their tracks; seat every planet on its ring plane.
-      ring.geometry.computeBoundingBox();
-      const box = ring.geometry.boundingBox!;
-      radius = (box.max.x - box.min.x) / 2 - .025;
-      planet.geometry = planet.geometry.clone();
-      made.push(planet.geometry);
-      planet.geometry.computeBoundingSphere();
-      const center = planet.geometry.boundingSphere!.center;
-      const flat = Math.hypot(center.x, center.z) || 1;
-      planet.geometry.translate(center.x / flat * radius - center.x, -center.y, center.z / flat * radius - center.z);
-    }
-    return { pivot, planet, speed: 1.1 * (.65 / radius) ** 1.5, precession: [.05, -.07, .09][i] };
-  });
-  return { dispose: () => disposeAll(made), update(time) {
+  const orbits = DUE_ORBITS.map((spec, i) => ({
+    track: view.getObjectByName(`OrbitPivot${i}`),
+    planet: view.getObjectByName(`PlanetPivot${i}`),
+    speed: ORBIT_SPEED(spec.radius),
+    precession: spec.precession,
+  }));
+  return { dispose() {}, update(time) {
     orbits.forEach(orbit => {
-      if (orbit.pivot) orbit.pivot.rotation.y = time * orbit.precession;
+      if (orbit.track) orbit.track.rotation.y = time * orbit.precession;
       if (orbit.planet) orbit.planet.rotation.y = time * orbit.speed;
     });
     // The red world flashes each time it passes its due mark.
