@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import { instruments } from '@/lib/instruments';
-import { skillGroups } from '@/lib/skills';
+import SkillDeck from '@/components/skill-deck';
 
 // Contact destinations supplied by the owner, 2026-09-15.
 const EMAIL = 'rayinailham9@gmail.com';
@@ -43,11 +43,8 @@ export default function Home() {
       <section id="skills" className="text-section" aria-labelledby="skills-heading">
         <p className="section-kicker">The toolkit</p>
         <h2 id="skills-heading" tabIndex={-1}>Skills, with proof.</h2>
-        <p className="section-intro">Choose a project beside each skill to explore the work behind it.</p>
-        <div className="skill-groups">{skillGroups.map(group => <details key={group.name} className="skill-group">
-          <summary>{group.name}<span aria-hidden="true">+</span></summary>
-          <ul>{group.items.map(skill => <li key={skill.name}><h3>{skill.name}</h3>{skill.projects.length > 0 && <div className="skill-projects">{skill.projects.map(id => <a key={id} href={`#${id}`} data-skill-project={id} aria-label={`${skill.name}: explore ${instruments.find(item => item.id === id)?.name}`}>{instruments.find(item => item.id === id)?.name}<span aria-hidden="true">↗</span></a>)}</div>}</li>)}</ul>
-        </details>)}</div>
+        <p className="section-intro">Drag the deck, or pick a project beside a skill to explore the work behind it.</p>
+        <SkillDeck />
       </section>
       <section id="about" className="text-section about-section" aria-labelledby="about-heading">
         <p className="section-kicker">Behind the instruments</p>

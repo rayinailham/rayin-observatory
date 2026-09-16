@@ -168,19 +168,64 @@ button { transition: color .18s, background-color .18s, scale .12s ease-out; }
 .text-section h2:focus { outline: none; }
 .text-section > p:not(.section-kicker):not(.pending-note):not(.footer-signature) { font-size: 13px; line-height: 1.85; color: var(--muted); }
 .section-intro { margin-bottom: 30px; }
-.skill-groups { margin-top: 36px; border-top: 1px solid var(--line); }
-.skill-group { border-bottom: 1px solid var(--line); }
-.skill-group summary { min-height: 62px; display: flex; gap: 12px; justify-content: space-between; align-items: center; font-size: 13px; cursor: pointer; list-style: none; }
-.skill-group summary::-webkit-details-marker { display: none; }
-.skill-group summary span { color: var(--amber); font-size: 22px; transition: transform .2s; }
-.skill-group[open] summary span { transform: rotate(45deg); }
-.skill-group summary:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
-.skill-group ul { list-style: none; padding: 0 0 22px; margin: 0; }
-.skill-group li + li { margin-top: 24px; }
-.skill-group h3 { font-size: 12px; font-weight: 400; margin: 9px 0; line-height: 1.6; }
-.skill-projects { display: flex; flex-wrap: wrap; gap: 4px 18px; }
-.skill-projects a { min-height: 44px; display: inline-flex; gap: 7px; align-items: center; color: var(--amber); font: 10px 'JetBrains Mono', monospace; text-decoration: none; }
+/* The toolkit is a deck: the front card reads in full, its neighbours fan behind it.
+   JS reads the four geometry values below, so each breakpoint tunes its own fan. */
+.skill-deck { --deck-spread: 66px; --deck-drop: 13px; --deck-tilt: 3.5; --deck-scale: .06; --deck-step: 120;
+  margin-top: 30px; overflow-x: clip; overflow-y: visible; }
+.deck-stage { display: grid; padding: 10px 0 20px; touch-action: pan-y; cursor: grab; }
+.deck-stage:active { cursor: grabbing; }
+/* Every card stretches to the tallest one, so the fan stays a tidy deck; short lists then
+   centre themselves in the card instead of leaving the space below them empty. */
+.skill-card { grid-area: 1 / 1; justify-self: center; align-self: stretch; width: min(292px, 74vw); min-height: 360px;
+  display: flex; flex-direction: column;
+  position: relative; padding: 20px 18px 22px; border: 1px solid var(--line); background: #121A2C;
+  box-shadow: 0 26px 48px -26px rgb(0 0 0 / .9); user-select: none; -webkit-user-select: none;
+  transition: transform .62s cubic-bezier(.22, 1, .36, 1), opacity .45s ease-out, filter .45s ease-out, border-color .3s; }
+/* A faint star tail gives the space under a short list a reason to be there. */
+.skill-card::before { content: ''; position: absolute; inset: auto 1px 1px; height: 52%; pointer-events: none; opacity: .5;
+  background-image: radial-gradient(1px 1px at 18% 24%, var(--muted), transparent), radial-gradient(1px 1px at 63% 61%, var(--muted), transparent),
+    radial-gradient(1px 1px at 84% 18%, var(--amber), transparent), radial-gradient(1px 1px at 37% 82%, var(--muted), transparent),
+    radial-gradient(1px 1px at 8% 67%, var(--muted), transparent);
+  background-size: 118px 96px; -webkit-mask-image: linear-gradient(transparent, #000); mask-image: linear-gradient(transparent, #000); }
+.skill-card > * { position: relative; }
+.skill-deck[data-dragging=true] .skill-card { transition: none; }
+.skill-deck.deck-enter .skill-card { transition-delay: calc(var(--i) * 45ms); }
+.skill-card[data-active=true] { border-color: rgb(242 165 65 / .5); }
+.skill-card[data-active=true]::after { content: ''; position: absolute; left: 0; top: -1px; width: 100%; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--amber), transparent); animation: deck-sweep 5s ease-in-out infinite; }
+.skill-card:not([data-active=true]) { cursor: pointer; }
+.skill-card:not([data-active=true]) a { pointer-events: none; }
+.skill-card a { -webkit-user-drag: none; }
+.card-index { font: 10px 'JetBrains Mono', monospace; letter-spacing: .12em; color: var(--amber); margin: 0 0 14px; }
+.card-index span { color: var(--muted); }
+.skill-card h3 { font: 400 22px/1.15 Fraunces, serif; letter-spacing: -.03em; margin: 0 0 8px; }
+.card-blurb { font-size: 11px; line-height: 1.6; color: var(--muted); margin: 0 0 14px; }
+.card-label { font: 9px 'JetBrains Mono', monospace; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
+.card-swaps { margin: 14px 0 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; font: 10px 'JetBrains Mono', monospace; }
+.card-swaps span { width: 100%; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); font-size: 9px; margin-bottom: 2px; }
+.card-swaps b { font-weight: 400; color: var(--ivory); border: 1px solid var(--line); padding: 4px 8px; }
+.skill-card ul { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--line); }
+.skill-card ul + .card-swaps { margin-top: auto; padding-top: 14px; }
+.skill-card li { padding: 8px 0 9px; border-bottom: 1px solid rgb(48 58 80 / .5); }
+.skill-card h4 { font-size: 12px; font-weight: 400; line-height: 1.5; margin: 0; }
+.skill-note { font-size: 10px; line-height: 1.5; color: var(--muted); margin: 1px 0 2px; }
+.skill-projects { display: flex; flex-wrap: wrap; gap: 0 16px; }
+.skill-projects a { min-height: 28px; display: inline-flex; gap: 7px; align-items: center; color: var(--amber); font: 10px 'JetBrains Mono', monospace; text-decoration: none; }
 .skill-projects a:hover { text-decoration: underline; }
+.deck-controls { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.deck-arrow { width: 44px; height: 44px; border: 1px solid var(--line); font-size: 15px; transition: color .18s, border-color .18s; }
+.deck-arrow:hover:not(:disabled) { border-color: var(--amber); }
+.deck-arrow:disabled { cursor: default; opacity: .3; }
+.deck-dots { display: flex; gap: 0; }
+.deck-dot { width: 15px; height: 44px; display: grid; place-items: center; }
+.deck-dot i { display: block; width: 9px; height: 1px; background: var(--line); transition: width .25s, height .25s, background-color .25s; }
+.deck-dot[data-active=true] i { width: 13px; height: 2px; background: var(--amber); }
+.deck-readout { font: 10px 'JetBrains Mono', monospace; color: var(--muted); text-align: center; margin: 12px 0 0; }
+@keyframes deck-sweep { 0%, 100% { opacity: 0; transform: translateX(-28%); } 50% { opacity: 1; transform: translateX(28%); } }
+/* Without JS the deck never fans, so it reads as a plain stack of cards instead. */
+.skill-deck:not([data-enhanced=true]) .deck-stage { grid-template-columns: 1fr; gap: 16px; }
+.skill-deck:not([data-enhanced=true]) .skill-card { grid-area: auto; }
+.skill-deck:not([data-enhanced=true]) .deck-controls, .skill-deck:not([data-enhanced=true]) .deck-readout { display: none; }
 .pending-note { font: 10px/1.8 'JetBrains Mono', monospace; color: var(--muted); }
 .text-section > .pending-note { margin-top: 22px; }
 .portrait-scan { position: relative; margin: 32px 0; overflow: hidden; background: var(--panel); }
@@ -349,16 +394,20 @@ button { transition: color .18s, background-color .18s, scale .12s ease-out; }
   .section-kicker { font-size: 11px; }
   .text-section h2 { font-size: clamp(48px, 4.5vw, 72px); }
   .text-section > p:not(.section-kicker):not(.pending-note):not(.footer-signature) { font-size: 16px; line-height: 1.9; max-width: 56ch; }
-  /* The tall right-hand item spans every row; the last 1fr row absorbs its height so text rows keep their rhythm. */
-  #skills { display: grid; grid-template-columns: .9fr 1.1fr; grid-template-rows: auto auto auto 1fr; column-gap: 96px; align-content: start; }
-  #skills > .section-kicker, #skills > h2, #skills > .section-intro { grid-column: 1; }
-  #skills > .section-intro { align-self: start; }
-  .skill-groups { grid-column: 2; grid-row: 1 / span 4; margin: 0; }
-  .skill-group summary { min-height: 76px; font-size: 17px; }
-  .skill-group ul { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-  .skill-group li + li { margin: 0; }
-  .skill-group h3 { font-size: 13px; }
-  .skill-projects a { font-size: 11px; }
+  /* The deck runs the full width under the heading, so the section no longer leans right. */
+  .skill-deck { --deck-spread: 150px; --deck-drop: 14px; --deck-tilt: 3.2; --deck-scale: .05; --deck-step: 150; margin-top: 36px; }
+  .deck-stage { padding: 14px 0 26px; }
+  .skill-card { width: 500px; min-height: 372px; padding: 30px 32px 32px; }
+  /* Four or five tools read as two columns, which keeps the whole deck from growing to fit one card. */
+  .skill-card[data-dense=true] ul { display: grid; grid-template-columns: 1fr 1fr; column-gap: 26px; }
+  .skill-card h3 { font-size: 31px; margin-bottom: 20px; }
+  .skill-card h4 { font-size: 13px; }
+  .skill-card li { padding: 10px 0 11px; }
+  .card-index { font-size: 11px; margin-bottom: 18px; }
+  .skill-projects a { font-size: 11px; min-height: 30px; }
+  .deck-controls { gap: 14px; }
+  .deck-dot { width: 18px; }
+  .deck-readout { font-size: 11px; margin-top: 14px; }
   .about-section { display: grid; grid-template-columns: .9fr 1.1fr; grid-template-rows: auto auto auto 1fr; column-gap: 96px; align-content: center; }
   .about-section > .section-kicker, .about-section > h2, .about-section > p { grid-column: 2; }
   .about-section > .portrait-scan { grid-column: 1; grid-row: 1 / span 4; width: min(100%, 440px); margin: 0; }

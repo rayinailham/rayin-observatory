@@ -157,24 +157,28 @@ async def run():
                 await position(page, slug, 2)
                 assert await page.locator('.observatory').get_attribute('data-chapter') == slug
             await menu_to(page, 'Skills', '#skills')
-            await page.locator('.skill-group').first.locator('summary').click()
-            await page.wait_for_timeout(300)
             links = await page.locator('[data-skill-project]').evaluate_all('(els)=>els.map(e=>({id:e.dataset.skillProject,href:e.getAttribute("href"),text:e.textContent}))')
             assert links and all(link['id'] in SLUGS and link['href'] == '#'+link['id'] for link in links)
-            daily = page.locator('.skill-group', has=page.locator('summary', has_text='Daily work'))
-            await daily.locator('summary').click()
-            assert await daily.locator('h3').all_inner_texts() == ['Go', 'MySQL / TiDB', 'Redis']
-            assert await daily.locator('a').count() == 0 and await daily.locator('h3').first.is_visible()
+            # Each deck dot is labelled with its group, so it doubles as the way to bring a card forward.
+            await page.get_by_role('button', name='Daily work', exact=True).click()
+            await page.wait_for_timeout(800)
+            daily = page.locator('.skill-card[data-active=true]')
+            assert await daily.locator('h3').inner_text() == 'Daily work'
+            assert await daily.locator('h4').all_inner_texts() == ['Go', 'MySQL / TiDB', 'Redis']
+            assert await daily.locator('a').count() == 0 and await daily.locator('h4').first.is_visible()
             assert await page.get_by_text('awaiting confirmation').count() == 0
-            await daily.locator('summary').click()
+            await page.get_by_role('button', name='Languages & runtime', exact=True).click()
+            await page.wait_for_timeout(800)
             await page.screenshot(path=str(OUT / f'skills-{width}x{height}.png'))
             # Reproduce browser-native scrolling before Lenis gets its next animation frame.
-            await page.locator('.skill-group').first.locator('[data-skill-project=crosscheck]').evaluate('(e)=>{window.scrollBy(0,-120);e.click();}')
+            await page.locator('.skill-card[data-active=true] [data-skill-project=crosscheck]').evaluate('(e)=>{window.scrollBy(0,-120);e.click();}')
             await page.wait_for_function("Math.abs(document.getElementById('crosscheck').getBoundingClientRect().top)<2", timeout=8000)
-            # Python proves all five; exercise one real skill link per destination after accordion resize.
+            # Python proves all five; exercise one real skill link per destination from the front card.
             for slug in SLUGS:
                 await menu_to(page, 'Skills', '#skills')
-                await page.locator('.skill-group').first.locator(f'[data-skill-project={slug}]').click()
+                await page.get_by_role('button', name='Languages & runtime', exact=True).click()
+                await page.wait_for_timeout(800)
+                await page.locator(f'.skill-card[data-active=true] [data-skill-project={slug}]').click()
                 try:
                     await page.wait_for_function('id=>Math.abs(document.getElementById(id).getBoundingClientRect().top)<2', arg=slug, timeout=8000)
                 except Exception:

@@ -14,7 +14,7 @@
 | Bagian PLAN.md yang relevan | §3 Q41, §5.1 (CrossCheck), §7 (kontrak isi), §8.1–§8.2 (visual/motion/mobile → desktop), §10 (copy), §11 (performa), §12 (fase personalisasi) |
 | Blocker | Rig tes: `verify_desktop.py` / `verify_mobile.py` di venv `crosscheck` (Playwright 1.62) gagal — canvas R3F tetap 300×150, `data-scene=loading`, Chrome for Testing 149/151, headless + headed; direproduksi pada kode lama, perlu re-provision engine |
 | Preview sesi ini | Revisi planet: `http://127.0.0.1:8780/` · preview produksi lokal (`next start`) |
-| Revisi terakhir | PLAN/PROGRESS diperbarui untuk personalisasi lima project (Q41); belum ada implementasi personalisasi baru. Revisi gerbang desktop sebelumnya tetap siap review |
+| Revisi terakhir | Skills jadi deck kartu (drag/swipe, 12 grup, deskripsi grup + per tool + "same job, other tools"); di-approve pemilik 2026-09-16. Revisi gerbang desktop sebelumnya tetap siap review |
 | Langkah berikut | Development 7A: baca dossier CrossCheck lokal, susun brief personal, bangun chapter + case **mobile dulu**, lalu poles desktop sebagai tampilan utama; verifikasi → `ready-for-test`. Pulihkan rig browser sebelum mengklaim hasil visual lulus |
 | Launch | Fase 8 menunggu gate 7A–7F. Catatan deployment terdahulu: Vercel CLI login 2026-09-16 (`chhrone`, scope `chhrones-projects`), `web/` belum `vercel link`; verifikasi lagi saat Fase 8. Testing produksi tetap mengikuti Q40 |
 
@@ -418,6 +418,22 @@ Testing (Claude Code / Antigravity) — **semua tes memakai URL Vercel, bukan pr
 
 > Entri terbaru di atas. Singkat, 1–2 baris: tanggal · harness · fase — apa yang dikerjakan,
 > verifikasi, berikutnya. Detail teknis taruh di CODEMAP / folder bukti, bukan di sini.
+
+- **2026-09-16 · Claude Code · Skills jadi deck kartu** — Atas permintaan pemilik (dropdown dinilai berat sebelah ke kanan):
+  `#skills` tidak lagi accordion `<details>` dua kolom. Komponen baru `web/components/skill-deck.tsx` menampilkan 12 grup
+  sebagai kartu bertumpuk yang bisa di-drag/swipe, melingkar (kartu selalu ada di kiri dan kanan), plus tombol panah, titik
+  per grup (aria-label = nama grup) dan readout. Geometri kipas (`--deck-spread/-drop/-tilt/-scale/-step`) hidup di CSS per
+  breakpoint, JS hanya membacanya. Dua kartu tiap sisi tetap terbaca (opacity 75% lalu 50%, blur 0,5 px/jarak), kartu ketiga
+  nol tepat di batas clamp supaya wrap tak berkelebat. Isi kartu mengikuti permintaan kedua pemilik: kategori → deskripsi
+  singkat (`blurb`) → daftar tools, tiap tool dengan satu baris keterangan (`note`) + link project → footer
+  "Same job, other tools" (`swaps`; padanan di lapangan, **bukan** klaim pengalaman). `blurb`, `note`, `swaps`
+  adalah field baru di `lib/skills.ts`; copy-nya **di-approve pemilik 2026-09-16** ("lulus semua approved"). Tanpa JS kartu tampil
+  sebagai tumpukan biasa (`data-enhanced=false`), reduced-motion mematikan transisi lewat aturan global.
+  Diukur di Chrome 149 (1440×900 + 390×844): klik link project → `#crosscheck` top 0 + `skill-highlight` + heading fokus;
+  drag melewati link tidak ikut navigasi; panah/panah-kiri-kanan/dot/klik kartu tetangga semua memindah kartu; wrap 01 → 12
+  jalan; overflow horizontal 0; tak ada kartu terpotong. Skrip bukti (`desktop_evidence.py`, `full_observatory_evidence.py`,
+  `verify_desktop.py`, `verify_mobile.py`) diperbarui ke selector deck (`h3` grup, `h4` skill). lint/typecheck/build pass.
+  Pemilik menyatakan lulus + approve, lalu minta commit + push.
 
 - **2026-09-16 · Codex · revisi rencana personalisasi** — PLAN/PROGRESS: brief lima project, fase 7A–7F,
   mobile dulu → desktop utama. Cek sumber dossier dan konsistensi tracker; berikutnya 7A Development.

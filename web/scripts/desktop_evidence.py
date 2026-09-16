@@ -45,7 +45,7 @@ ITEMS = {
     'hero': 'Hero: text rail left, dome + Saturn on the right of a full-width Canvas; header shows Work / About / Contact instead of Menu',
     'headerNav': 'Header navigation: Work / About / Contact scroll to their sections, on the homepage and from a case file',
     'chapters': 'Five chapters: copy + reading rail left, instrument on the right, camera orbits on scroll, no overlap',
-    'skills': 'Skills: heading left, accordion right with two-column items; a project link scrolls to its chapter',
+    'skills': 'Skills: heading left, the card deck centred under it and fanned both ways; a project link scrolls to its chapter',
     'about': 'About: portrait left, copy right, paragraphs grouped without stretched gaps',
     'contact': 'Contact: CTA left, four links right, correct targets',
     'flightIn': 'Open case file on desktop: text fades, scroll locked, camera flies in, focus on the case heading',
@@ -227,21 +227,29 @@ async def main_flow(browser, checks, text):
 
     # Skills
     await glide(page, await top(page, '#skills'))
-    # Second group (Test automation & QA) has several items, so the two-column grid is measurable.
-    await page.locator('.skill-group summary').nth(1).click()
-    await page.wait_for_timeout(500)
+    # Second group (Test automation & QA) has several items, so the two-column card body is measurable.
+    await page.locator('.deck-arrow').last.click()
+    await page.wait_for_timeout(900)
     await snap('04-skills.png')
-    heading, groups = await bbox(page, '#skills-heading'), await bbox(page, '.skill-groups')
-    items = await page.locator('.skill-group[open] li').evaluate_all('els=>els.map(e=>Math.round(e.getBoundingClientRect().left))')
-    link = page.locator('.skill-group[open] [data-skill-project]').first
+    heading, deck = await bbox(page, '#skills-heading'), await bbox(page, '.skill-deck')
+    front = await bbox(page, '.skill-card[data-active=true]')
+    # The deck is centred in the section, and the fan reaches to both sides of the front card.
+    centred = abs((front['x'] + front['width'] / 2) - (deck['x'] + deck['width'] / 2)) < 4
+    sides = await page.locator('.skill-card').evaluate_all(
+        '(els)=>els.map(e=>Math.round(parseFloat(e.style.transform.match(/translate3d\\(([-0-9.]+)/)[1])))')
+    fanned = any(x < -20 for x in sides) and any(x > 20 for x in sides)
+    items = await page.locator('.skill-card[data-active=true] li').evaluate_all('els=>els.map(e=>Math.round(e.getBoundingClientRect().left))')
+    link = page.locator('.skill-card[data-active=true] [data-skill-project]').first
     project = await link.get_attribute('data-skill-project')
     await link.click()
     await at_top(page, f'#{project}')
     highlighted = await page.locator(f'#{project}.skill-highlight').count() == 1
     await snap('04b-skill-link.png')
     checks['skills'] = {
-        'pass': box_right(heading) < groups['x'] and highlighted and len(set(items)) == 2,
-        'detail': f"heading right {round(box_right(heading))} < accordion x {round(groups['x'])}; item columns x={sorted(set(items))}; project link → #{project} scrolled + highlighted={highlighted}",
+        'pass': box_bottom(heading) < deck['y'] and centred and fanned and highlighted and len(set(items)) == 2,
+        'detail': f"heading bottom {round(box_bottom(heading))} < deck y {round(deck['y'])}; front card centred={centred}; "
+                  f"fan offsets={sorted(set(sides))}; item columns x={sorted(set(items))}; "
+                  f"project link → #{project} scrolled + highlighted={highlighted}",
         'screenshot': '04-skills.png',
     }
 

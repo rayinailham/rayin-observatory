@@ -42,7 +42,7 @@ ITEMS = {
     'order': 'Five chapters in PLAN §5 order',
     **{f'chapter-{s}': f'Chapter {NAMES[s]}: pinned, orbit, idle motion, reading, Open case file preview' for s in SLUGS},
     'numbers': 'Every homepage reading traces to its dossier',
-    'skills': 'Skills grouped (PLAN §9), every item linked to a proving project, no internal/unconfirmed names',
+    'skills': 'Skills grouped into deck cards (PLAN §9), every item linked to a proving project, no internal/unconfirmed names',
     'skill-link': 'Choosing a project beside a skill returns to that instrument and highlights it',
     'about': 'About: stylised portrait, scan reveal, first-person DRAFT copy',
     'contact': 'Contact: Email CTA + Email / LinkedIn / GitHub / Upwork links',
@@ -225,13 +225,14 @@ async def main_flow(browser, ev):
 
     async def skills():
         await menu_to(page, 'Skills', '#skills')
-        groups = page.locator('.skill-group')
+        groups = page.locator('.skill-card')
         count = await groups.count()
-        await groups.nth(1).locator('summary').click()
-        await page.wait_for_timeout(500)
+        # The deck holds every group at once; one step forward proves it moves.
+        await page.locator('.deck-arrow').last.click()
+        await page.wait_for_timeout(900)
         shot = await ev.shot(page, 'skills-open')
-        items = await page.locator('.skill-group li').evaluate_all(
-            '(els)=>els.map(li=>({name:li.querySelector("h3").textContent,links:[...li.querySelectorAll("a")].map(a=>a.getAttribute("href"))}))')
+        items = await page.locator('.skill-card li').evaluate_all(
+            '(els)=>els.map(li=>({name:li.querySelector("h4").textContent,links:[...li.querySelectorAll("a")].map(a=>a.getAttribute("href"))}))')
         unlinked = [i['name'] for i in items if not i['links'] or any(h not in [f'#{s}' for s in SLUGS] for h in i['links'])]
         unconfirmed = [i['name'] for i in items if i['name'] in UNCONFIRMED]
         names = [i['name'] for i in items]
@@ -242,7 +243,12 @@ async def main_flow(browser, ev):
     await ev.step('skills', skills())
 
     async def skill_link():
-        link = page.locator('.skill-group').nth(1).locator('[data-skill-project=brandwall]').first
+        link = page.locator('.skill-card[data-active=true] [data-skill-project=brandwall]').first
+        for _ in range(await page.locator('.skill-card').count()):
+            if await link.count():
+                break
+            await page.locator('.deck-arrow').last.click()
+            await page.wait_for_timeout(800)
         await link.click()
         await page.wait_for_function("Math.abs(document.getElementById('brandwall').getBoundingClientRect().top)<2", timeout=8000)
         await page.wait_for_timeout(900)

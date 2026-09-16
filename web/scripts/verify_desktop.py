@@ -126,7 +126,8 @@ async def viewport(browser, width, height):
         else:
             await position(page, f'#{section}')
         if section == 'skills':
-            await page.locator('.skill-group summary').first.click()
+            await page.locator('.deck-arrow').last.click()
+            await page.wait_for_timeout(700)
         await capture(page, f'{section}-{tag}')
     await position(page, '#crosscheck', 240)
     await page.locator('[data-open-case="crosscheck"]').click()
