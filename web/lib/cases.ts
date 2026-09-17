@@ -1,5 +1,5 @@
 // Case file content for all five instruments, in homepage order (PLAN §5 / §7).
-// Personal copy approved at gates 7A (CrossCheck) and 7B (SurgeLine).
+// Personal copy approved at gates 7A (CrossCheck), 7B (SurgeLine) and 7C (DriftWatch).
 // Every reading traces to its dossier section (`source`);
 // portfolio/CAPABILITY_<NAME>.md in the project root. Full table: web/README.md.
 import type { InstrumentId } from './instruments';
@@ -21,7 +21,7 @@ export type CaseFile = {
   video: { duration: number; label: string; intro: string };
   // Phase 7A: a named node the case is entered and left through (CrossCheck's middle lens).
   aperture?: string;
-  transition?: 'pulse';
+  transition?: 'pulse' | 'ribbon';
 };
 
 // Screen position (CSS px) of the lens a case is entered through: written by the scene every frame,
@@ -112,22 +112,22 @@ export const caseFiles: readonly CaseFile[] = [
       intro: 'English captions. No audio. Live footage comes from a separate 3,000-record demonstration run, labeled on screen.' },
   },
   {
-    id: 'driftwatch', draft: false,
-    deck: ['Collect every day.', 'Speak up when it changes.'],
+    id: 'driftwatch', draft: false, aperture: 'NeedlePivot', transition: 'ribbon',
+    deck: ['Keep yesterday.', 'Explain today.'],
     brief: [
       'Scrapers rarely break loudly. A page layout changes, a column goes empty, and the data keeps flowing until someone finds weeks of wrong reports.',
-      'I build collection pipelines that run on a schedule, compare each day with the last good run and raise an alarm the same day a source changes.',
+      'I build scheduled collection pipelines that keep dated snapshots, report ordinary changes and raise an alarm when the data or the collection can no longer be trusted.',
     ],
     context: 'Two public scraping sandboxes, one documentation site that passed a robots.txt check, and an owned test site where failures were planted.',
     instrumentHeading: ['One needle.', 'A daily trace.'],
     // Numbered top-down on the instrument; the needle leader meets its pivot so it clears the frame.
     components: [
       { id: 'alarms', node: 'NeedlePivot', marker: [12, 33], title: 'Alarms', label: 'Ten rules, written first',
-        body: 'Ten alarm rules, with thresholds written before testing, flag empty runs, missing fields, error spikes and missed schedules. Normal changes stay quiet.' },
+        body: 'Normal additions, edits and removals stayed healthy in the test. A broken page layout returned no records and raised alarms. Zero rows is a reason to investigate, never a quiet success.' },
       { id: 'compare', node: 'driftwatchMount', part: 'ceramic', marker: [88, 45], title: 'Change detection', label: 'New, changed, removed',
-        body: 'Every day is saved as a dated snapshot and compared with the last successful run, field by field. Timestamps are ignored, so a stable source shows no phantom changes.' },
+        body: 'Dated snapshots keep their history. I compare stable record IDs and field values against the last successful run, skipping failed days. Fetch timestamps stay out of the diff.' },
       { id: 'collect', node: 'RollerPivot0', part: 'ceramic', marker: [12, 57], title: 'Daily collection', label: 'Polite, scheduled, resumable',
-        body: 'A scheduled job collects each source at one request per second with an honest User-Agent. If it stops, it resumes from saved progress instead of starting over.' },
+        body: 'The timer collects the sources; a separate watchdog detects a run that never starts. In the recorded project, alarms also exposed a runner setup failure, not a change to the source.' },
     ],
     flowHeading: ['From a source page', 'to a daily verdict.'],
     flow: [
@@ -139,7 +139,7 @@ export const caseFiles: readonly CaseFile[] = [
     readingsHeading: ['Measured on', 'the test sources.'],
     readingsIntro: 'Recorded from the project’s own runs on sandboxes, a small documentation site and an owned test site, not client data.',
     readings: [
-      { value: 11, suffix: '/11', label: 'Planted failures caught', context: 'Planted one at a time in the owned test site, with 0 false alarms. Three were normal changes that correctly stayed quiet.', source: '§1 / §6 K1 / §7' },
+      { value: 11, suffix: '/11', label: 'Test scenarios handled correctly', context: 'Planted one at a time in the owned test site, with 0 false alarms. Three were normal changes that correctly stayed quiet.', source: '§1 / §6 K1 / §7' },
       { value: 1323, suffix: '', label: 'Records collected per day', context: 'Across four sources, with 0 duplicates and every required field filled.', source: '§6 K9 / §7' },
       { value: 12, suffix: '/12', label: 'Unattended runs finished cleanly', context: 'Three consecutive days, four sources a day, started by the scheduler with no manual step.', source: '§6 K5 / §7 / §9' },
       { value: 1, suffix: '', label: 'Request where a browser needed 8', context: 'A direct data endpoint found during setup replaced the browser for the same 10 quotes.', source: '§6 K8 / §7' },

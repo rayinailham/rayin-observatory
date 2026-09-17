@@ -113,6 +113,16 @@ async def measure(browser, url, slug):
             await page.wait_for_timeout(400)
         await segment('crash/resume demonstration', demonstration)
         await land(page, 0)
+    if slug == 'driftwatch' and await page.locator('.monitoring-room').count():
+        async def comparison():
+            for scenario in ('change', 'layout', 'pipeline', 'missing', 'recovery'):
+                await land(page, await page.locator('.monitor-scenarios').evaluate('e=>e.getBoundingClientRect().top+scrollY-100'))
+                await page.locator(f'[data-scenario-choice={scenario}]').tap()
+                await land(page, await page.locator('[data-compare]').evaluate('e=>e.getBoundingClientRect().top+scrollY-100'))
+                await page.locator('[data-compare]').tap()
+                await page.wait_for_timeout(850)
+        await segment('snapshot comparisons', comparison)
+        await land(page, 0)
     await segment('case scroll to Next', lambda: swipe_until(page, cdp, 10 ** 6))
 
     async def back():

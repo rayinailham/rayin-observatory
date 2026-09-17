@@ -47,6 +47,11 @@ export default function Home() {
                 ? <div className="dispatch-chapter" role="img" aria-label="Illustration: three browsers send records from a saved work list; browser 2 is cut, resumes, and every record reaches an outcome">{[0, 1, 2].map(lane => <div key={lane} className="dispatch-strand" data-strand={lane}>
                   <span>Browser {lane + 1}{lane === 1 && <b><em>cut</em><em>resumed</em></b>}</span><div aria-hidden="true">{Array.from({ length: 8 }, (_, c) => <i key={c} style={{ '--c': c } as CSSProperties} />)}</div>
                 </div>)}<small>amber sent · green receipt saved · crash demo inside ↗</small></div>
+              : instrument.id === 'driftwatch'
+                ? <div className="monitor-chapter" role="img" aria-label="Illustrated trace: quiet collection, then an empty-run alarm; compare snapshots inside">
+                  <svg viewBox="0 0 320 28" preserveAspectRatio="none" aria-hidden="true"><path className="monitor-chapter-base" d="M0 15H320" /><path className="monitor-chapter-line" pathLength="1" d="M0 15H118L126 13L136 17L144 15H195L203 3L211 25L220 12L228 15H320" /><path className="monitor-chapter-alarm" pathLength="1" d="M195 15L203 3L211 25L220 12L228 15" /></svg>
+                  <span><b><em>Last good snapshot → compare</em><em>Empty run → alarm</em></b><small>Illustration</small></span>
+                </div>
               : <p className="orbit-hint">Scroll to orbit the instrument</p>}
         </div>
       </div>

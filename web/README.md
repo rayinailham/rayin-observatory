@@ -1,5 +1,49 @@
 # Rayin Observatory · Personal rooms
 
+## Phase 7C — DriftWatch monitoring room (gate passed, 2026-09-17)
+
+The owner accepted the 21/21 Testing pack and all findings on 2026-09-17. Copy is approved, including the
+numbered Day 1–3 illustration; DRAFT labels are removed. The phone verdict distance after Compare is accepted.
+The Testing fix (clip-window trace) is part of the approved motion.
+
+Personal brief: a team needs repeatable content data and a way to know when it stops being trustworthy.
+The story is last good snapshot → current collection → field diff → a reasoned verdict. Ordinary changes
+stay healthy; an empty collection and a run that never started must never look healthy. The instrument is
+an archive, not a live dashboard. The existing seismograph leads into a dated paper timeline.
+
+Mobile first: stacked snapshots, tap scenario + Compare, readable before/after field details and an alarm
+below. Desktop follows mobile verification: a wide time axis, two snapshots alongside a contextual verdict;
+quiet editorial spacing rather than worker lanes. Existing 3D geometry is retained.
+
+Copy approved at gate 7C (was DRAFT during Development/Testing): the room, hotspot bodies, brief clarification,
+source ledger, soak timeline, DueWatch teaser and the chapter strip.
+
+| Copy / evidence | Source / boundary |
+|---|---|
+| Last successful baseline; stable IDs; volatile timestamps excluded; dated snapshots kept | DriftWatch §4; §6 K3 |
+| Added/changed/removed are ordinary changes, no alarm by themselves | §6 K1 DO-01–03; no claim that every change is an alarm |
+| Layout break → empty collection; five alarm codes | §6 K1 DO-04; controlled test |
+| Collector did not start fixture → empty collection | §6 K2; real pipeline failure; symptoms alone do not diagnose the cause |
+| Missing run → RUN_MISSING, independent watchdog | §6 K1 DO-09; §6 K5 |
+| Recovered failures marked resolved, not deleted; failed days never become baseline | §4; §6 K2 |
+| Fictional /guide, /notes, /help, /start titles; comparison marked Day 1–3 | Clearly labelled illustration, not harvested rows or actual daily outcomes; no network collection. Numbered days, not calendar dates, so the illustrated failure never collides with the recorded 01–03 Sep soak (0 alarms) |
+| 1,323/day: books 1,000, quotes 100, SEO 23, owned lab 200 | §3.2; §7; role/source labels, no affiliation |
+| 11/11 test scenarios, zero false positives in that test | §6 K1; §7; includes three normal-change controls, not eleven alarm events |
+| Three unattended days, 12/12 runs; 1–3 Sep 2026 | §6 K5; §9: Sep 1 indirect proof, Sep 2–3 journal; public sources unchanged |
+| Dossier checked 13 Sep 2026; archive, not current status | dossier opening date; §9; no long-term monitoring claim |
+| Next: scheduled contract checks and human handoff | DueWatch approved deck, teaser only |
+
+Motion contract: chapter trace reveal is a pure function of chapter orbit (reverse scroll reverses it).
+Compare draws a quiet trace then a local spike only for an alarm (0.8 s, linear; a clip window opens left → right
+so the path never scales and the spike appears in place — Testing fix 2026-09-17), reveals the verdict
+(0.2 s, power2.out); text stays stationary. Choosing another scenario kills the old motion and clears the
+verdict; repeated Compare restarts the same deterministic comparison, no pending callback queue. Scroll
+never resets a comparison. Reduced motion and keyboard compare settle immediately. The entry paper ribbon
+unrolls from the projected needle into a full-width timeline (0.7 s, power2.inOut); Return rolls back to the
+stored chapter origin. Route/history interruption kills the ribbon. No per-frame root CSS writes.
+
+Development evidence belongs in `assets/renders/personal-driftwatch/dev/`; Testing makes the separate gate pack.
+
 ## Phase 7B — SurgeLine dispatch room (gate passed, 2026-09-17)
 
 The owner accepted the 18/18 Testing pack and all findings on 2026-09-17. Copy is approved;

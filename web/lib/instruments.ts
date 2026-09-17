@@ -1,4 +1,4 @@
-// Homepage copy approved by the owner at the Phase 3 gate, 2026-09-15.
+// Homepage copy approved at Phase 3; DriftWatch revision approved at gate 7C (2026-09-17).
 // Exact dossier sections and proof context: web/README.md, Copy provenance.
 export const instruments = [
   { id: 'crosscheck', name: 'CrossCheck', category: 'Web QA',
@@ -8,8 +8,8 @@ export const instruments = [
     pitch: 'I turn your spreadsheet into a resumable form-filling workflow, with a confirmation number for every success.',
     reading: '50,000', unit: 'records processed', context: 'Synthetic data · owned test form' },
   { id: 'driftwatch', name: 'DriftWatch', category: 'Data monitoring',
-    pitch: 'I collect your web data on a schedule and flag source changes before silent failures spoil your reports.',
-    reading: '11/11', unit: 'planted failures caught', context: 'In a controlled failure test' },
+    pitch: 'I keep dated snapshots of your web data, show what changed and flag when collection can no longer be trusted.',
+    reading: '11/11', unit: 'test scenarios handled', context: 'Includes normal-change controls' },
   { id: 'duewatch', name: 'DueWatch', category: 'Expiry & follow-up',
     pitch: 'I build daily expiry checks and follow-up workflows that hand sensitive messages to a person.',
     reading: '200', unit: 'contracts checked per run', context: 'Synthetic contracts · mock delivery' },

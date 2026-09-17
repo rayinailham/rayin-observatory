@@ -78,7 +78,7 @@ async def inspect(page, case, width, height, shots):
     assert all(b['y'] + b['height'] < top_of_card for b in cards)
     await page.get_by_role('button', name='Close component card').click()
     # CrossCheck explains its flow as the Phase 7A inspection field; the others keep the shared list.
-    flow = {'crosscheck': '.inspection-steps li', 'surgeline': '.dispatch-steps li'}.get(case['id'], '.signal-flow li')
+    flow = {'crosscheck': '.inspection-steps li', 'surgeline': '.dispatch-steps li', 'driftwatch': '.monitor-steps li'}.get(case['id'], '.signal-flow li')
     assert await page.locator(flow).count() == 4
     for i, value in enumerate(case['readings']):
         await page.locator('.case-reading').nth(i).scroll_into_view_if_needed()

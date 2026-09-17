@@ -34,6 +34,8 @@ BIG = 5_000_000  # videos: size + mtime instead of reading every byte
 
 # name: (command, cwd, timeout s, result JSON relative to ROOT or None, phones env honoured, copy JSON to)
 SUITES = {
+    'monitor': ([PY, 'verify_driftwatch_room.py'], SCRIPTS, 900, 'assets/renders/personal-driftwatch/dev/verification.json', True, None),
+    'perf-driftwatch': ([PY, 'perf_quick.py', '--slug', 'driftwatch'], SCRIPTS, 600, 'assets/renders/perf-quick/driftwatch.json', False, None),
     'dispatch': ([PY, 'verify_surgeline_room.py'], SCRIPTS, 900, 'assets/renders/personal-surgeline/dev/verification.json', True, None),
     'perf-surgeline': ([PY, 'perf_quick.py', '--slug', 'surgeline'], SCRIPTS, 600, 'assets/renders/perf-quick/surgeline.json', False, None),
     'room': ([PY, 'verify_crosscheck_room.py'], SCRIPTS, 900, 'assets/renders/personal-crosscheck/dev/verification.json', True, None),

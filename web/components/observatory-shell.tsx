@@ -72,6 +72,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
   const pageContent = useRef<HTMLDivElement>(null);
   const iris = useRef<HTMLDivElement>(null);
   const pulse = useRef<HTMLDivElement>(null);
+  const ribbon = useRef<HTMLDivElement>(null);
   // Where the antenna sat on screen when its case was opened; Return restores that scroll, so the pulse lands there.
   const pulseHome = useRef<IrisCentre & { w: number; h: number } | null>(null);
   const sceneLayer = useRef<HTMLDivElement>(null);
@@ -188,6 +189,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
     // A lens flight leaves the iris covering the screen; the arriving page always uncovers it,
     // including after Back interrupted a departure half way.
     const irisState = iris.current?.dataset.state;
+    if (ribbon.current) { gsap.killTweensOf(ribbon.current); gsap.set(ribbon.current, { opacity: 0 }); ribbon.current.dataset.direction = 'idle'; }
     if (pulse.current) gsap.set(pulse.current.querySelectorAll('i'), { opacity: 0 });
     if (irisState === 'disc' || irisState === 'hole') {
       const r = parseFloat(iris.current!.style.getPropertyValue('--iris-r')) || 0;
@@ -435,8 +437,24 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
       .to(pageContent.current, { opacity: 0, duration: reducedMotion ? 0 : .48, ease: 'power2.out' }, 0)
       .to(caseView.current, { mix: 1, duration: reducedMotion ? 0 : .78, ease: 'power2.inOut' }, 0);
     // Phase 7A: CrossCheck is entered through its lens; the arriving case opens the iris again.
-    if (caseFiles[index].transition === 'pulse') flight.current.add(pulseFlight('out'), .08);
+    if (caseFiles[index].transition === 'ribbon') flight.current.add(ribbonFlight('out'), .08);
+    else if (caseFiles[index].transition === 'pulse') flight.current.add(pulseFlight('out'), .08);
     else if (caseFiles[index].aperture && !reducedMotion) flight.current.add(irisTween(iris.current, irisMotion, 'disc', 0, irisReach(), .5, 'power2.in'), .32);
+  }
+
+  function ribbonFlight(direction: 'in' | 'out', centre = lensCentre()) {
+    const sheet = ribbon.current;
+    const timeline = gsap.timeline();
+    if (!sheet || reducedMotion) return timeline;
+    // One local layer; transform/opacity only. Full-width paper unrolls from the needle.
+    const collapsed = { x: centre.x, y: centre.y, scaleX: .012, scaleY: .12 };
+    const expanded = { x: 0, y: window.innerHeight * .46, scaleX: 1, scaleY: 1 };
+    timeline.set(sheet, { opacity: .95, transformOrigin: '0 50%', ...(direction === 'out' ? collapsed : expanded) })
+      .call(() => { sheet.dataset.direction = direction; })
+      .to(sheet, { ...(direction === 'out' ? expanded : collapsed), duration: .7, ease: 'power2.inOut' })
+      .to(sheet, { opacity: 0, duration: .14 })
+      .call(() => { sheet.dataset.direction = 'idle'; });
+    return timeline;
   }
 
   function pulseFlight(direction: 'in' | 'out', centre = lensCentre()) {
@@ -475,8 +493,10 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
         audio.current?.transition('in');
       })
       .to(sweep, { transition: 1, duration: reducedMotion ? 0 : .78, ease: 'power2.inOut' });
-    if (caseFiles[from].transition === 'pulse') flight.current.add(pulseFlight('in'), 0);
-    else if (caseFiles[index].transition === 'pulse') flight.current.add(pulseFlight('out'), .68);
+    if (caseFiles[from].transition === 'ribbon') flight.current.add(ribbonFlight('in'), 0);
+    else if (caseFiles[from].transition === 'pulse') flight.current.add(pulseFlight('in'), 0);
+    if (caseFiles[index].transition === 'ribbon') flight.current.add(ribbonFlight('out'), .78);
+    else if (caseFiles[index].transition === 'pulse' && caseFiles[from].transition !== 'pulse') flight.current.add(pulseFlight('out'), .68);
   }
 
   function leaveCase(target: number | string = 'return') {
@@ -494,7 +514,8 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
     // On the case page the antenna has usually scrolled away; aim at the chapter antenna the visitor left from.
     const home = pulseHome.current;
     const sameView = home && home.w === window.innerWidth && home.h === window.innerHeight && homeScroll.current !== null;
-    if (target === 'return' && caseFiles[current].transition === 'pulse') flight.current.add(pulseFlight('in', sameView ? home : lensCentre()), 0);
+    if (target === 'return' && caseFiles[current].transition === 'ribbon') flight.current.add(ribbonFlight('in', sameView ? home : lensCentre()), 0);
+    else if (target === 'return' && caseFiles[current].transition === 'pulse') flight.current.add(pulseFlight('in', sameView ? home : lensCentre()), 0);
     else if (target === 'return' && caseFiles[current].aperture && !reducedMotion) flight.current.add(irisTween(iris.current, irisMotion, 'hole', irisReach(), 0, .48, 'power2.in'), 0);
   }
 
@@ -545,6 +566,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
         }
       }}>{children}</div>
       <div ref={iris} className="lens-iris" data-state="hidden" aria-hidden="true" />
+      <div ref={ribbon} className="monitor-ribbon" data-direction="idle" aria-hidden="true"><svg viewBox="0 0 600 80" preserveAspectRatio="none"><path d="M0 40H250L264 35L278 46L296 40H600" /></svg><span>SNAPSHOT / COMPARE / RECORD</span></div>
       <div ref={pulse} className="dispatch-pulse" aria-hidden="true"><i /><i /><i /></div>
       <button className="hero-contact" onClick={openContact}>Contact <span aria-hidden="true">↗</span></button>
       <div ref={progressBar} className="progress-readout"><span>SCROLL</span><span className="readout-track" aria-hidden="true"><i /></span><output ref={readout} aria-label="Scroll progress">000%</output></div>
