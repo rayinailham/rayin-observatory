@@ -9,21 +9,22 @@
 
 | Hal | Isi |
 |---|---|
-| Fase aktif | **Fase 7D — DueWatch: time control room** · Development (Codex, salinan paralel `assets/development/phase-7d/`) |
-| Status fase | 7C `done` (gate lolos 2026-09-17, "saya approve semua untuk 7C"). 7D `in-dev` di salinan paralel. 7B `done` (gate lolos 2026-09-17). 7A `done` (gate lolos 2026-09-16) |
-| Bagian PLAN.md yang relevan | §3 Q41–Q44, §12.3 (efisiensi tes — wajib), §5.3 (DriftWatch), §7 (kontrak isi), §8.1–§8.2 (visual/motion/mobile → desktop), §10 (copy), §11 (performa), §12 (fase personalisasi) |
-| Blocker | Tidak ada untuk 7C. 7D: integrasi salinan ke `web/` utama sekarang boleh (7C stabil); bandingkan `BASELINE.json` dengan commit gate 7C |
-| Preview sesi ini | `http://127.0.0.1:8767/` · preview produksi lokal (`npm run build --prefix web && npm run start --prefix web`); 7C: `/work/driftwatch` |
-| Revisi terakhir | Gate 7C lolos 2026-09-17 (Claude Code): pemilik "saya approve semua untuk 7C" → copy 7C approved (termasuk Day 1–3), label DRAFT DriftWatch dilepas, jarak verdict HP diterima; build + regresi `monitor`, `cases`/`mobile` 390×844 passed (sumber `8b800e3ebedbbbb4`); commit + push. Sebelumnya 7C Testing → `awaiting-gate` 2026-09-17 (Claude Code): paket `driftwatch_room_evidence.py` 21/21 (memanggil `verify_driftwatch_room.viewport/edges`); fix gerak Compare = jendela clip (lonjakan digambar di tempat, dulu diperas `scaleX`); runner 13/13 hijau di sumber `a8336493ca0de6ca`. Sebelumnya 7C Development → `ready-for-test` 2026-09-17 (Codex → Claude Code): trace chapter seismograf, pita jarum → timeline, meja banding 5 situasi (perubahan biasa sehat; layout rusak/collector gagal/run hilang = alarm beralasan; pulih pakai baseline terakhir), arsip bukti terpisah; ilustrasi Day 1–3 (bukan tanggal soak); runner 13 suite hijau di sumber `40a56b14db159831`. Sebelumnya gate 7B lolos 2026-09-17 (Claude Code): copy approved, label DRAFT SurgeLine dilepas, Cut sebelum Form diterima; build + regresi terdampak; commit + push. Sebelumnya Testing 7B (Claude Code): paket `surgeline_room_evidence.py` 18/18; fix pulsa Return mendarat di titik antena asal (`pulseHome` di shell); runner 11 suite hijau di sumber `37a4f3e3770463fb`. Sebelumnya Development 7B (Codex → Claude Code): strip chapter 3 browser (lane 2 cut → resumed), pulsa antena masuk/kembali, papan dispatch A–F (antrean → 3 browser → Confirmed/Rejected/Dead-letter; Cut/Resume/Replay), ledger + bukti rekaman, teaser DriftWatch; fix fps var CSS root. Copy baru DRAFT |
-| Langkah berikut | **7D Development** (Codex, salinan paralel): selesaikan lalu integrasikan ke `web/` utama di atas commit gate 7C → `ready-for-test` |
+| Fase aktif | **Fase 7E — BrandWall: visual studio** · `todo` (Development berikutnya) |
+| Status fase | 7D `done` (gate 2026-09-18, "semuanya approved"); 7A/7B/7C `done`. 7E `todo`. |
+| Bagian PLAN.md yang relevan | §3 Q41–Q46, §5.5 (BrandWall), §7, §8.1–§8.2, §10–§12.3. |
+| Blocker | — |
+| Preview sesi ini | `http://127.0.0.1:8767/` = build utama pasca-gate 7D (2026-09-18). :8784 (salinan 7D) tidak dipakai lagi. |
+| Revisi terakhir | Gate 7D lolos 2026-09-18 (Claude Code): pemilik "semuanya approved" → copy 7D approved, label DRAFT DueWatch dilepas (`cases.ts`, strip `page.tsx` → "Illustration", komentar `duewatch-room.ts/.tsx`/`instruments.ts`/CSS, tes `verify_duewatch_room.py`/`verify_cases.py`/`duewatch_room_evidence.py` mengharapkan 0 DRAFT), 2 temuan diterima; lint/typecheck/build + regresi `time`, `cases`/`mobile` 390×844 passed (sumber `de8440d2274dbcd4`); commit + push. Sebelumnya: 7D Testing → `awaiting-gate` 2026-09-17 (Claude Code): lint/typecheck/build utama, runner 16/16 passed (sumber `f19aac05262f34b3`; `time` 6 viewport + edge hijau setelah fix rig, `perf-surgeline` 57–60 fps — gagal lama tidak terulang), fix tes basi `verify_cases` (judul hotspot DueWatch), paket bukti baru 22/22; tanpa perubahan kode app. Sebelumnya: 7D terintegrasi 2026-09-17 (Codex): dua modul agenda/triage, replay ledger, audit, chapter dan transisi cincin; tanpa tes ulang atas arahan pemilik. Detail verifikasi/temuan di handoff 7D. Sebelumnya: Gate 7C lolos 2026-09-17 (Claude Code): pemilik "saya approve semua untuk 7C" → copy 7C approved (termasuk Day 1–3), label DRAFT DriftWatch dilepas, jarak verdict HP diterima; build + regresi `monitor`, `cases`/`mobile` 390×844 passed (sumber `8b800e3ebedbbbb4`); commit + push. Sebelumnya 7C Testing → `awaiting-gate` 2026-09-17 (Claude Code): paket `driftwatch_room_evidence.py` 21/21 (memanggil `verify_driftwatch_room.viewport/edges`); fix gerak Compare = jendela clip (lonjakan digambar di tempat, dulu diperas `scaleX`); runner 13/13 hijau di sumber `a8336493ca0de6ca`. Sebelumnya 7C Development → `ready-for-test` 2026-09-17 (Codex → Claude Code): trace chapter seismograf, pita jarum → timeline, meja banding 5 situasi (perubahan biasa sehat; layout rusak/collector gagal/run hilang = alarm beralasan; pulih pakai baseline terakhir), arsip bukti terpisah; ilustrasi Day 1–3 (bukan tanggal soak); runner 13 suite hijau di sumber `40a56b14db159831`. Sebelumnya gate 7B lolos 2026-09-17 (Claude Code): copy approved, label DRAFT SurgeLine dilepas, Cut sebelum Form diterima; build + regresi terdampak; commit + push. Sebelumnya Testing 7B (Claude Code): paket `surgeline_room_evidence.py` 18/18; fix pulsa Return mendarat di titik antena asal (`pulseHome` di shell); runner 11 suite hijau di sumber `37a4f3e3770463fb`. Sebelumnya Development 7B (Codex → Claude Code): strip chapter 3 browser (lane 2 cut → resumed), pulsa antena masuk/kembali, papan dispatch A–F (antrean → 3 browser → Confirmed/Rejected/Dead-letter; Cut/Resume/Replay), ledger + bukti rekaman, teaser DriftWatch; fix fps var CSS root. Copy baru DRAFT |
+| Langkah berikut | **7E Development (Codex / Claude Code):** BrandWall visual studio, PLAN §5.5, dossier `portfolio/CAPABILITY_BRANDWALL.md`; mobile dulu lalu desktop, `perf_quick.py --slug brandwall` sebelum `ready-for-test`. |
 | Launch | Fase 8 menunggu gate 7A–7F. Catatan deployment terdahulu: Vercel CLI login 2026-09-16 (`chhrone`, scope `chhrones-projects`), `web/` belum `vercel link`; verifikasi lagi saat Fase 8. Testing produksi tetap mengikuti Q40 |
 
-### Development paralel 7D (izin pemilik 2026-09-17)
+### Integrasi 7D (izin pemilik 2026-09-17)
 
-Pemilik memilih **7D penuh di salinan terpisah; integrasi setelah 7C stabil**.
-Salinan: `assets/development/phase-7d/` (sumber, dependency, build, preview dan bukti sendiri).
-7C tetap mengikuti status Testing di atas. 7D `in-dev` di salinan; belum digabung ke `web/` utama.
-Jangan menyalin balik berkas bersama sebelum 7C stabil; bandingkan `BASELINE.json` dan perubahan Testing.
+Development awal di `assets/development/phase-7d/`. Pemilik kemudian menyatakan:
+**"7C sudah stabil tinggal kamu integrasikan, gak perlu tes ulang cukup integrasikan aja"**.
+15 berkas 7D terintegrasi ke `web/` utama; approval/perbaikan 7C dipertahankan.
+Handoff dan bukti Development tetap di salinan; `INTEGRATION.json` mencatat hash hasil penggabungan.
+Tanpa tes ulang/rebuild utama pada sesi integrasi. Belum gate 7D, belum commit/push 7D.
 
 ### Arahan wajib saat memakai prompt universal
 
@@ -54,7 +55,7 @@ Jangan menyalin balik berkas bersama sebelum 7C stabil; bandingkan `BASELINE.jso
 | 7A | CrossCheck — inspection room | `done` | 2026-09-16 |
 | 7B | SurgeLine — dispatch room | `done` | 2026-09-17 |
 | 7C | DriftWatch — monitoring room | `done` | 2026-09-17 |
-| 7D | DueWatch — time control room | `todo` | — |
+| 7D | DueWatch — time control room | `done` | 2026-09-18 |
 | 7E | BrandWall — visual studio | `todo` | — |
 | 7F | Five rooms, one observatory | `todo` | — |
 | 8 | Launch ready | `todo` | — |
@@ -377,7 +378,7 @@ semua checkbox baru sengaja kosong. Setiap tahap memakai aturan Development/Test
 | 7A CrossCheck | lolos Testing + gate 2026-09-16 (390/360/430 + 768) | lolos Testing + gate 2026-09-16 (1440/1920) | lolos 2026-09-16 |
 | 7B SurgeLine | lolos Testing + gate 2026-09-17 (390/360/430 + 768) | lolos Testing + gate 2026-09-17 (1440/1920) | lolos 2026-09-16; ulang pasca-gate 2026-09-17 |
 | 7C DriftWatch | lolos Testing + gate 2026-09-17 (390/360/430 + 768) | lolos Testing + gate 2026-09-17 (1440/1920) | lolos 2026-09-17 ulang pasca-fix; ulang pasca-gate (`monitor`, `cases`/`mobile` 390×844) |
-| 7D DueWatch | `todo` | `todo` | `todo` |
+| 7D DueWatch | lolos Testing 2026-09-17 + gate 2026-09-18 (390/360/430 + 768) | lolos Testing 2026-09-17 + gate 2026-09-18 (1440/1920) | runner 16/16 passed 2026-09-17; ulang pasca-gate (`time`, `cases`/`mobile` 390×844) |
 | 7E BrandWall | `todo` | `todo` | `todo` |
 | 7F Integrasi lima project | `todo` | `todo` | `todo` |
 
@@ -582,23 +583,66 @@ Sumber: `portfolio/CAPABILITY_DUEWATCH.md` §1–4, §7–8, §11. Brief desain:
 Target: pengunjung memahami agenda kontrak dan batas tindak lanjut otomatis pada pesan.
 
 Development (Codex / Claude Code), **urut mobile → desktop**:
-- [ ] Brief dan copy personal DRAFT memisahkan tracker/triage: 200 kontrak/run, 18 pesan uji,
+- [x] Brief dan copy personal DRAFT memisahkan tracker/triage: 200 kontrak/run, 18 pesan uji,
   6/6 sensitif dieskalasi, nol API eksternal; tampilkan batas audit dan tanggal simulasi video
-- [ ] Mobile: chapter orrery + agenda vertikal, pergantian modul via tap, status kontrak dan
+- [x] Mobile: chapter orrery + agenda vertikal, pergantian modul via tap, status kontrak dan
   handoff manusia jelas; jangan membuat dua modul terlihat sebagai satu alur yang tidak terbukti
-- [ ] Animasi waktu → kategori kontrak; pesan sensitif berhenti ke manusia; replay pengingat
+- [x] Animasi waktu → kategori kontrak; pesan sensitif berhenti ke manusia; replay pengingat
   tidak menambah duplikat; definisikan trigger, timing tenang, state akhir dan interupsi
-- [ ] Transisi cincin → agenda, return ke orrery; Next memperkenalkan studio BrandWall
-- [ ] Verifikasi mobile selesai sebelum desktop; catat hasil pada tabel kemajuan
-- [ ] Desktop: agenda kontrak dan meja triage berdampingan dengan hierarki berbeda;
+- [x] Transisi cincin → agenda, return ke orrery; Next memperkenalkan studio BrandWall
+- [x] Verifikasi mobile selesai sebelum desktop; catat hasil pada tabel kemajuan
+- [x] Desktop: agenda kontrak dan meja triage berdampingan dengan hierarki berbeda;
   pencahayaan hangat, tempo tenang, tanpa countdown darurat palsu
-- [ ] Regresi mobile, lint/typecheck/build + tes fokus; sumber copy/bukti → `ready-for-test`
+- [x] Regresi mobile, lint/typecheck/build + tes fokus; sumber copy/bukti → `ready-for-test` (dituntaskan di sesi Testing 2026-09-17 pada build terintegrasi: lint/typecheck/build exit 0, runner 16/16)
+
+Handoff Development 7D (2026-09-17):
+- **Sumber utama sudah terintegrasi.** Brief/copy dan provenance: `web/README.md` bagian Phase 7D;
+  rincian salinan: `assets/development/phase-7d/HANDOFF.md`, metadata `INTEGRATION.json`.
+- Semua fitur Development terpasang. Checklist verifikasi penuh di atas sengaja belum dicentang;
+  `ready-for-test` memakai pengecualian pemilik: integrasikan saja, tanpa tes ulang. Bukan gate lolos.
+- Verifikasi sebelum integrasi (salinan, sumber `9be3fc9f6ae78f2d`): lint/typecheck/build passed;
+  enam viewport 390/360/430/768/1440/1920 passed pada hasil `viewport`; tes state passed;
+  gate fps DueWatch 52.1–59.1 fps / 1.5–7.3% frame lambat, CPU 4×, GPU Intel.
+  Suite `monitor`, `perf-driftwatch`, `dispatch`, `room`, `audio` passed. Regresi penuh dihentikan
+  atas instruksi pemilik; **bukan 16/16 passed**. `time` terakhir failed pada assertion error model
+  yang sengaja diblok; rig sudah diperbaiki (hanya error ambient yang disengaja diizinkan),
+  tetapi belum dijalankan ulang. `perf-surgeline` failed: chapter 18.9% dan case scroll 21.6%
+  frame lambat (batas 10%); belum diatribusi dengan baseline. Tidak ada klaim regresi tertentu sebagai penyebab.
+  Setelah integrasi: cek penggabungan per berkas/hash saja; **tanpa tes ulang dan tanpa rebuild utama**
+  sesuai instruksi pemilik. Bukti salinan tidak dilabeli sebagai hasil build terintegrasi.
+  
+- Bukti: `assets/development/phase-7d/assets/renders/personal-duewatch/dev/verification.json`,
+  `mobile-before-desktop.json`, `assets/renders/perf-quick/duewatch.json`, `regression-ledger.json`
+  (dua path terakhir juga di dalam salinan). Preview utama perlu build baru pada sesi Testing.
 
 Testing (Claude Code / Antigravity):
-- [ ] Jalankan seluruh kontrak Testing 7A–7F; dua modul dan simulasi terlabel, tanpa pengiriman nyata
-- [ ] Bukti pergantian status/handoff/replay, catatan video dan batas audit tetap terlihat;
-  paket `assets/renders/personal-duewatch/evidence/` mobile/desktop → `awaiting-gate`
-- [ ] Copy baru di-approve + gate personalisasi DueWatch lolos
+- [x] Jalankan seluruh kontrak Testing 7A–7F; dua modul dan simulasi terlabel, tanpa pengiriman nyata
+- [x] Bukti pergantian status/handoff/replay, catatan video dan batas audit tetap terlihat;
+  paket `assets/renders/personal-duewatch/evidence/` mobile/desktop → `awaiting-gate` (22/22 pass)
+- [x] Copy baru di-approve + gate personalisasi DueWatch lolos (2026-09-18, "semuanya approved"; temuan cincin → rail tipis dan tick dial tanpa label diterima)
+
+Bahan gate 7D (Testing 2026-09-17, Claude Code) — folder `assets/renders/personal-duewatch/evidence/`:
+- **Video:** `walkthrough-mobile.mp4` (390×844 touch, 172 dtk), `walkthrough-desktop.mp4` (1440×900 wheel/klik + resize, 116 dtk),
+  `slow-motion.mp4` (0.25×, 188 dtk, 12 klip: pointer chapter, cincin → rail, jarum ke tiap batas, tanggal tak jelas, teks disetujui vs berhenti di manusia, replay tanpa pengingat baru, tap cepat, rail kembali HP; cincin masuk, dua meja, cincin kembali, resize desktop).
+  Tanpa suara. **Foto:** `contact-sheet-mobile.jpg` (28), `contact-sheet-desktop.jpg` (20), strip per item `i01`…`i17`, grafik `p01-fps-4x.png`, `viewports/` (6 viewport + fallback/reduced/slow); `evidence.json` pass/fail per item + kategori + `forOwner`.
+- **Kategori:** cerita ✔ · visual ✔ · animasi ✔ · transisi ✔ · mobile ✔ · desktop ✔ · sumber ✔ · performa ✔ (22/22 item).
+- Item lolos (ringkas): chapterPointer (pointer = orbit, galat maks 0, balik membalik, diam saat idle; HP swipe + desktop wheel), ringEntry (cincin .65 −28° dari orrery → rail 342 px HP / 1000 px desktop ±830 ms, fokus heading),
+  hotspots (cek harian + tanggal tak jelas ke manusia / 6 fixture + celah mixed-intent / ledger sama + batas re-import), agendaDesk (61/60/8/7/0/lewat → Active/Due soon/Due soon/Needs renewal/Needs renewal/Expired; jarum monoton tanpa overshoot, diam ±550–620 ms, kartu ±150 ms; satu baris "Example here"),
+  badData (Bad data + "Keep checking the others", baris sendiri, hari dipilih membersihkan), humanHandoff (harga/stok/status → teks disetujui + log mock lokal; komplain/pembayaran/tak jelas → berhenti ke manusia tanpa draf; sinyal 0→24 px ±250 ms; celah mixed-intent tertulis),
+  **reminderReplay** (24 jam tepat 0 pending → >24 jam 1 → 6 replay tetap 1 "adds no duplicate" → dibalas tetap 1 → reset 0 → dibalas dulu tetap 0; HP + desktop), **twoModules** (HP satu meja per tap A/B, state bertahan dua arah, tombol ≥44 px; desktop berdampingan, langkah A/ dan B/),
+  **notLive** (label simulasi, dial "BUSINESS TIME / ILLUSTRATION", tanpa countdown, semua state diam 2.1 dtk), evidenceAudit (200/run, 18 pesan + 6/6 + 0 API, 12 tetap 12 + batasnya; tanggal simulasi vs 8 firing/9 hari; 7 temuan 4 High/3 Medium bisa dibuka, A9/A10 terbuka),
+  returnNext (rail melipat ke titik asal ±0 px, scroll ±0, fokus Open case file; Next → BrandWall), historyDirect, interruptions (double tap +1 history; 12 tap hari cepat → satu posisi akhir, animasi ≤1; ganti modul saat jarum berputar → final; 12 tap pesan → rute terakhir; scroll balik tetap; keyboard langsung final; Back saat cincin → bersih; resize 1440→390/1024/900/1920/1440 state tetap, overflow 0),
+  modelSlowFail, reducedMotion (tanpa cincin, pointer final, jarum/sinyal tanpa animasi), 4 HP/tablet + 1440/1920 (`verify_duewatch_room` dipanggil di paket, Q42), desktopComposition (meja agenda 643 px di samping triage 613 px, modul terpilih bergaris amber, gradien hangat, langkah/bukti satu baris, catatan tanggal dua kolom, audit ≤900 px rata kanan),
+  sources (42/42 klaim → dossier, 6/6 label simulasi/rekaman, "live"/"production-ready" hanya negasi), performa 4× CPU (chapter 60.0, cincin masuk 57.9, tap agenda+triage+pengingat 60.0, scroll case 60.0, cincin kembali 58.7 fps; ≤2.2% lambat),
+  clean (1 Canvas, 0 error, 0 ≥400, 0 overflow), regressions (ledger 16 suite `passed` di sumber `f19aac05262f34b3`).
+- **Temuan Development yang ditutup:** `time` kini hijau 6 viewport + edge (fallback hanya mengizinkan error model ambient yang sengaja diblok); `perf-surgeline` di build utama 57.0–60.0 fps ≤3% lambat — 18.9%/21.6% dulu diukur di salinan saat rig sibuk, tidak terulang.
+- **Bug ditemukan + diperbaiki di Testing:** tes basi `verify_cases.py` (fallback DueWatch mengharapkan judul hotspot lama "Safe message triage" → "Message decisions"). Tanpa bug app; kode app tidak diubah.
+- **Temuan untuk pemilik (keputusan):**
+  1. **Approve copy DRAFT 7D** (pitch + strip pointer chapter, deck/brief/heading instrumen, 3 hotspot, ruang kendali waktu: intro, disclosure, agenda A, triage B + catatan celah, contoh pengingat terpisah + batas; 4 langkah; bukti rekaman 3 kolom, catatan tanggal, 7 temuan audit; teaser BrandWall).
+  2. **Cincin → rail tipis:** cincin = garis 1 px, saat dipipihkan (scaleY .13; rail 1000 px desktop) jadi garis rambut di atas orrery yang ikut bergerak; rail pudar sebelum case muncul di Brief (meja agenda jauh di bawah). Timing/pendaratan lolos. Terima, atau kembali ke Development untuk garis/rail lebih tegas (`m02a-ring-rail.png`, `d02a-ring-rail.png`, klip slow-motion 2 dan 9).
+  3. **Tick dial tanpa label:** kategori terbaca dari tombol hari, kartu hasil dan baris "Example here". Terima, atau tambah label (`m04-agenda-7.png`).
+  4. Info: refresh `/work/duewatch` mengulang ke 61 hari, modul A, 0 pengingat — sama seperti 7B/7C.
+- Batas: Chromium GPU emulasi lokal; GPU host tidak di-throttle; HP fisik = Fase 8.
 
 ### Fase 7E — BrandWall: visual studio
 
@@ -701,6 +745,7 @@ Testing (Claude Code / Antigravity) — **semua tes memakai URL Vercel, bukan pr
 | 2026-09-16 | Setiap akhir fase (gate lolos) wajib git commit + push ke `origin main`; ditulis di `PROMPT.md` (langkah tutup sesi no. 4). Disalin ke PLAN §3 Q38 | Pemilik, chat sesi Claude Code |
 | 2026-09-16 | Gate Fase 7 lolos dari paket bukti Testing ulang 14/14 ("lolos commit dan push"); jeda instrumen ±3 dtk diterima apa adanya. Disalin ke PLAN §3 Q39 | Pemilik, chat sesi Claude Code |
 | 2026-09-16 | Testing Fase 8 dijalankan di **URL produksi Vercel** (deploy dulu, baru tes), bukan preview lokal. Vercel CLI 54.9.1 terpasang + dicatat di `RULES.md` agar semua harness pakai. Disalin ke PLAN §3 Q40 | Pemilik, chat sesi Claude Code |
+| 2026-09-18 | Gate 7D lolos ("semuanya approved"): copy 7D approved, DRAFT DueWatch dilepas (strip chapter jadi "Illustration"); temuan cincin → rail tipis dan tick dial tanpa label diterima. Fase aktif berikut 7E. Disalin ke PLAN §3 Q46 | Pemilik, chat sesi Claude Code |
 | 2026-09-17 | Gate 7C lolos ("saya approve semua untuk 7C ini"): copy 7C approved termasuk ilustrasi Day 1–3, DRAFT DriftWatch dilepas; jarak verdict HP sesudah Compare diterima; fix jendela clip trace bagian dari motion approved. Commit + push tanpa mengganggu Development 7D paralel. Disalin ke PLAN §3 Q45 | Pemilik, chat sesi Claude Code |
 | 2026-09-17 | Gate 7B lolos ("7b sudah saya cek dan lulus semua"): copy 7B approved, DRAFT SurgeLine dilepas; Cut sebelum B sampai Form diterima; refresh mengulang ilustrasi sesuai desain. Fase aktif berikut 7C. Disalin ke PLAN §3 Q44 | Pemilik, chat sesi Claude Code |
 | 2026-09-16 | Gate 7A lolos ("lulus semua aman"): copy 7A approved, DRAFT dilepas; performa scrub (11–13% frame lambat) dan crop CC-001 diterima apa adanya. Disalin ke PLAN §3 Q43 | Pemilik, chat sesi Claude Code |
@@ -708,6 +753,13 @@ Testing (Claude Code / Antigravity) — **semua tes memakai URL Vercel, bukan pr
 | 2026-09-16 | Personalisasi cerita, visual, animasi dan transisi lima project dari `portfolio/` lokal; setiap fase mobile dahulu, lalu desktop sebagai tampilan utama. Sisipkan 7A–7E per project + 7F integrasi sebelum launch; fase aktif berikut 7A. Disalin ke PLAN §3 Q41 | Pemilik, chat sesi Codex |
 
 ## Log sesi
+
+- **2026-09-18 · Claude Code · Gate 7D lolos → done** — Pemilik "semuanya approved": copy 7D approved + 2 temuan diterima (Q46). DRAFT DueWatch dilepas (`cases.ts`, strip `page.tsx` → "Illustration", komentar kode, 3 tes mengharapkan 0 DRAFT). Verifikasi: lint/typecheck/build exit 0; `run_regressions.py --suites time,cases,mobile --phone-only cases,mobile` passed (sumber `de8440d2274dbcd4`). Commit + push. Berikutnya: 7E Development.
+
+- **2026-09-17 · Claude Code · Fase 7D Testing → awaiting-gate** — Build utama terintegrasi (lint/typecheck/build exit 0). Runner 16/16 passed di sumber `f19aac05262f34b3` (`time` hijau setelah fix rig; `perf-surgeline` 57–60 fps, gagal salinan tidak terulang; fix tes basi `verify_cases`). Skrip bukti baru `duewatch_room_evidence.py` (22 item: walkthrough HP touch + desktop, jejak per frame pointer/cincin/jarum/sinyal, urutan pengingat, interupsi, slow-motion 0.25×, fps 4×, sumber; memanggil `verify_duewatch_room.viewport/edges`) → 22/22 (item desktopComposition dihitung ulang dari ukuran tersimpan setelah fix cek tepi audit). Tanpa perubahan kode app. Berikutnya: gate pemilik + approve copy DRAFT 7D + 2 keputusan temuan; belum commit/push.
+
+- **2026-09-17 · Codex · 7D Development → ready-for-test, integrasi** — Agenda/triage, replay ledger, audit dan cincin; mobile → desktop di salinan. Lint/typecheck/build, enam viewport dan fps DueWatch passed.
+  Pemilik minta integrasi setelah 7C stabil tanpa tes ulang; 15 berkas digabung, 7C dipertahankan. Regresi penuh belum selesai, edge rig dan fps SurgeLine tercatat untuk Testing; belum gate 7D.
 
 - **2026-09-17 · Claude Code · Gate 7C lolos → done** — Pemilik "saya approve semua untuk 7C": copy 7C approved, DRAFT DriftWatch dilepas (`cases.ts`, strip `page.tsx`, komentar `driftwatch-room.ts`/`instruments.ts`, tes `verify_driftwatch_room.py`/`verify_cases.py`/`driftwatch_room_evidence.py` mengharapkan 0 DRAFT), README 7C = gate passed (Q45). Verifikasi: lint/typecheck/build exit 0; `run_regressions.py --suites monitor,cases,mobile --phone-only cases,mobile` passed (sumber `8b800e3ebedbbbb4`). Commit + push; `assets/development/phase-7d/` (Codex) tidak disentuh (tak dilacak git). Berikutnya: 7D Development/integrasi (Codex).
 

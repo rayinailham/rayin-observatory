@@ -1050,3 +1050,141 @@ button { transition: color .18s, background-color .18s, scale .12s ease-out; }
   .case-page .monitor-snapshot h3 { min-height: 32px; }
   .monitor-comparison { padding-left: 42px; }
 }
+
+/* Phase 7D — DueWatch. Business time, two independent desks. Copy approved at gate 7D. */
+.time-chapter { margin-top: 16px; color: var(--muted); }
+.time-chapter-track { display: flex; justify-content: space-between; position: relative; padding-top: 12px; border-top: 1px solid var(--line); font: 9px 'JetBrains Mono', monospace; }
+.time-chapter-track i { position: absolute; top: -4px; left: 0; width: calc(100% - 7px); height: 7px; transform: translateX(calc(var(--instrument-3-orbit, 0) * 100%)); }
+.time-chapter-track i::before { content: ''; display: block; width: 7px; height: 7px; border-radius: 50%; background: var(--amber); }
+.time-chapter small { display: block; margin-top: 9px; font: 8px/1.5 'JetBrains Mono', monospace; }
+.time-flight { position: fixed; top: -90px; left: -90px; width: 180px; height: 180px; border: 1px solid var(--amber); border-radius: 50%; opacity: 0; pointer-events: none; z-index: 3; }
+.time-flight i { position: absolute; inset: 12px; border: 1px solid rgb(237 232 220 / .5); border-radius: 50%; }
+.time-flight i:nth-child(2) { inset: 24px; }
+.time-flight i:nth-child(3) { inset: 42px; border-color: var(--amber); }
+.case-page .time-disclosure { border-left: 2px solid var(--amber); padding-left: 12px; font: 10px/1.8 'JetBrains Mono', monospace; }
+.time-module-picker { display: flex; gap: 8px; margin: 28px 0; }
+.time-room button { cursor: pointer; min-height: 44px; border: 1px solid var(--line); background: transparent; color: var(--ivory); padding: 10px 12px; font: 11px/1.5 Inter, sans-serif; transition: background .18s, border-color .18s, scale .12s; }
+.time-room button:active { scale: .98; }
+.time-room button[aria-pressed=true] { background: var(--panel); border-color: var(--amber); color: var(--amber); }
+.time-room button:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+.time-module-picker button { flex: 1; }
+.time-desk { min-width: 0; border-top: 1px solid var(--amber); padding-top: 24px; }
+.time-desk header { display: flex; align-items: center; gap: 16px; }
+.time-module-number { font: 52px/1 Fraunces, serif; color: var(--amber); }
+.case-page .time-desk header .section-kicker { margin: 0 0 8px; font-size: 9px; }
+.case-page .time-desk h3 { font: 24px/1.15 Fraunces, serif; margin: 0; }
+.case-page .time-desk p { font-size: 12px; line-height: 1.85; }
+.time-room[data-module=agenda] .time-triage, .time-room[data-module=triage] .time-agenda { display: none; }
+.time-clock { max-width: 300px; margin: 22px auto 16px; text-align: center; }
+.time-clock svg { display: block; width: 100%; height: 145px; overflow: visible; }
+.time-clock path, .time-clock line { fill: none; stroke: var(--line); stroke-width: 1; }
+.time-clock .time-hand { stroke: var(--amber); stroke-width: 2; transform-origin: 150px 130px; }
+.time-clock circle { fill: var(--ivory); }
+.time-clock span { font: 8px 'JetBrains Mono', monospace; color: var(--muted); }
+.time-date-picker, .time-message-picker { border: 0; padding: 0; margin: 20px 0; min-width: 0; }
+.time-date-picker legend, .time-message-picker legend { font: 10px/1.6 'JetBrains Mono', monospace; color: var(--muted); margin-bottom: 12px; }
+.time-date-picker > div, .time-message-picker > div { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.time-date-picker .time-bad-date { width: 100%; margin-top: 8px; border-style: dashed; }
+.time-contract-result { padding: 20px; background: var(--panel); border-left: 2px solid var(--amber); }
+.time-example { color: var(--muted); font: 9px 'JetBrains Mono', monospace; }
+.time-contract-result h4 { font: 28px Fraunces, serif; margin: 12px 0; }
+.case-page .time-contract-result p { margin: 0; }
+.time-agenda-list { padding: 0; margin: 24px 0; list-style: none; }
+.time-agenda-list li { display: flex; align-items: center; gap: 14px; border-top: 1px solid var(--line); padding: 14px 0; }
+.time-agenda-list li > span { width: 6px; height: 6px; border: 1px solid var(--muted); border-radius: 50%; flex-shrink: 0; }
+.time-agenda-list li[data-current=true] > span { background: var(--amber); border-color: var(--amber); }
+.time-agenda-list b { display: block; font-size: 12px; font-weight: 500; }
+.time-agenda-list small { display: block; color: var(--muted); margin-top: 4px; font: 9px 'JetBrains Mono', monospace; }
+.time-agenda-list em { margin-left: auto; font: 8px 'JetBrains Mono', monospace; color: var(--amber); }
+.case-page .time-footnote { font: 10px/1.8 'JetBrains Mono', monospace; color: var(--muted); }
+.time-handoff { margin: 28px 0 16px; }
+.time-handoff > span { font: 10px 'JetBrains Mono', monospace; color: var(--muted); }
+.time-handoff > i { display: block; height: 30px; width: 1px; background: var(--amber); margin-left: 20px; }
+.time-handoff > div { border: 1px solid var(--amber); padding: 20px; background: var(--panel); }
+.time-handoff[data-route=human] > div { border-left: 4px solid var(--amber); }
+.time-handoff b { font: 20px/1.4 Fraunces, serif; }
+.time-handoff small { font: 9px 'JetBrains Mono', monospace; color: var(--amber); }
+.case-page .time-boundary-note { border-left: 1px solid var(--line); padding-left: 12px; font-size: 10px; color: var(--muted); }
+.time-reminders { padding-top: 28px; margin-top: 32px; border-top: 1px solid var(--line); }
+.time-reminders h4 { font: 25px/1.25 Fraunces, serif; margin: 10px 0; }
+.time-reminder-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 24px 0; }
+.time-ledger { display: flex; align-items: center; gap: 20px; padding: 20px 0; border-block: 1px solid var(--line); }
+.time-ledger > strong { font: 48px 'JetBrains Mono', monospace; color: var(--amber); }
+.time-ledger b { font-size: 10px; font-weight: 400; }
+.case-page .time-ledger p { margin: 8px 0 0; font-size: 11px; }
+.time-room .time-reset { border: 0; margin: 8px 0; padding-left: 0; color: var(--amber); }
+.time-steps { padding: 0; margin: 36px 0 0; list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.time-steps li { border-top: 1px solid var(--line); padding-top: 12px; }
+.time-steps b, .time-steps span { display: block; font-size: 10px; line-height: 1.7; }
+.time-steps b { color: var(--amber); font-weight: 400; }
+.time-steps span { color: var(--muted); margin-top: 6px; }
+.time-proof-columns article { border-top: 1px solid var(--line); padding: 24px 0; }
+.time-proof-columns article > span { font: 9px 'JetBrains Mono', monospace; color: var(--amber); }
+.case-page .time-proof-columns h3 { font: 30px Fraunces, serif; margin: 14px 0; }
+.case-page .time-proof-columns p, .case-page .time-dates-note p, .case-page .time-audit p { font-size: 12px; }
+.time-proof-columns small { font: 9px 'JetBrains Mono', monospace; color: var(--muted); }
+.time-dates-note { padding: 20px; margin: 20px 0 40px; border: 1px solid var(--line); }
+.case-page .time-dates-note h3, .case-page .time-audit h3 { font: 25px/1.3 Fraunces, serif; margin: 0 0 16px; }
+.time-audit ol { list-style: none; padding: 0; margin: 24px 0; }
+.time-audit li { border-top: 1px solid var(--line); }
+.time-audit summary { cursor: pointer; display: flex; align-items: center; gap: 12px; min-height: 64px; font-size: 11px; padding: 12px 0; list-style: none; }
+.time-audit summary::-webkit-details-marker { display: none; }
+.time-audit summary > span { flex: 0 0 48px; font: 9px 'JetBrains Mono', monospace; color: var(--amber); }
+.time-audit summary > b { margin-left: auto; font-size: 18px; color: var(--amber); }
+.time-audit details[open] summary > b { rotate: 45deg; }
+.case-page .time-audit details p { margin: 0 0 20px; }
+.time-next { border-left: 1px solid var(--amber); padding-left: 20px; }
+@media (prefers-reduced-motion: reduce) {
+  .time-flight { display: none; }
+  .time-chapter-track i { transform: translateX(100%); }
+  .time-room button { transition: none; }
+}
+@media (min-width: 1024px) {
+  .time-chapter { margin-top: 22px; }
+  .time-chapter-track { padding-top: 16px; font-size: 10px; }
+  .time-chapter small { font-size: 9px; }
+  .time-intro { display: grid; grid-template-columns: 1.15fr 1fr; gap: 0 64px; }
+  .time-intro .section-kicker { grid-column: 1 / -1; }
+  .time-intro h2 { grid-row: span 2; }
+  .case-page .time-intro > p:not(.section-kicker) { max-width: 500px; }
+  .time-module-picker { max-width: 480px; margin: 36px 0 48px; }
+  .time-desks { display: grid; grid-template-columns: 1.05fr 1fr; gap: clamp(40px, 5vw, 90px); align-items: start; }
+  .time-room[data-module] .time-desk { display: block; border-color: var(--line); }
+  .time-room[data-module=agenda] .time-agenda, .time-room[data-module=triage] .time-triage { border-color: var(--amber); }
+  .time-desk { padding: 30px 24px 24px; background: linear-gradient(180deg, rgb(242 165 65 / .045), transparent 580px); }
+  .time-desk header { gap: 22px; }
+  .time-module-number { font-size: 68px; }
+  .case-page .time-desk h3 { font-size: clamp(26px, 2.4vw, 38px); }
+  .case-page .time-desk p { font-size: 13px; }
+  .time-clock { max-width: 360px; margin-top: 36px; }
+  .time-clock svg { height: 190px; }
+  .time-date-picker > div { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .time-contract-result { padding: 26px; }
+  .time-contract-result h4 { font-size: 34px; }
+  .time-agenda-list li { padding: 18px 0; }
+  .time-agenda-list b { font-size: 13px; }
+  .time-message-picker { margin-top: 35px; }
+  .time-handoff > div { padding: 28px; }
+  .time-handoff b { font-size: 25px; }
+  .case-page .time-boundary-note { font-size: 11px; }
+  .time-reminders { padding-top: 36px; margin-top: 38px; }
+  .time-reminders h4 { font-size: 30px; }
+  .time-steps { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 32px; margin-top: 56px; }
+  .time-steps b, .time-steps span { font-size: 11px; }
+  .time-proof-columns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 36px; margin-top: 40px; }
+  .case-page .time-proof-columns h3 { font-size: 34px; }
+  .time-dates-note { display: grid; grid-template-columns: 1fr 1.6fr; gap: 48px; padding: 32px; margin: 32px 0 64px; align-items: center; }
+  .case-page .time-dates-note h3, .case-page .time-dates-note p { margin: 0; }
+  .time-audit { max-width: 900px; margin-left: auto; }
+  .case-page .time-audit h3 { font-size: 34px; }
+  .time-audit summary { font-size: 13px; }
+  .time-audit summary > span { flex-basis: 65px; font-size: 10px; }
+  .time-audit details p { padding-left: 77px; }
+  .time-next { max-width: 670px; }
+}
+@media (min-width: 1600px) {
+  .time-desks { gap: 90px; }
+  .time-desk { padding-inline: 32px; }
+  .time-clock { margin-block: 42px 32px; }
+}
+.time-handoff > i > b { display: block; width: 5px; height: 5px; margin-left: -2px; border-radius: 50%; background: var(--amber); transform: translateY(24px); }

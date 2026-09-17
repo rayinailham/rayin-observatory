@@ -52,6 +52,11 @@ export default function Home() {
                   <svg viewBox="0 0 320 28" preserveAspectRatio="none" aria-hidden="true"><path className="monitor-chapter-base" d="M0 15H320" /><path className="monitor-chapter-line" pathLength="1" d="M0 15H118L126 13L136 17L144 15H195L203 3L211 25L220 12L228 15H320" /><path className="monitor-chapter-alarm" pathLength="1" d="M195 15L203 3L211 25L220 12L228 15" /></svg>
                   <span><b><em>Last good snapshot → compare</em><em>Empty run → alarm</em></b><small>Illustration</small></span>
                 </div>
+              : instrument.id === 'duewatch'
+                ? <div className="time-chapter" role="img" aria-label="Illustration: a business-time pointer moves from active to renewal; message triage is a separate module">
+                  <div className="time-chapter-track" aria-hidden="true"><i /><span>Active</span><span>Due soon</span><span>Renewal</span></div>
+                  <small>Contract agenda / separate message triage · Illustration</small>
+                </div>
               : <p className="orbit-hint">Scroll to orbit the instrument</p>}
         </div>
       </div>

@@ -636,3 +636,58 @@ hotspot cards, projected leader endpoints, four count-ups, limits, lazy video du
 inside the chain; Return after a chain lands on that chapter; five direct URLs; `/work/unknown` → 404;
 blocked model → DueWatch still view. Multi-digit readings must appear verbatim in their dossier.
 Output: `assets/renders/case-files/dev/`. Not the Testing-stage gate pack.
+
+## Phase 7D — DueWatch time control room (gate passed, 2026-09-18)
+
+Personal brief, isolation and integration rules: `../assets/development/phase-7d/HANDOFF.md`.
+The site demonstrates two independent routines. It does not run the underlying DueWatch service,
+classify visitor text, send messages or store reminders outside local component state.
+
+| New copy / visible data | Source in `portfolio/CAPABILITY_DUEWATCH.md` |
+|---|---|
+| Chapter, deck, brief, three component cards | §1–4, §7; DRAFT synthesis with audit limits |
+| Active >60; due soon 8–60; renewal 0–7; expired <0; bad data | §3.1; English translations of locked statuses |
+| 61/60/8/7/0/−1 day controls and example indicator | Illustrative boundary inputs, not run totals; policy from §3.1 |
+| Six category buttons, human handoff, no draft | §3.4, §6 K5; intended policy, explicitly not a classifier |
+| Mixed-intent and optional draft-filter weaknesses | §7 finding 2; adjacent to handoff illustration |
+| Exact 24h pending; >24h eligible; replied skipped | §6 K6; isolated eligible email example, not WhatsApp sending policy |
+| Example ledger 0→1, repeated checks stay 1 | Illustrative state, distinct from recorded run; §6 K6; no re-import/concurrency claim |
+| 200 contracts; 45 hostile rows; 7/7 reference renewals | §3.1–3.3, §6 K2, §8 (4 September 2026 reference date) |
+| 18 fixtures, 6/6 sensitive, 0 external API calls | §6 K5/K8, §8; local mock log, not production accuracy |
+| 12 reminders after six sequential checks | §6 K6, §7 finding 1; saved ledger only |
+| 8 timer firings / 9 real days, 5–13 September; no backfill | §6 K4, §8, §11 item 10 |
+| Seven audit findings (four High / three Medium); A9/A10 open | §7, §8, §11; dossier snapshot, not fresh audit |
+| Video simulated business-date disclosure | §7 finding 4, owner decision Q35 retained |
+| BrandWall Next teaser | PLAN §5.5; DRAFT connective copy |
+
+No change to existing model geometry or Blender assets. Existing orrery anchors remain in use.
+Mobile is verified before desktop composition. Scope-specific tests live in `verify_duewatch_room.py`
+(reusable `viewport` and `edges`), `verify_duewatch_state.mjs`, and DueWatch segments in `perf_quick.py`.
+
+### Integration and verification exception — 2026-09-17
+
+The owner requested integration after 7C stabilized, with no repeated tests in this session.
+All 7C copy approvals and its trace-motion fix were preserved. Integration metadata and pre-merge
+backups: `../assets/development/phase-7d/INTEGRATION.json` and `integration-before/`.
+
+Before integration, lint/typecheck/build, all six viewport journeys and the DueWatch GPU fps gate passed
+on the isolated copy. Full regressions did not finish. The isolated `time` suite last failed on the
+expected blocked-model error; that assertion was corrected but not rerun. The SurgeLine fps gate failed
+its slow-frame limit (chapter 18.9%, case scroll 21.6%; allowed 10%) and was not attributed with a baseline.
+These remain explicit Testing follow-ups. Source integration was inspected; the merged build was not tested
+or rebuilt at the owner’s request. Existing :8767 preview still serves the previous build; :8784 serves
+the isolated DueWatch preview. Copy 7D remains DRAFT; no 7D gate is claimed.
+
+### Testing — 2026-09-17 (Claude Code) → awaiting gate
+
+The integrated build was rebuilt and tested on :8767. Lint, typecheck and build exit 0; `run_regressions.py` passed all
+16 suites on source `f19aac05262f34b3`. The `time` suite now passes six viewports and its edges; `perf-surgeline` measured
+57.0–60.0 fps with at most 3.0% slow frames, so the earlier isolated-copy failure did not reproduce. One stale test was fixed
+(`verify_cases.py` expected the old DueWatch hotspot title). No application code changed.
+Evidence pack `assets/renders/personal-duewatch/evidence/` (`duewatch_room_evidence.py`): 22/22 items, mobile and desktop walkthroughs,
+0.25x slow motion, contact sheets, `evidence.json`. Motion contract measured: chapter pointer equals orbit; ring .65/−28° → flat rail
+(~830 ms visible); hand turns monotonically and settles at about 550–620 ms, result card about 150 ms; handoff signal 0→24 px about 250 ms;
+keyboard and reduced motion are final at once.
+
+Gate 2026-09-18 ("semuanya approved"): all new 7D copy approved and DRAFT labels removed (the chapter strip now reads
+"Illustration"). Accepted as they are: the faint hairline ring → rail and the unlabelled dial ticks.

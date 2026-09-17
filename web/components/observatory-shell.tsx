@@ -73,6 +73,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
   const iris = useRef<HTMLDivElement>(null);
   const pulse = useRef<HTMLDivElement>(null);
   const ribbon = useRef<HTMLDivElement>(null);
+  const timeRing = useRef<HTMLDivElement>(null);
   // Where the antenna sat on screen when its case was opened; Return restores that scroll, so the pulse lands there.
   const pulseHome = useRef<IrisCentre & { w: number; h: number } | null>(null);
   const sceneLayer = useRef<HTMLDivElement>(null);
@@ -189,6 +190,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
     // A lens flight leaves the iris covering the screen; the arriving page always uncovers it,
     // including after Back interrupted a departure half way.
     const irisState = iris.current?.dataset.state;
+    if (timeRing.current) { gsap.killTweensOf(timeRing.current); gsap.set(timeRing.current, { opacity: 0 }); timeRing.current.dataset.direction = 'idle'; }
     if (ribbon.current) { gsap.killTweensOf(ribbon.current); gsap.set(ribbon.current, { opacity: 0 }); ribbon.current.dataset.direction = 'idle'; }
     if (pulse.current) gsap.set(pulse.current.querySelectorAll('i'), { opacity: 0 });
     if (irisState === 'disc' || irisState === 'hole') {
@@ -437,9 +439,26 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
       .to(pageContent.current, { opacity: 0, duration: reducedMotion ? 0 : .48, ease: 'power2.out' }, 0)
       .to(caseView.current, { mix: 1, duration: reducedMotion ? 0 : .78, ease: 'power2.inOut' }, 0);
     // Phase 7A: CrossCheck is entered through its lens; the arriving case opens the iris again.
-    if (caseFiles[index].transition === 'ribbon') flight.current.add(ribbonFlight('out'), .08);
+    if (caseFiles[index].transition === 'time') flight.current.add(timeFlight('out'), 0);
+    else if (caseFiles[index].transition === 'ribbon') flight.current.add(ribbonFlight('out'), .08);
     else if (caseFiles[index].transition === 'pulse') flight.current.add(pulseFlight('out'), .08);
     else if (caseFiles[index].aperture && !reducedMotion) flight.current.add(irisTween(iris.current, irisMotion, 'disc', 0, irisReach(), .5, 'power2.in'), .32);
+  }
+
+  // Phase 7D: a local orbit opens into an agenda rail, then folds back to its saved origin.
+  function timeFlight(direction: 'in' | 'out', centre = lensCentre()) {
+    const ring = timeRing.current;
+    const timeline = gsap.timeline();
+    if (!ring || reducedMotion) return timeline;
+    const orbit = { x: centre.x, y: centre.y, scaleX: .65, scaleY: .65, rotation: -28 };
+    const agenda = { x: window.innerWidth / 2, y: window.innerHeight * .43,
+      scaleX: Math.min(window.innerWidth - 48, 1000) / 180, scaleY: .13, rotation: 0 };
+    timeline.set(ring, { opacity: .85, ...(direction === 'out' ? orbit : agenda) })
+      .call(() => { ring.dataset.direction = direction; })
+      .to(ring, { ...(direction === 'out' ? agenda : orbit), duration: .72, ease: 'power2.inOut' })
+      .to(ring, { opacity: 0, duration: .18 })
+      .call(() => { ring.dataset.direction = 'idle'; });
+    return timeline;
   }
 
   function ribbonFlight(direction: 'in' | 'out', centre = lensCentre()) {
@@ -493,9 +512,11 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
         audio.current?.transition('in');
       })
       .to(sweep, { transition: 1, duration: reducedMotion ? 0 : .78, ease: 'power2.inOut' });
-    if (caseFiles[from].transition === 'ribbon') flight.current.add(ribbonFlight('in'), 0);
+    if (caseFiles[from].transition === 'time') flight.current.add(timeFlight('in'), 0);
+    else if (caseFiles[from].transition === 'ribbon') flight.current.add(ribbonFlight('in'), 0);
     else if (caseFiles[from].transition === 'pulse') flight.current.add(pulseFlight('in'), 0);
-    if (caseFiles[index].transition === 'ribbon') flight.current.add(ribbonFlight('out'), .78);
+    if (caseFiles[index].transition === 'time') flight.current.add(timeFlight('out'), .68);
+    else if (caseFiles[index].transition === 'ribbon') flight.current.add(ribbonFlight('out'), .78);
     else if (caseFiles[index].transition === 'pulse' && caseFiles[from].transition !== 'pulse') flight.current.add(pulseFlight('out'), .68);
   }
 
@@ -514,7 +535,8 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
     // On the case page the antenna has usually scrolled away; aim at the chapter antenna the visitor left from.
     const home = pulseHome.current;
     const sameView = home && home.w === window.innerWidth && home.h === window.innerHeight && homeScroll.current !== null;
-    if (target === 'return' && caseFiles[current].transition === 'ribbon') flight.current.add(ribbonFlight('in', sameView ? home : lensCentre()), 0);
+    if (target === 'return' && caseFiles[current].transition === 'time') flight.current.add(timeFlight('in', sameView ? home : lensCentre()), 0);
+    else if (target === 'return' && caseFiles[current].transition === 'ribbon') flight.current.add(ribbonFlight('in', sameView ? home : lensCentre()), 0);
     else if (target === 'return' && caseFiles[current].transition === 'pulse') flight.current.add(pulseFlight('in', sameView ? home : lensCentre()), 0);
     else if (target === 'return' && caseFiles[current].aperture && !reducedMotion) flight.current.add(irisTween(iris.current, irisMotion, 'hole', irisReach(), 0, .48, 'power2.in'), 0);
   }
@@ -566,6 +588,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
         }
       }}>{children}</div>
       <div ref={iris} className="lens-iris" data-state="hidden" aria-hidden="true" />
+      <div ref={timeRing} className="time-flight" data-direction="idle" aria-hidden="true"><i /><i /><i /></div>
       <div ref={ribbon} className="monitor-ribbon" data-direction="idle" aria-hidden="true"><svg viewBox="0 0 600 80" preserveAspectRatio="none"><path d="M0 40H250L264 35L278 46L296 40H600" /></svg><span>SNAPSHOT / COMPARE / RECORD</span></div>
       <div ref={pulse} className="dispatch-pulse" aria-hidden="true"><i /><i /><i /></div>
       <button className="hero-contact" onClick={openContact}>Contact <span aria-hidden="true">↗</span></button>

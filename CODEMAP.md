@@ -1,5 +1,11 @@
 # CODEMAP — Peta kode Rayin Observatory
 
+Update terbaru 2026-09-18 · Claude Code: **Gate 7D lolos → `done`** ("semuanya approved"): copy 7D approved, label DRAFT DueWatch dilepas (`cases.ts`, strip `page.tsx` "Illustration", komentar `duewatch-room.ts/.tsx`/`instruments.ts`/`globals.css`, tes `verify_duewatch_room.py`/`verify_cases.py`/`duewatch_room_evidence.py` mengharapkan 0 DRAFT); regresi `time`, `cases`/`mobile` 390×844 passed (sumber `de8440d2274dbcd4`). Lihat entri "Gate 7D" di §4.
+
+Sebelumnya 2026-09-17 · Claude Code: **7D Testing → `awaiting-gate`** — build utama terintegrasi dites: runner 16/16 passed (sumber `f19aac05262f34b3`), skrip bukti baru `duewatch_room_evidence.py` 22/22 (memanggil `verify_duewatch_room.viewport/edges`), fix tes basi `verify_cases.py`; tanpa perubahan kode app. Lihat entri "Fase 7D — Testing" di §4.
+
+Sebelumnya 2026-09-17 · Codex: **7D terintegrasi → ready-for-test** dengan exception pemilik tanpa tes ulang. 15 berkas, approval/fix 7C tetap utuh. Verifikasi salinan dan temuan terbuka dirinci di entri 7D; belum rebuild utama.
+
 Revisi terbaru 2026-09-17 · Claude Code: **Gate 7C lolos → `done`** ("saya approve semua untuk 7C"): copy 7C approved, label DRAFT DriftWatch dilepas (`cases.ts`, strip `page.tsx`, komentar `driftwatch-room.ts`/`instruments.ts`, tes `verify_driftwatch_room.py`/`verify_cases.py`/`driftwatch_room_evidence.py` mengharapkan 0 DRAFT), `web/README.md` 7C = gate passed; regresi `monitor`, `cases`/`mobile` 390×844 passed (sumber `8b800e3ebedbbbb4`). Lihat entri "Gate 7C" di §4.
 Sebelumnya 2026-09-17 · Claude Code: **7C Testing → `awaiting-gate`** — paket bukti `driftwatch_room_evidence.py` 21/21 (memanggil `verify_driftwatch_room.viewport/edges`); fix gerak Compare: trace dibuka lewat jendela `clipPath` (`driftwatch-room.tsx`, CSS 7C) sehingga lonjakan tidak bergeser/melebar; runner 13/13 hijau di sumber `a8336493ca0de6ca`. Lihat entri "Fase 7C — Testing" di §4. (Codex paralel: 7D di salinan `assets/development/phase-7d/`, lihat entri 7D.)
 Sebelumnya 2026-09-17 · Codex → Claude Code: **7C Development → `ready-for-test`** — DriftWatch monitoring room (`driftwatch-room.tsx/.ts`, trace chapter `page.tsx`, pita `observatory-shell.tsx`, blok CSS 7C, `verify_driftwatch_room.py`, suite `monitor`/`perf-driftwatch`); ilustrasi Day 1–3, snapshot desktop sticky; runner 13/13 hijau di sumber `40a56b14db159831`. Lihat entri "Fase 7C" di §4.
@@ -15,7 +21,8 @@ Sebelumnya · Codex: urutan delapan planet + perbaikan gerak/fade; lihat “Revi
 > menunjuknya dan berkas akan diubah. Update setiap berkas dibuat/diubah/dipindah/dihapus.
 > Entri tidak cocok dengan kode = bug; perbaiki saat ditemukan.
 
-**Terakhir diperbarui:** 2026-09-17 · Claude Code · **Gate 7C lolos → `done`**; commit + push. Lihat entri "Gate 7C" di §4.
+**Terakhir diperbarui:** 2026-09-17 · Codex · 7D terintegrasi, sumber siap Testing dengan catatan verifikasi; lihat entri 7D.
+Sebelumnya: 2026-09-17 · Claude Code · **Gate 7C lolos → `done`**; commit + push. Lihat entri "Gate 7C" di §4.
 Sebelumnya: 2026-09-17 · Claude Code · **7C Testing → `awaiting-gate`**: `web/scripts/driftwatch_room_evidence.py` baru (paket `assets/renders/personal-driftwatch/evidence/`, 21/21, 3 MP4), `driftwatch-room.tsx` jendela clip trace, `globals.css` baris `.monitor-trace-reveal` dihapus, `web/README.md` kontrak motion 7C. Lihat entri "Fase 7C — Testing" di §4.
 Sebelumnya: 2026-09-17 · Codex · handoff 7C tetap `ready-for-test`; catatan status basi di entri `PROGRESS.md`/`CODEMAP.md` diperbaiki, log sesi PROGRESS ditambah. JSON Development dan ledger dibaca ulang; Testing belum dimulai (PLAN §12.2: Claude Code / Antigravity). Lihat entri "Fase 7C — DriftWatch Development" di §4.
 Sebelumnya: 2026-09-17 · Claude Code · **Gate 7B lolos → `done`**. Lihat entri "Gate 7B" di §4.
@@ -65,6 +72,8 @@ Semua dari root project kecuali disebut lain.
 | `cd web/scripts && timeout 1500 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python showpiece_evidence.py` | Paket bukti Testing Fase 7 → `assets/renders/showpiece/evidence/`: 14 item (termasuk `enterEarly`: urutan unduh instrumen sesudah Enter + scroll/case dini), MP4 390×844 **dengan audio asli situs**, performa PLAN §11 (gate slow 4G + CPU 4×, fps 4×/6×, GLB, DPR), contact sheet, `evidence.json`; exit 1 bila ada fail. Jalankan setelah 6 suite regresi (item `phones` membaca JSON-nya). Server :8767 aktif. |
 | `/home/rayin/Projects/Testing/crosscheck/.venv/bin/python web/scripts/run_regressions.py [--suites a,b] [--phone-only mobile,case,cases,showpiece] [--force] [--list]` | **Q42 — pakai ini untuk semua regresi.** Suite berurutan (room, audio, mobile, case, cases, showpiece, desktop-a, desktop-b, perf-crosscheck); lewati suite yang sudah `passed` pada sidik jari sumber sama (`assets/renders/regression-ledger.json`); `--phone-only` = 390×844 saja; menolak jalan bila build lebih tua dari sumber. Dari root, server :8767 aktif. |
 | `cd web/scripts && timeout 600 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python perf_quick.py --slug <project> [--baseline <url>]` | **Q42 — gerbang fps Development** sebelum `ready-for-test`: 390×844 DPR 2, suara nyala, CPU 4×, chapter → terbang → scroll case → Return; tiap segmen ≥45 fps dan ≤10% frame lambat → `assets/renders/perf-quick/<slug>.json`. `--baseline` = build pembanding (mis. salinan HEAD di port lain) untuk atribusi. |
+| `cd web/scripts && timeout 2700 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python duewatch_room_evidence.py [--only mobile,desktop,back,slow,reduced,viewports,fps] [--remeasure-fps]` | Paket bukti Testing 7D → `assets/renders/personal-duewatch/evidence/` (22 item, 8 kategori, 3 MP4, contact sheet HP + desktop, `evidence.json`); memanggil `verify_duewatch_room.viewport/edges` (Q42). `--only` tetap menghapus paket dulu. Jalankan sesudah runner regresi; ±30 menit. |
+| `cd web/scripts && timeout 900 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python verify_duewatch_room.py [--sizes WxH,...] [--no-edges]` | Fase 7D Development (suite `time`): pointer chapter, cincin, 3 hotspot, 6 batas hari + Bad data, 6 kategori pesan + handoff, pengingat 24 jam/replay/dibalas/reset, tap cepat, state antar modul, audit, Return/Next/history/reload, layout dua meja; edge reduced/fallback/slow + Back saat cincin; 390/360/430 → 768 → 1440/1920 → `assets/renders/personal-duewatch/dev/`. Server :8767 aktif. |
 | `cd web/scripts && timeout 2700 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python driftwatch_room_evidence.py [--only mobile,desktop,back,slow,reduced,viewports,fps] [--remeasure-fps]` | Paket bukti Testing 7C → `assets/renders/personal-driftwatch/evidence/` (21 item, 8 kategori, 3 MP4, contact sheet HP + desktop, `evidence.json`); memanggil `verify_driftwatch_room.viewport/edges` (Q42). `--remeasure-fps` = pertahankan paket, ukur ulang fps saja (percobaan lama tetap di `measurements.fps4xAttempts`). Jalankan sesudah runner regresi; ±25 menit. |
 | `cd web/scripts && timeout 2700 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python surgeline_room_evidence.py [--only mobile,desktop,back,slow,reduced,viewports,fps]` | Paket bukti Testing 7B → `assets/renders/personal-surgeline/evidence/` (18 item, 8 kategori, 3 MP4, contact sheet HP + desktop, `evidence.json`); memanggil `verify_surgeline_room.viewport/edges` (Q42). Jalankan sesudah runner regresi; ±20 menit. |
 | `cd web/scripts && timeout 2400 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python crosscheck_room_evidence.py [--only mobile,desktop,back,slow,viewports,fps,images]` | Paket bukti Testing 7A → `assets/renders/personal-crosscheck/evidence/` (17 item, 8 kategori, 3 MP4, contact sheet HP + desktop, `evidence.json`); `--only` untuk debug (paket tetap dihapus dulu). Jalankan sesudah runner regresi; ±25 menit. |
@@ -155,7 +164,10 @@ Rayin Observatory/
 │   ├── scripts/verify_driftwatch_room.py  Phase 7C focused checks (chapter trace, ribbon, five comparisons), six viewports + edges
 │   ├── scripts/crosscheck_room_evidence.py  Phase 7A Testing evidence pack (phone + desktop walkthroughs, slow motion, fps, sources)
 │   ├── scripts/surgeline_room_evidence.py  Phase 7B Testing evidence pack (board traces, pulse, no-duplicate, slow motion, fps, sources)
+│   ├── scripts/verify_duewatch_room.py  Phase 7D focused checks (chapter pointer, ring, agenda/triage/reminders), six viewports + edges
+│   ├── scripts/verify_duewatch_state.mjs  Phase 7D illustration state boundaries (node)
 │   ├── scripts/driftwatch_room_evidence.py  Phase 7C Testing evidence pack (chapter trace, ribbon, five comparisons traced, interruptions, slow motion, fps, sources)
+│   ├── scripts/duewatch_room_evidence.py  Phase 7D Testing evidence pack (pointer, ring, hand/signal traces, reminder sequence, interruptions, slow motion, fps, sources)
 │   ├── scripts/run_regressions.py  Q42 regression runner + ledger (skip suites already green on the same source)
 │   ├── scripts/perf_quick.py      Q42 Development fps gate (4x CPU, one phone)
 │   ├── scripts/case_files_evidence.py  Phase 5 Testing evidence pack (all 5 cases + chain)
@@ -207,6 +219,8 @@ Rayin Observatory/
     │   ├── personal-surgeline/evidence/  Phase 7B Testing gate pack (MP4 ×3, sheets, evidence.json)
     │   ├── personal-driftwatch/dev/  Phase 7C Development PNGs + verification.json (verify_driftwatch_room)
     │   ├── personal-driftwatch/evidence/  Phase 7C Testing gate pack (MP4 ×3, sheets, evidence.json)
+    │   ├── personal-duewatch/dev/  Phase 7D Development PNGs + verification.json (verify_duewatch_room)
+    │   ├── personal-duewatch/evidence/  Phase 7D Testing gate pack (MP4 ×3, sheets, evidence.json)
     │   ├── perf-quick/<slug>.json  Q42 fps gate results
     │   ├── regression-ledger.json  Q42 runner ledger (suite → source fingerprint, status)
     │   ├── showpiece/evidence/   Phase 7 Testing: MP4 390×844 + real audio, contact sheet, perf PNG/chart, phones/ + edges/, evidence.json
@@ -246,15 +260,100 @@ Rayin Observatory/
 
 ## 4. Modul dan berkas
 
-### Fase 7D — Development paralel terisolasi (2026-09-17, Codex)
+### Gate 7D lolos (2026-09-18, Claude Code)
 
-- **Izin:** pemilik memilih 7D penuh di salinan terpisah; integrasi setelah 7C stabil.
-- `assets/development/phase-7d/`: salinan sumber `web/`, dependency independen, `portfolio/` dan dokumen sesi.
-  Build `.next`, preview dan hasil tes lokal salinan; tidak memakai build/ledger Testing 7C.
-- `assets/development/phase-7d/BASELINE.json`: SHA-256 sumber `web/` saat salinan dibuat; acuan integrasi,
-  bukan izin menimpa perubahan 7C. `assets/` tetap lokal, tidak dilacak git.
-- `PROGRESS.md`: catatan Development paralel; status/gate 7C tidak diubah.
-- `CODEMAP.md`: peta salinan ini; rincian 7D akan dilengkapi setelah verifikasi.
+- `web/lib/cases.ts`: DueWatch `draft: false`; komentar kepala = copy approved gate 7A–7D.
+- `web/app/page.tsx`: strip chapter DueWatch `Contract agenda / separate message triage · Illustration` (tanpa DRAFT).
+- Komentar kepala approved tanpa perubahan perilaku: `web/lib/duewatch-room.ts`, `web/components/duewatch-room.tsx`, `web/lib/instruments.ts`, blok 7D `web/app/globals.css`.
+- Tes: `verify_duewatch_room.py` (case 0 DRAFT), `verify_cases.py` (DueWatch `draft: False`), `duewatch_room_evidence.py` (item `story` + label sumber mengharapkan 0 DRAFT, `owner_notes` = approved/diterima). Paket bukti tersimpan tetap hasil run Testing (masih ber-DRAFT; arsip gate).
+- `web/README.md`: judul bagian 7D "gate passed, 2026-09-18". `PLAN.md` §3 Q46.
+
+### Fase 7D — Testing (2026-09-17, Claude Code)
+
+#### `web/scripts/duewatch_room_evidence.py`
+- **Peran:** generator paket bukti gate 7D (bukan tes Development).
+- **Ekspor utama:** `ITEMS` (22 item → kategori), `CATEGORIES`, sampler JS `CHAPTER` (orbit + posisi pointer di track), `RING` (skala X/Y, rotasi, pusat, opacity cincin per frame), `HAND` (sudut jarum, opacity/offset kartu, kategori, jumlah animasi),
+  `DOT` (sinyal handoff), `ROOM` (bacaan DOM ruang: modul, kategori, baris agenda, sudut jarum, rute, ledger), `STORY`, `LAYOUT`; `land` (scrollY numerik, clamp ≥0), `chapter_summary`, `ring_summary` (pose orbit .65/−28° ↔ rail `min(W−48,1000)/180` × .13 di (W/2, .43H)),
+  `hand_motion` (monoton, tanpa overshoot, diam 500–820 ms, kartu ≤330 ms), `dot_motion` (0→24 px ≤340 ms), `agenda_run`, `triage_run`, `reminder_run` + `reminder_ok` (urutan 24 jam/replay/dibalas/reset), `interrupt_run`, `evidence_run`, `mobile_walk`, `desktop_walk` (layout + resize dengan state),
+  `back_during_flight`, `model_slow_fail`, `reduced_motion`, `viewports` (`vdw.OUT` = `evidence/viewports`, rekaman webm dihapus), `perf`, `sources_check` (42 klaim → dossier, label simulasi, "live"/"production-ready" hanya negasi), `sheets`, `verdicts`, `OWNER_NOTES`/`owner_notes`, `remeasure_fps`; `--only` debug.
+- **Bergantung pada:** `verify_duewatch_room` (enter/idle/viewport/edges), `verify_driftwatch_room.land`, `crosscheck_room_evidence` (Walk, swipe/wheel, encode, slow_motion; `cre.OUT/RAW` diarahkan ke paket ini), `case_files_evidence.tile`, `run_regressions` (sidik jari + ledger 16 suite), dossier `portfolio/CAPABILITY_DUEWATCH.md`, ffmpeg, matplotlib/Pillow.
+- **State / efek samping:** hapus + tulis ulang `assets/renders/personal-duewatch/evidence/` (kecuali `--remeasure-fps`); tidak menulis sumber situs.
+- **Catatan:** item `story` mengharapkan 0 label DRAFT sejak gate 7D (saat run Testing: 1 case + strip). `verify_duewatch_room.land` menerima selector, bukan angka — jangan diimpor untuk scrollY.
+
+#### `assets/renders/personal-duewatch/evidence/`
+- `walkthrough-mobile.mp4` (390×844, 172 dtk), `walkthrough-desktop.mp4` (1440×900, 116 dtk), `slow-motion.mp4` (720×844, 188 dtk, 12 klip), `contact-sheet-mobile.jpg` (28), `contact-sheet-desktop.jpg` (20), strip `i01`…`i17`,
+  `p01-fps-4x.png`, PNG sumber `m*`/`d*`, `viewports/` (vdw 6 viewport + reduced/fallback/slow), `edges/back-during-ring.png`, `evidence.json`. Generated; jangan edit tangan (pengecualian 2026-09-17: `desktopComposition` dihitung ulang dari `measurements` setelah fix cek tepi audit; `forOwner` diisi dari `owner_notes`).
+- Hasil 2026-09-17 (sumber `f19aac05262f34b3`): 22/22 pass; 4× CPU chapter 60.0, cincin masuk 57.9, tap ruang 60.0, scroll case 60.0, cincin kembali 58.7 fps (≤2.2% lambat).
+
+#### `web/scripts/verify_cases.py` (fix Testing 7D)
+- Fallback DueWatch mengharapkan judul hotspot 7D `Message decisions` (dulu `Safe message triage`, basi sejak integrasi 7D). Runner `cases` passed setelah fix.
+
+### Fase 7D — DueWatch terintegrasi (2026-09-17, Codex)
+
+**Sumber utama `web/` sudah menerima 7D.** Development sebelumnya di salinan
+`assets/development/phase-7d/`; pemilik meminta integrasi sesudah 7C stabil tanpa tes ulang.
+Path `web/...` di bawah sekarang menunjuk aplikasi utama. Metadata/bukti Development tetap di salinan.
+
+- `assets/development/phase-7d/HANDOFF.md`: brief personal DRAFT, batas isolasi, instruksi preview :8784, aturan integrasi.
+- `assets/development/phase-7d/BASELINE.json`: hash awal semua sumber web tersalin, tanpa dependency/build/cache/env.
+- `assets/development/phase-7d/CHANGES.json`: manifest berkas 7D baru/berubah + hash kandidat dan status main terhadap baseline;
+  arsip kandidat awal; hasil integrasi final ada di `INTEGRATION.json`.
+- `web/lib/duewatch-room.ts`: `contractCategory`, `contractStops`, lima kategori, enam `messageSamples`,
+  `checkReminder`, `initialReminder`, `reminderResults`, tujuh `auditFindings`. Pure functions/data;
+  tidak membaca jam nyata atau menjalankan classifier/pengiriman. Angka input demonstrasi terlabel.
+- `web/components/duewatch-room.tsx`: `TimeControlRoom` (agenda, tap module, category selection,
+  handoff, ledger lokal/replay/reply/reset) + `TimeEvidence` (tiga bukti terpisah, tanggal video/scheduler,
+  tujuh disclosure audit). State bertahan ketika ganti modul; reload reset. Motion lokal WAAPI
+  hand 650ms, hasil 200ms, handoff dot 240ms; cancel saat interupsi/unmount, keyboard/reduced langsung.
+- `web/components/case-file.tsx`: DueWatch memakai dua komponen personal mengganti flow generik;
+  Next BrandWall menjelaskan studio visual. Komponen case lain tetap pada jalur semula.
+- `web/lib/cases.ts`: DueWatch DRAFT, brief/deck/hotspot personal dan batas sequential ledger;
+  `aperture: OrbitPivot0`, union `transition` menambah `time`; tidak mengubah geometri/anchor lain.
+- `web/lib/instruments.ts`: pitch DueWatch DRAFT mencakup renewal/handoff/audit.
+- `web/app/page.tsx`: `.time-chapter` track pointer mengikuti `--instrument-3-orbit`, caption DRAFT.
+- `web/components/observatory-shell.tsx`: ref `timeRing`, `timeFlight(in|out)` membuka orbit menjadi
+  rail agenda (720ms + fade 180ms); Return memakai posisi asal tersimpan, Next menutup/membuka sesuai
+  instrumen. Cleanup pathname mematikan/reset layer; reduced motion melewati efek. Satu Canvas tetap.
+- `web/app/globals.css`: blok `time-*` di akhir; mobile agenda vertikal + tap module, desktop dua meja
+  berdampingan 1024+, evidence tiga kolom, audit sempit terpisah, reduced-motion, target ≥44px.
+- `web/scripts/verify_duewatch_state.mjs`: batas 61/60/8/7/0/−1/null/NaN, tepat 24h, repeat saved
+  check, replied sebelum/sesudah log. Menguji ilustrasi lokal, bukan engine DueWatch asli.
+- `web/scripts/verify_duewatch_room.py`: `viewport(browser,w,h)` dan `edges(browser)` reusable Testing;
+  chapter maju/balik, cincin, hotspot, kategori/status, enam handoff, replay/reply/reset, tap cepat,
+  state antar modul, tujuh audit, disclosure, Return/focus, Next/history/reload, layout desktop,
+  fallback (mengizinkan hanya error ambient yang sengaja diblok), reduced, keyboard, slow model, resize, Back saat terbang; console/page/HTTP/external/overflow. Default URL :8767 di main, override env untuk salinan :8784. Opsi perekaman 390/1440 aktif (dijalankan di Testing 2026-09-17; paket bukti menghapus webm-nya).
+- `web/scripts/run_regressions.py`: registry `time`, `time-state`, `perf-duewatch`; output relatif root tempat skrip berada. Ledger main tidak diisi hasil salinan.
+- `web/scripts/perf_quick.py`: segmen `business time and handoff` pada slug duewatch, selain flight/scroll/return.
+- `web/scripts/verify_cases.py`: DueWatch DRAFT, judul hotspot baru, empat `.time-steps`.
+- `web/scripts/verify_desktop.py`: DueWatch menyasar `.time-room`, tidak memaksakan flow generik mendatar.
+- `web/README.md`: peta copy/angka 7D, provenance dossier, batas simulasi/audit, handoff.
+- `assets/development/phase-7d/assets/renders/personal-duewatch/dev/`: PNG per viewport, `verification.json`, hasil HP sebelum
+  desktop `mobile-before-desktop.json`; bukan paket gate Testing.
+- `assets/development/phase-7d/assets/renders/perf-quick/duewatch.json`: hasil gate fps emulasi; bukan fps HP fisik.
+- `assets/development/phase-7d/assets/renders/regression-ledger.json`: hasil Q42 sumber salinan; tidak menimpa ledger utama.
+- `PROGRESS.md` / `CODEMAP.md` utama: status 7D siap Testing dengan exception verifikasi eksplisit; checklist regresi penuh tetap terbuka. Salinan kedua dokumen memuat arsip Development + arahan kembali ke main.
+
+
+- `assets/development/phase-7d/INTEGRATION.json`: 15 berkas terintegrasi, hash sebelum/sesudah,
+  hash 7C/PLAN yang dipertahankan, instruksi pemilik, batas verifikasi. Bukan hasil tes runtime.
+- `assets/development/phase-7d/integration-before/`: cadangan main tepat sebelum penggabungan;
+  mencakup 11 berkas lama + PROGRESS/CODEMAP; berkas baru tidak mempunyai salinan sebelum.
+- `assets/development/phase-7d/assets/renders/personal-duewatch/dev/env-check.md`: tiga engine launch,
+  software renderer sandbox vs GPU host. Functional UI memakai Chromium, bukan tes lintas engine.
+- `assets/development/phase-7d/assets/regression-7d.log`: log runner parsial; dihentikan sesuai arahan pemilik.
+- **Verifikasi / batas:** Verifikasi sebelum integrasi (salinan, sumber `9be3fc9f6ae78f2d`): lint/typecheck/build passed;
+  enam viewport 390/360/430/768/1440/1920 passed pada hasil `viewport`; tes state passed;
+  gate fps DueWatch 52.1–59.1 fps / 1.5–7.3% frame lambat, CPU 4×, GPU Intel.
+  Suite `monitor`, `perf-driftwatch`, `dispatch`, `room`, `audio` passed. Regresi penuh dihentikan
+  atas instruksi pemilik; **bukan 16/16 passed**. `time` terakhir failed pada assertion error model
+  yang sengaja diblok; rig sudah diperbaiki (hanya error ambient yang disengaja diizinkan),
+  tetapi belum dijalankan ulang. `perf-surgeline` failed: chapter 18.9% dan case scroll 21.6%
+  frame lambat (batas 10%); belum diatribusi dengan baseline. Tidak ada klaim regresi tertentu sebagai penyebab.
+  Setelah integrasi: cek penggabungan per berkas/hash saja; **tanpa tes ulang dan tanpa rebuild utama**
+  sesuai instruksi pemilik. Bukti salinan tidak dilabeli sebagai hasil build terintegrasi.
+  
+- **Fix Development:** pointer chapter mengikuti lebar track, bukan viewport (bug tablet);
+  fallback menerima 0 Canvas saat still view. Tidak ada tes/rebuild setelah integrasi.
 
 
 ### Gate 7C lolos (2026-09-17, Claude Code)
@@ -1203,7 +1302,7 @@ Brief personal + tabel sumber copy DRAFT: `web/README.md` bagian Phase 7A.
   tahap Development (Codex/Claude Code) lalu Testing (Claude Code/Antigravity, paket bukti di
   `assets/renders/<slug-fase>/evidence/`); lihat PLAN §12 dan `PROMPT.md`.
 - **State / efek samping:** diperbarui setiap sesi; tidak menandai fase done tanpa gate pemilik.
-- **Catatan:** Fase 0–6 `done` (gate 2026-09-14/15). Fase 7 `done` 2026-09-16 (Testing ulang 14/14; jeda instrumen diterima). Fase 7A `done` 2026-09-16 (copy approved; dua temuan diterima). Fase 7B `done` 2026-09-17 (Testing 18/18; copy approved; Cut sebelum Form diterima). Fase 7C `done` 2026-09-17 (Testing 21/21; copy approved; fix jendela clip trace; jarak verdict HP diterima). Fase aktif 7D `in-dev` (Codex, salinan paralel); 7D–7F/8 `todo`, 9 `deferred`. `assets/` tidak dilacak git sejak 2026-09-15 (tetap lokal; riwayat commit lama masih memuatnya). Log sesi dijaga ringkas.
+- **Catatan:** Fase 0–6 `done` (gate 2026-09-14/15). Fase 7 `done` 2026-09-16 (Testing ulang 14/14; jeda instrumen diterima). Fase 7A `done` 2026-09-16 (copy approved; dua temuan diterima). Fase 7B `done` 2026-09-17 (Testing 18/18; copy approved; Cut sebelum Form diterima). Fase 7C `done` 2026-09-17 (Testing 21/21; copy approved; fix jendela clip trace; jarak verdict HP diterima). Fase aktif 7D `ready-for-test` (terintegrasi, pengecualian pemilik tanpa tes ulang; regresi penuh/temuan terbuka di entri 7D); 7E–7F/8 `todo`, 9 `deferred`. `assets/` tidak dilacak git sejak 2026-09-15 (tetap lokal; riwayat commit lama masih memuatnya). Log sesi dijaga ringkas.
 
 ## 5. Aset
 

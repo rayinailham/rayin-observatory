@@ -1,4 +1,4 @@
-// Homepage copy approved at Phase 3; DriftWatch revision approved at gate 7C (2026-09-17).
+// Homepage copy approved at Phase 3; DriftWatch revision approved at gate 7C (2026-09-17); DueWatch revision at gate 7D (2026-09-18).
 // Exact dossier sections and proof context: web/README.md, Copy provenance.
 export const instruments = [
   { id: 'crosscheck', name: 'CrossCheck', category: 'Web QA',
@@ -11,7 +11,7 @@ export const instruments = [
     pitch: 'I keep dated snapshots of your web data, show what changed and flag when collection can no longer be trusted.',
     reading: '11/11', unit: 'test scenarios handled', context: 'Includes normal-change controls' },
   { id: 'duewatch', name: 'DueWatch', category: 'Expiry & follow-up',
-    pitch: 'I build daily expiry checks and follow-up workflows that hand sensitive messages to a person.',
+    pitch: 'I make renewal dates visible and build message workflows with a human handoff — then test where their safeguards break.',
     reading: '200', unit: 'contracts checked per run', context: 'Synthetic contracts · mock delivery' },
   { id: 'brandwall', name: 'BrandWall', category: 'Visual design QA',
     pitch: 'I test brand assets across your product surfaces and themes, then report where layouts break and which CSS rules fix them.',

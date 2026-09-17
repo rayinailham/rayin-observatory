@@ -23,7 +23,7 @@ CASES = [
     {'id': 'driftwatch', 'name': 'DriftWatch', 'draft': False, 'duration': 118.2,
      'cards': ['Alarms', 'Change detection', 'Daily collection'], 'readings': ['11', '1,323', '12', '1']},
     {'id': 'duewatch', 'name': 'DueWatch', 'draft': False, 'duration': 102.5,
-     'cards': ['Daily expiry check', 'Safe message triage', '24-hour follow-up'], 'readings': ['200', '7', '6', '12']},
+     'cards': ['Daily expiry check', 'Message decisions', 'Saved reminder record'], 'readings': ['200', '7', '6', '12']},
     {'id': 'brandwall', 'name': 'BrandWall', 'draft': False, 'duration': 125.0,
      'cards': ['Test matrix', 'Measurement', 'Fix rules'], 'readings': ['300', '18', '11', '0']},
 ]
@@ -78,7 +78,7 @@ async def inspect(page, case, width, height, shots):
     assert all(b['y'] + b['height'] < top_of_card for b in cards)
     await page.get_by_role('button', name='Close component card').click()
     # CrossCheck explains its flow as the Phase 7A inspection field; the others keep the shared list.
-    flow = {'crosscheck': '.inspection-steps li', 'surgeline': '.dispatch-steps li', 'driftwatch': '.monitor-steps li'}.get(case['id'], '.signal-flow li')
+    flow = {'crosscheck': '.inspection-steps li', 'surgeline': '.dispatch-steps li', 'driftwatch': '.monitor-steps li', 'duewatch': '.time-steps li'}.get(case['id'], '.signal-flow li')
     assert await page.locator(flow).count() == 4
     for i, value in enumerate(case['readings']):
         await page.locator('.case-reading').nth(i).scroll_into_view_if_needed()
@@ -200,7 +200,7 @@ async def run():
         heading = await page.locator('.case-instrument-heading').bounding_box()
         assert notice['y'] + notice['height'] <= heading['y'], (notice, heading)
         await page.locator('.hotspot-1').click()
-        assert await page.locator('#component-card h3').inner_text() == 'Safe message triage'
+        assert await page.locator('#component-card h3').inner_text() == 'Message decisions'
         await page.screenshot(path=str(OUT / 'fallback-duewatch-390x844.png'))
         await context.close()
         REPORT['results'].append({'directEntry': [case['id'] for case in CASES], 'unknownSlug404': True, 'fallback': 'duewatch'})

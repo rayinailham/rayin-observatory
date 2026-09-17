@@ -123,6 +123,22 @@ async def measure(browser, url, slug):
                 await page.wait_for_timeout(850)
         await segment('snapshot comparisons', comparison)
         await land(page, 0)
+    if slug == 'duewatch' and await page.locator('.time-room').count():
+        async def time_controls():
+            await land(page, await page.locator('.time-date-picker').evaluate('e=>e.getBoundingClientRect().top+scrollY-100'))
+            for days in ('60', '7', '0', '-1'):
+                await page.locator(f'[data-days="{days}"]').tap()
+                await page.wait_for_timeout(700)
+            await land(page, await page.locator('.time-module-picker').evaluate('e=>e.getBoundingClientRect().top+scrollY-100'))
+            await page.get_by_role('button', name='B / Message triage', exact=True).tap()
+            await land(page, await page.locator('.time-message-picker').evaluate('e=>e.getBoundingClientRect().top+scrollY-100'))
+            await page.locator('[data-message=payment]').tap()
+            await land(page, await page.locator('.time-reminder-actions').evaluate('e=>e.getBoundingClientRect().top+scrollY-100'))
+            await page.locator('[data-reminder=later]').tap()
+            await page.locator('[data-reminder=replay]').tap()
+            await page.wait_for_timeout(500)
+        await segment('business time and handoff', time_controls)
+        await land(page, 0)
     await segment('case scroll to Next', lambda: swipe_until(page, cdp, 10 ** 6))
 
     async def back():

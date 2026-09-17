@@ -1,5 +1,5 @@
 // Case file content for all five instruments, in homepage order (PLAN §5 / §7).
-// Personal copy approved at gates 7A (CrossCheck), 7B (SurgeLine) and 7C (DriftWatch).
+// Personal copy approved at gates 7A (CrossCheck), 7B (SurgeLine), 7C (DriftWatch) and 7D (DueWatch).
 // Every reading traces to its dossier section (`source`);
 // portfolio/CAPABILITY_<NAME>.md in the project root. Full table: web/README.md.
 import type { InstrumentId } from './instruments';
@@ -21,7 +21,7 @@ export type CaseFile = {
   video: { duration: number; label: string; intro: string };
   // Phase 7A: a named node the case is entered and left through (CrossCheck's middle lens).
   aperture?: string;
-  transition?: 'pulse' | 'ribbon';
+  transition?: 'pulse' | 'ribbon' | 'time';
 };
 
 // Screen position (CSS px) of the lens a case is entered through: written by the scene every frame,
@@ -153,28 +153,28 @@ export const caseFiles: readonly CaseFile[] = [
       intro: 'English captions. No audio. Terminal footage was recorded in a disposable copy of the project.' },
   },
   {
-    id: 'duewatch', draft: false,
-    deck: ['Checked every morning.', 'Hard messages go to a person.'],
+    id: 'duewatch', draft: false, aperture: 'OrbitPivot0', transition: 'time',
+    deck: ['Know when to act.', 'Know when to hand over.'],
     brief: [
       'A contract sheet is only checked when someone remembers, and a busy inbox invites rushed automatic replies. One missed renewal or one wrong answer to an angry customer costs more than the time saved.',
-      'I build daily expiry checks and message workflows that back up the sheet before writing, answer only simple questions and hand complaints and payment issues to a person.',
+      'I built two separate routines: a contract tracker that protects the master sheet, and a message workflow designed to hand difficult conversations to a person. The evidence includes the gaps an independent self-review found.',
     ],
     context: 'Synthetic contracts and test messages. Every message “sent” here is a local mock log; live sending is not demonstrated.',
-    instrumentHeading: ['Three orbits.', 'One daily clock.'],
+    instrumentHeading: ['A daily check.', 'A human boundary.'],
     components: [
       { id: 'expiry', node: 'OrbitPivot0', part: 'ceramic', marker: [12, 33], title: 'Daily expiry check', label: 'Calendar-correct dates',
         body: 'Every morning each contract’s expiry is recomputed from its start date and term, with correct month and leap-year math. Unclear dates are flagged for a person instead of guessed.' },
-      { id: 'triage', node: 'OrbitPivot1', part: 'alarm', marker: [88, 45], title: 'Safe message triage', label: 'Hand off when unsure',
-        body: 'Simple price, stock and status questions get approved replies. Complaints, payment problems and anything unclear go to a person, with no draft attached.' },
-      { id: 'followup', node: 'OrbitPivot2', part: 'ceramic', marker: [12, 57], title: '24-hour follow-up', label: 'One reminder, never two',
-        body: 'If a customer has not replied within 24 hours, one reminder is logged. A customer who replied is skipped, and running the check again adds nothing.' },
+      { id: 'triage', node: 'OrbitPivot1', part: 'alarm', marker: [88, 45], title: 'Message decisions', label: 'Policy meets its limits',
+        body: 'Six sensitive fixtures went to a person without a draft. That proves those examples; the later audit found a mixed-intent weakness. The intended boundary and that limit stay visible below.' },
+      { id: 'followup', node: 'OrbitPivot2', part: 'ceramic', marker: [12, 57], title: 'Saved reminder record', label: 'Sequential checks, same ledger',
+        body: 'After more than 24 hours, an eligible mock reminder is recorded. Repeat checks on the same saved ledger add nothing. Re-import can erase that history: an open audit finding.' },
     ],
     flowHeading: ['From a sheet and an inbox', 'to a safe routine.'],
     flow: [
       { title: 'Back up first', body: 'Before anything is written, the contract sheet is copied to a dated backup, and the original file stays untouched.' },
       { title: 'Recompute the dates', body: 'Each row gets its expiry date, days left and a status. A bad row is flagged without stopping the others.' },
       { title: 'Sort the messages', body: 'An n8n workflow sends each message to one set of rules that decides: approved reply or hand-off to a person.' },
-      { title: 'Follow up once', body: 'A ledger records every reminder, so a follow-up is logged once and never repeated.' },
+      { title: 'Follow up once', body: 'Repeat checks consult the stored ledger. Sequential checks are proven; re-import and concurrent delivery are not.' },
     ],
     readingsHeading: ['Measured on', 'synthetic data.'],
     readingsIntro: 'Recorded from the project’s own runs on synthetic contracts and 18 test messages, with mock delivery only.',
@@ -182,7 +182,7 @@ export const caseFiles: readonly CaseFile[] = [
       { value: 200, suffix: '', label: 'Contracts checked per run', context: 'Including 45 deliberately difficult date rows, such as leap days and ambiguous formats.', source: '§3.1 / §3.3 / §8' },
       { value: 7, suffix: '/7', label: 'Renewals matched a manual audit', context: 'On the reference date, the engine and a hand check of all 200 rows found the same seven contracts.', source: '§6 K2 / §8' },
       { value: 6, suffix: '/6', label: 'Sensitive test messages sent to a person', context: 'Complaint, payment and unclear messages among 18 fixtures; none received an automatic draft.', source: '§6 K5 / §8' },
-      { value: 12, suffix: '', label: 'Reminders, unchanged after six replays', context: 'The follow-up check ran six times in a row and still logged exactly 12 mock reminders.', source: '§6 K6 / §8' },
+      { value: 12, suffix: '', label: 'Reminders, unchanged after six replays', context: 'Six sequential checks on the same saved ledger kept 12 mock reminders. Re-import and concurrency are not covered.', source: '§6 K6 / §8' },
     ],
     limits: [
       'A later self-review attacked this project and found real gaps: a message mixing a price question with a complaint could still get an automatic reply, and repeating an inbox import can overwrite follow-up history. Both are documented findings, not fixed claims.',
