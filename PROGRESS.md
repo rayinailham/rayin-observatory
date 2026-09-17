@@ -9,13 +9,13 @@
 
 | Hal | Isi |
 |---|---|
-| Fase aktif | **Fase 7B — SurgeLine: dispatch room** · Development (belum dimulai) |
-| Status fase | 7B `todo`. 7A `done` (gate lolos 2026-09-16, "lulus semua aman") |
-| Bagian PLAN.md yang relevan | §3 Q41–Q43, §12.3 (efisiensi tes — wajib mulai 7B), §5.2 (SurgeLine), §7 (kontrak isi), §8.1–§8.2 (visual/motion/mobile → desktop), §10 (copy), §11 (performa), §12 (fase personalisasi) |
-| Blocker | Tidak ada. Rig tes pulih 2026-09-16 (canvas 390×844 `ready`, Chromium 151; `verify_case` baseline lolos tanpa re-provision). Dua timeout lama (`verify:mobile` 360×740 readout, edge `verify_showpiece` return) terbukti juga gagal di HEAD `ac01ca4` → timing ekor Lenis di tes, diperbaiki di tes |
-| Preview sesi ini | 7A: `http://127.0.0.1:8767/` → CrossCheck → Open case file, atau `/work/crosscheck` · preview produksi lokal (`npm run start --prefix web`) |
-| Revisi terakhir | Testing 7A: fix regresi fps (posisi lensa ditulis ke CSS akar tiap frame, 60 → ±34 fps di 4× CPU → 52–59 fps), chip tanpa scale, sel `crispEdges`; alat Q42 `run_regressions.py` + `perf_quick.py`. Sebelumnya 7A Development: strip lane chapter, iris lensa masuk/kembali, inspection field matriks run asli, finding desk 4 temuan berbukti, teaser Next SurgeLine. Copy baru DRAFT |
-| Langkah berikut | **Development 7B SurgeLine** (Codex / Claude Code): brief personal dari `portfolio/CAPABILITY_SURGELINE.md`, mobile → desktop; sebelum `ready-for-test` jalankan `perf_quick.py --slug surgeline` + regresi lewat `run_regressions.py` (PLAN §12.3); tambah suite fase 7B ke `SUITES` runner |
+| Fase aktif | **Fase 7C — DriftWatch: monitoring room** · tahap Development (belum dimulai) |
+| Status fase | 7C `todo`. 7B `done` (gate lolos 2026-09-17, "lulus semua"). 7A `done` (gate lolos 2026-09-16) |
+| Bagian PLAN.md yang relevan | §3 Q41–Q44, §12.3 (efisiensi tes — wajib), §5.3 (DriftWatch), §7 (kontrak isi), §8.1–§8.2 (visual/motion/mobile → desktop), §10 (copy), §11 (performa), §12 (fase personalisasi) |
+| Blocker | Tidak ada. 7C siap dimulai (Development) |
+| Preview sesi ini | `http://127.0.0.1:8767/` · preview produksi lokal (`npm run build --prefix web && npm run start --prefix web`); 7B: `/work/surgeline` |
+| Revisi terakhir | Gate 7B lolos 2026-09-17 (Claude Code): copy approved, label DRAFT SurgeLine dilepas, Cut sebelum Form diterima; build + regresi terdampak; commit + push. Sebelumnya Testing 7B (Claude Code): paket `surgeline_room_evidence.py` 18/18; fix pulsa Return mendarat di titik antena asal (`pulseHome` di shell); runner 11 suite hijau di sumber `37a4f3e3770463fb`. Sebelumnya Development 7B (Codex → Claude Code): strip chapter 3 browser (lane 2 cut → resumed), pulsa antena masuk/kembali, papan dispatch A–F (antrean → 3 browser → Confirmed/Rejected/Dead-letter; Cut/Resume/Replay), ledger + bukti rekaman, teaser DriftWatch; fix fps var CSS root. Copy baru DRAFT |
+| Langkah berikut | **7C Development** (Codex utama / Claude Code): checklist Fase 7C, mobile → desktop, sumber `portfolio/CAPABILITY_DRIFTWATCH.md`, brief PLAN §5.3; `perf_quick.py --slug driftwatch` sebelum `ready-for-test` (Q42) |
 | Launch | Fase 8 menunggu gate 7A–7F. Catatan deployment terdahulu: Vercel CLI login 2026-09-16 (`chhrone`, scope `chhrones-projects`), `web/` belum `vercel link`; verifikasi lagi saat Fase 8. Testing produksi tetap mengikuti Q40 |
 
 ### Arahan wajib saat memakai prompt universal
@@ -45,7 +45,7 @@
 | 6 | Desktop | `done` | 2026-09-15 |
 | 7 | Showpiece polish | `done` | 2026-09-16 |
 | 7A | CrossCheck — inspection room | `done` | 2026-09-16 |
-| 7B | SurgeLine — dispatch room | `todo` | — |
+| 7B | SurgeLine — dispatch room | `done` | 2026-09-17 |
 | 7C | DriftWatch — monitoring room | `todo` | — |
 | 7D | DueWatch — time control room | `todo` | — |
 | 7E | BrandWall — visual studio | `todo` | — |
@@ -368,7 +368,7 @@ semua checkbox baru sengaja kosong. Setiap tahap memakai aturan Development/Test
 | Fase | Mobile: implementasi + verifikasi | Desktop: komposisi + polish | Regresi mobile sesudah desktop |
 |---|---|---|---|
 | 7A CrossCheck | lolos Testing + gate 2026-09-16 (390/360/430 + 768) | lolos Testing + gate 2026-09-16 (1440/1920) | lolos 2026-09-16 |
-| 7B SurgeLine | `todo` | `todo` | `todo` |
+| 7B SurgeLine | lolos Testing + gate 2026-09-17 (390/360/430 + 768) | lolos Testing + gate 2026-09-17 (1440/1920) | lolos 2026-09-16; ulang pasca-gate 2026-09-17 |
 | 7C DriftWatch | `todo` | `todo` | `todo` |
 | 7D DueWatch | `todo` | `todo` | `todo` |
 | 7E BrandWall | `todo` | `todo` | `todo` |
@@ -462,23 +462,54 @@ Sumber: `portfolio/CAPABILITY_SURGELINE.md` §1–4, §7, §9. Brief desain: PLA
 Target: pengunjung melihat bagaimana pekerjaan lanjut setelah crash tanpa pengiriman ganda.
 
 Development (Codex / Claude Code), **urut mobile → desktop**:
-- [ ] Brief dan copy personal DRAFT: 50,000 input → 49,950 unik; 48,273 terkonfirmasi,
+- [x] Brief dan copy personal DRAFT: 50,000 input → 49,950 unik; 48,273 terkonfirmasi,
   844 ditolak, 833 dead-letter; dua kill, nol duplikat. Nyatakan target lokal dan batas estimasi 6M
-- [ ] Mobile: chapter antena + alur vertikal case dari spreadsheet sampai konfirmasi;
+- [x] Mobile: chapter antena + alur vertikal case dari spreadsheet sampai konfirmasi;
   kontrol demonstrasi crash/resume lewat tap, hasil gagal tetap terlihat dan beralasan
-- [ ] Animasi record/pekerja/pulsa → satu jalur putus → resume tanpa mengulang record sukses;
+- [x] Animasi record/pekerja/pulsa → satu jalur putus → resume tanpa mengulang record sukses;
   tetapkan trigger, timing, state akhir dan interupsi, tandai ilustrasi sebagai demonstrasi
-- [ ] Transisi mengikuti pulsa antena; return menjaga orientasi; Next memperkenalkan DriftWatch
-- [ ] Verifikasi mobile selesai sebelum desktop; catat hasil pada tabel kemajuan
-- [ ] Desktop: jalur pekerja paralel lebar, area crash/resume dan hasil berdampingan;
+- [x] Transisi mengikuti pulsa antena; return menjaga orientasi; Next memperkenalkan DriftWatch
+- [x] Verifikasi mobile selesai sebelum desktop; catat hasil pada tabel kemajuan
+- [x] Desktop: jalur pekerja paralel lebar, area crash/resume dan hasil berdampingan;
   ritme pengiriman tegas, bukti tetap terbaca saat aliran bergerak
-- [ ] Regresi mobile, lint/typecheck/build + tes fokus; sumber copy/bukti → `ready-for-test`
+- [x] Regresi mobile, lint/typecheck/build + tes fokus; sumber copy/bukti → `ready-for-test`
+
+Bahan handoff 7B Development (2026-09-16, Codex → Claude Code):
+- **Preview:** `http://127.0.0.1:8767/` → chapter SurgeLine → Open case file (atau `/work/surgeline`). Server mati → `npm run build --prefix web && npm run start --prefix web`.
+- **Brief + peta sumber copy DRAFT + kontrak motion:** `web/README.md` bagian Phase 7B. Copy baru DRAFT: strip chapter, body 3 hotspot, intro/steps/label papan/narasi 5 stage/ledger, bukti rekaman, teaser DriftWatch. Record A–F dan receipt DEMO-* fiktif, dilabeli ilustrasi; angka run (50,000 → 49,950; 10,621 → 21,508 → 48,273; 844 / 833; 0 duplikat; 7 pulih; 6M estimasi 3.0/4.1 hari, tidak pernah dijalankan) dari dossier §3–4, §6 K1–K7, §7, §9.
+- **Yang dibangun:** chapter → strip 3 browser × 8 record ikut orbit (amber terkirim → hijau receipt), lane 2 beku + `cut` di orbit .35–.6 lalu `resumed`, scroll balik membalik. Masuk/kembali: 3 cincin pulsa dari antena. Case: **papan dispatch** — Start (A → Confirmed, C → Rejected dengan getar di Form, B menunggu receipt), Cut (B beku merah putus-putus, lane 2 offline, A/C tetap), Resume (klaim kedaluwarsa, B kembali ke antrean, dikirim lagi `×2` → Confirmed; D/E jalan; F dicoba 5× → Dead-letter; A tidak bergerak), Replay eksplisit. Ledger per record + alasan; bukti rekaman terpisah dari ilustrasi. HP: papan + tombol dalam satu layar 390×844. Desktop: steps satu baris, papan lebar kiri→kanan, control di samping ledger 2 kolom.
+- **Fix performa (shell):** var CSS scroll (`--journey`, hero, reveal/offset, orbit) pindah dari root ke elemen konsumennya. 4× CPU 390×844 (`perf_quick.py`): SurgeLine chapter 48.7 → **60.0 fps** (lambat 23% → 0%), terbang 55.7, demo crash/resume 59.8, scroll case 59.7, return 58.0; CrossCheck chapter 55.9 → 59.8. Rig: iGPU Intel headless, bukan HP fisik.
+- **Verifikasi:** lint/typecheck/build exit 0. `run_regressions.py --phone-only room,mobile,case,cases,showpiece` di sumber `c78f440b40bb069d`: dispatch (6 viewport + edge back/resize saat resume/fallback/reduced), perf-surgeline, room, audio, mobile, case, cases, showpiece, desktop-a, desktop-b passed; perf-crosscheck gagal tipis sekali (return 44.7) → ulang `--force` passed (49.6). Foto/JSON `assets/renders/personal-surgeline/dev/`.
+- **Untuk Testing/pemilik:** (1) arsip bukti lama (`case_files_evidence.py`, `desktop_evidence.py`) masih mengharapkan `.signal-flow` SurgeLine → paket 7B perlu skrip baru. (2) Keputusan desain terbuka: Cut boleh ditekan sebelum B sampai Form (B membeku di tengah jalur, tetap "stranded"). (3) Tanpa JS chip papan bertumpuk di pojok (halaman butuh JS untuk masuk, dampak kecil).
 
 Testing (Claude Code / Antigravity):
-- [ ] Jalankan seluruh kontrak Testing 7A–7F; simulasi resume tidak menggandakan hasil visual
-- [ ] Bukti membedakan selesai diproses dari sukses terkonfirmasi; motion antrean dan entry/return
-  dinilai di dua device; paket `assets/renders/personal-surgeline/evidence/` → `awaiting-gate`
-- [ ] Copy baru di-approve + gate personalisasi SurgeLine lolos
+- [x] Jalankan seluruh kontrak Testing 7A–7F; simulasi resume tidak menggandakan hasil visual (jejak per frame, HP tap + desktop klik)
+- [x] Bukti membedakan selesai diproses dari sukses terkonfirmasi; motion antrean dan entry/return
+  dinilai di dua device; paket `assets/renders/personal-surgeline/evidence/` → `awaiting-gate` (18/18 pass)
+- [x] Copy baru di-approve + gate personalisasi SurgeLine lolos (2026-09-17, "lulus semua"; temuan Cut sebelum Form diterima)
+
+Bahan gate 7B (Testing 2026-09-16, Claude Code) — folder `assets/renders/personal-surgeline/evidence/`:
+- **Video:** `walkthrough-mobile.mp4` (390×844 touch, 152 dtk), `walkthrough-desktop.mp4` (1440×900 wheel/klik + resize, 80 dtk),
+  `slow-motion.mp4` (0.25×, 135 dtk: pulsa masuk/kembali HP + desktop, Start → Cut, Resume tanpa kirim ulang A, Cut sebelum Form, resize saat pemulihan).
+  Tanpa suara. **Foto:** `contact-sheet-mobile.jpg` (28 frame), `contact-sheet-desktop.jpg` (18), strip per item `i01`…`i13`, grafik `p01-fps-4x.png`,
+  `viewports/` (6 viewport + fallback/reduced); `evidence.json` pass/fail per item + kategori + `forOwner`.
+- **Kategori:** cerita ✔ · visual ✔ · animasi ✔ · transisi ✔ · mobile ✔ · desktop ✔ · sumber ✔ · performa ✔ (18/18 item).
+- Item lolos (ringkas): chapterStrip (lane 2 beku 7.4 selama orbit .39–.56 + `cut`, akhir tiga lane hijau + `resumed`, balik membalik; HP swipe + desktop wheel),
+  pulseEntry (3 cincin bertingkat ±680 ms dari antena, fokus heading), hotspots, dispatchDemo (C getar 3 balikan → Rejected, B menunggu dengan cincin, Cut membekukan B,
+  lane 2 offline, Resume ±3.9 dtk tombol nonaktif, B kembali ke antrean ×2 → Confirmed, F ×1…×5 → Dead-letter; papan + tombol satu layar HP),
+  **noDuplicate** (±237 frame HP/desktop: A bergeser 0 px, 6 chip tiap frame, confirmed 1 → 4 hanya naik, 0 frame dua chip confirmed bertumpuk, ledger 6 baris; scroll balik tetap, Replay reset, 7 tap cepat tetap 4/1/1),
+  **processedVsConfirmed** (48,273 hijau vs 844/833 merah, jumlah 49,950; alasan per record), returnNext (±0 px, fokus Open case file, cincin mendarat di titik asal), historyDirect,
+  interruptions (double tap +1 history, Cut ±0.8 dtk → B beku di tengah lane, Back saat pulsa → cincin 0, resize 1440→390 saat pemulihan lalu 1024/900/1920/1440 → 6 chip/4 confirmed/0 overflow),
+  modelSlowFail, reducedMotion (cincin 0, chip snap 10–20 ms, pesan pemulihan 1.3 dtk), 4 HP/tablet + 1440/1920 (`verify_surgeline_room` dipanggil di paket, Q42),
+  sources (20/20 klaim → dossier, 4/4 label ilustrasi/rekaman), performa 4× CPU (chapter 60.0, pulsa masuk 56.6, demo papan 60.0, scroll case 60.0, return 58.6 fps; ≤3% frame lambat),
+  clean (1 Canvas, 0 error, 0 ≥400, 0 overflow), regressions (ledger 11 suite `passed` di sumber `37a4f3e3770463fb`).
+- **Bug ditemukan + diperbaiki di Testing:** pulsa Return menyusut ke tepi atas layar, bukan ke antena — `lensCentre()` dibaca di halaman case saat dish sudah ter-scroll
+  keluar (di-clamp `h*.14`; desktop y 126 vs antena 353). Fix: `pulseHome` menyimpan titik antena saat `openCase`, dipakai Return bila viewport sama. Build ulang → runner 11 suite → paket penuh diulang.
+- **Temuan untuk pemilik (keputusan):**
+  1. **Approve copy DRAFT 7B** (strip chapter, 3 hotspot, narasi papan 5 stage + label + ledger, bagian bukti rekaman, teaser DriftWatch).
+  2. **Cut sebelum B sampai Form** diizinkan: B beku di tengah lane, tetap "stranded", Resume selesai normal (`m05b-cut-before-form.png`, klip slow-motion 4). Terima, atau kembali ke Development agar Cut aktif hanya saat B menunggu di Form.
+  3. Info: refresh `/work/surgeline` mengulang ilustrasi dari "Start dispatch" (bukan state tersimpan) — sesuai desain.
+- Batas: Chromium GPU emulasi lokal; GPU host tidak di-throttle; HP fisik = Fase 8.
 
 ### Fase 7C — DriftWatch: monitoring room
 
@@ -629,14 +660,25 @@ Testing (Claude Code / Antigravity) — **semua tes memakai URL Vercel, bukan pr
 | 2026-09-16 | Setiap akhir fase (gate lolos) wajib git commit + push ke `origin main`; ditulis di `PROMPT.md` (langkah tutup sesi no. 4). Disalin ke PLAN §3 Q38 | Pemilik, chat sesi Claude Code |
 | 2026-09-16 | Gate Fase 7 lolos dari paket bukti Testing ulang 14/14 ("lolos commit dan push"); jeda instrumen ±3 dtk diterima apa adanya. Disalin ke PLAN §3 Q39 | Pemilik, chat sesi Claude Code |
 | 2026-09-16 | Testing Fase 8 dijalankan di **URL produksi Vercel** (deploy dulu, baru tes), bukan preview lokal. Vercel CLI 54.9.1 terpasang + dicatat di `RULES.md` agar semua harness pakai. Disalin ke PLAN §3 Q40 | Pemilik, chat sesi Claude Code |
+| 2026-09-17 | Gate 7B lolos ("7b sudah saya cek dan lulus semua"): copy 7B approved, DRAFT SurgeLine dilepas; Cut sebelum B sampai Form diterima; refresh mengulang ilustrasi sesuai desain. Fase aktif berikut 7C. Disalin ke PLAN §3 Q44 | Pemilik, chat sesi Claude Code |
 | 2026-09-16 | Gate 7A lolos ("lulus semua aman"): copy 7A approved, DRAFT dilepas; performa scrub (11–13% frame lambat) dan crop CC-001 diterima apa adanya. Disalin ke PLAN §3 Q43 | Pemilik, chat sesi Claude Code |
 | 2026-09-16 | Testing jangan lama lagi: mulai 7B Development wajib `perf_quick.py`; regresi lewat `run_regressions.py` (skip suite yang sudah lolos di sumber sama, setelah fix hanya yang belum hijau); paket bukti memanggil tes dev fase aktif; suite fase lama 390×844 saja. Disalin ke PLAN §3 Q42 + §12.3 | Pemilik, chat sesi Claude Code (Testing 7A) |
 | 2026-09-16 | Personalisasi cerita, visual, animasi dan transisi lima project dari `portfolio/` lokal; setiap fase mobile dahulu, lalu desktop sebagai tampilan utama. Sisipkan 7A–7E per project + 7F integrasi sebelum launch; fase aktif berikut 7A. Disalin ke PLAN §3 Q41 | Pemilik, chat sesi Codex |
 
 ## Log sesi
 
+- **2026-09-17 · Claude Code · Gate 7B lolos → done** — Pemilik "lulus semua": copy 7B approved, DRAFT SurgeLine dilepas, Cut sebelum Form diterima (Q44).
+  Verifikasi: lint/typecheck/build exit 0; `run_regressions.py --suites dispatch,cases,mobile --phone-only cases,mobile` passed (sumber `1c556e5b73edefd6`). Commit + push. Berikutnya: 7C Development.
+
+- **2026-09-17 · Codex · handoff 7B** — Cek hasil Testing tersimpan: 18/18 pass; berkas video/foto bukti tersedia.
+  Rapikan catatan status CODEMAP; tanpa perubahan aplikasi atau tes ulang. Berikutnya: keputusan pemilik atas paket Testing 7B; 7C belum dimulai.
+
 > Entri terbaru di atas. Singkat, 1–2 baris: tanggal · harness · fase — apa yang dikerjakan,
 > verifikasi, berikutnya. Detail teknis taruh di CODEMAP / folder bukti, bukan di sini.
+
+- **2026-09-16 · Claude Code · Fase 7B Testing → awaiting-gate** — Skrip bukti baru `surgeline_room_evidence.py` (18 item: walkthrough HP touch + desktop, jejak papan per frame untuk no-duplicate, pulsa, slow-motion 0.25×, fps 4×, sumber; memanggil `verify_surgeline_room.viewport/edges`). Bug: pulsa Return mendarat di tepi atas → fix `pulseHome` di shell. Verifikasi: lint/typecheck/build, runner 11 suite passed (sumber `37a4f3e3770463fb`), paket 18/18 pass. Berikutnya: gate pemilik + approve copy DRAFT + keputusan Cut sebelum Form.
+
+- **2026-09-16 · Codex → Claude Code · Fase 7B → ready-for-test** — Codex: reducer/ledger/bukti rekaman, pulsa antena, `verify_surgeline_room.py`. Claude Code: papan dispatch A–F (GSAP transform, Cut/Resume/Replay, pose per stage), strip chapter 3 browser, layout desktop; fps gagal ternyata akar var CSS di root tiap frame (sama di HEAD) → dipindah ke elemen konsumen, chapter 48.7 → 60 fps. Verifikasi: lint/typecheck/build + runner 11 suite passed (perf-crosscheck setelah ulang). Berikutnya: Testing 7B + approve copy DRAFT.
 
 - **2026-09-16 · Claude Code · Gate 7A lolos → done** — Pemilik "lulus semua aman": label DRAFT CrossCheck dilepas (`cases.ts` + 3 tes), build, `run_regressions.py --suites case,cases --phone-only case,cases` passed (34 + 88 dtk). Commit + push (Q38). Berikutnya: Development 7B dengan aturan Q42.
 

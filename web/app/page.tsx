@@ -33,15 +33,20 @@ export default function Home() {
           <p className="instrument-pitch">{instrument.pitch}</p>
         </div>
         <div className="instrument-reading">
-          <div className="proof-reading"><strong>{instrument.reading}</strong><span>{instrument.unit}<br /><small>{instrument.context}</small></span></div>
+          <div className="proof-reading"><strong>{instrument.reading}</strong><span>{instrument.id === 'surgeline' ? 'input rows · 49,950 unique' : instrument.unit}<br /><small>{instrument.context}</small></span></div>
           <button className="case-button" data-open-case={instrument.id}>Open case file <span aria-hidden="true">↗</span></button>
           {instrument.id === 'brandwall'
             ? <p className="orbit-hint" id="observer-readout" data-observed="false">Tap to observe · <b className="when-off">detector off, wave pattern</b><b className="when-on">detector on, particle pattern</b></p>
             : instrument.id === 'crosscheck'
-              // Phase 7A (DRAFT): the lenses sweep three browser lanes; each lane fills its 3 screen sizes × 3 roles as you orbit.
+              // Phase 7A (approved at gate 2026-09-16): the lenses sweep three browser lanes; each lane fills its 3 screen sizes × 3 roles as you orbit.
               ? <div className="scan-strip" role="img" aria-label="Scan pattern: three browsers, each checked at three screen sizes as three user roles">{scanLanes.map((lane, i) => <div key={lane} className="scan-lane" data-lane={i}>
                 <span>{lane}</span><div aria-hidden="true">{Array.from({ length: 9 }, (_, c) => <i key={c} style={{ '--c': c } as CSSProperties} />)}</div>
               </div>)}</div>
+              // Phase 7B (approved at gate 2026-09-17): three browser lanes fill with the orbit; lane 2 stops mid-way, then resumes where it stopped.
+              : instrument.id === 'surgeline'
+                ? <div className="dispatch-chapter" role="img" aria-label="Illustration: three browsers send records from a saved work list; browser 2 is cut, resumes, and every record reaches an outcome">{[0, 1, 2].map(lane => <div key={lane} className="dispatch-strand" data-strand={lane}>
+                  <span>Browser {lane + 1}{lane === 1 && <b><em>cut</em><em>resumed</em></b>}</span><div aria-hidden="true">{Array.from({ length: 8 }, (_, c) => <i key={c} style={{ '--c': c } as CSSProperties} />)}</div>
+                </div>)}<small>amber sent · green receipt saved · crash demo inside ↗</small></div>
               : <p className="orbit-hint">Scroll to orbit the instrument</p>}
         </div>
       </div>

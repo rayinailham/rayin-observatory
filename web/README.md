@@ -1,5 +1,64 @@
 # Rayin Observatory · Personal rooms
 
+## Phase 7B — SurgeLine dispatch room (gate passed, 2026-09-17)
+
+The owner accepted the 18/18 Testing pack and all findings on 2026-09-17. Copy is approved;
+DRAFT labels are removed. Cut may freeze B before it reaches the Form; this behavior is accepted.
+
+Brief: a client has a large spreadsheet and a form-only platform. The fear is a crash that
+loses work or sends it twice. The story is saved work list → browser workers → interrupted claim
+→ recovery → receipts and explicit failures. Amber means in flight; green means receipt saved only;
+red means failed with a reason. The antenna geometry stays; entry/return use expanding/contracting antenna pulses.
+Return aims the contracting rings at the antenna point the visitor left from (the case page has scrolled the dish away).
+
+- **Chapter (mobile + desktop):** strip of three browser lanes × 8 records under Open case file, a pure
+  function of the chapter orbit (amber sent → green receipt). Lane 2 freezes and shows `cut` between orbit
+  .35–.6, then `resumed` and continues from where it stopped. Reverse scroll reverses it.
+- **Case, mobile:** four steps → **dispatch board** (saved work list of A–F → three browser lanes ending at a
+  Form → Confirmed / Rejected / Dead-letter bins) → narration + one tap button → saved-outcomes ledger.
+  Board and button fit one 390×844 view.
+- **Case, desktop ≥1024:** steps in one row; one wide board reading left to right (2×3 saved list, three long
+  lanes, stacked bins); crash/resume control beside the two-column ledger.
+
+Sources are **portfolio/CAPABILITY_SURGELINE.md in this repository** (Q41), not the former
+sibling path. New chapter strip, hotspot bodies, dispatch-room narration, board labels, proof composition,
+and DriftWatch introduction were approved at gate 7B. Existing pitch, deck, brief, readings and video stay approved.
+
+| Copy / fact | Source / boundary |
+|---|---|
+| Queue on disk, atomic ownership, lease (claim) recovery, saved receipt | §3–4; §6 K1–K5 |
+| Chapter “input rows · 49,950 unique”; 50,000 → 49,950; 50 duplicate input rows | §3.1; §6 K3; §7 |
+| 48,273 confirmed / 844 validation rejections / 833 dead-letter | §6 K2; §7; totals sum to 49,950 |
+| 10,621 → 21,508 → 48,273 receipts; two kills; zero duplicates; 7 recovered | §6 K1; §7; whole process group killed in the real run |
+| Five attempts; validation not retried; failure reason retained | §3.2; §6 K2/K5 |
+| “The 120-second claim expiry is compressed” | §6 K5 `LEASE_TIMEOUT_SECONDS` 120 |
+| B sent twice, same receipt, recorded once | §3.2 target idempotency; a required boundary, not a universal platform guarantee |
+| ≈3.0 days / conservative 4.1 days for 6M | §6 K7; §7/9; extrapolation only, local target without network delay/rate limit |
+| Fictional A–F and DEMO-* receipts | Explicit illustration, not run evidence or a proportionate sample; no submission |
+| Next: day-to-day changes | DriftWatch §1; teaser only, no Phase 7C implementation |
+
+Motion contract (board, `components/surgeline-room.tsx`): the guarded reducer owns the stage; GSAP moves chips
+between measured `data-slot` places with transforms only, and a chip's colour/send count changes when it arrives.
+- **Start** (≈2.1 s): A, B, C leave the list .22 s apart; each lane leg .36 s claim + .66 s travel; A lands in
+  Confirmed, C shakes at the form and lands in Rejected, B waits at the form with a pulsing ring (receipt not saved).
+- **Cut** (tap any time after Start): B freezes wherever it is, dashed red; lane 2 `offline`; A and C finish their trips.
+- **Resume** (≈3.4 s, button disabled): lane 2 shows the claim expiring (.9 s), B returns to its list slot, is claimed
+  again, reaches the form a second time (`×2`) and lands last in Confirmed; D and E run lanes 1 and 3; F retries four
+  times at the form (`×2…×5`) and lands in Dead-letter; A gets a ring (kept, not re-sent) and never moves.
+  Completion is the timeline's end.
+- **Replay:** explicit only; chips fade out, return to the list, fade in staggered. Reverse scroll never resets.
+- **Interruptions:** repeated taps ignored by the reducer; a width change (or an idle height change) re-rests every chip
+  on its slot for the current stage, and a resize during recovery settles on the final outcome. Unmount kills motion.
+- **Reduced motion:** chips snap to each stage's pose; recovery settles after 0.9 s so its message is readable.
+
+Performance: scroll-driven custom properties now live on the element that uses them (orbit on each chapter section,
+`--journey` on the progress readout, hero vars on `#first-light`, reveal/offset on the scene layer) instead of the root.
+At 4× CPU, 390×844, the SurgeLine chapter went from 48.7 fps with 23% slow frames (same on HEAD) to 60.0 fps, 0% slow.
+
+Development verification: `perf_quick.py --slug surgeline` and `run_regressions.py` (suites `dispatch`, `perf-surgeline`
+plus all older suites). `dispatch` exports reusable `viewport()` and `edges()` for the Testing pack. Screenshots/JSON under
+`assets/renders/personal-surgeline/dev/` are Development evidence only.
+
 Phase 7A (CrossCheck inspection room) passed the owner's gate on 2026-09-16; its copy is approved. See below.
 
 Phase 7 Development: sound design, calibration feedback, micro-interactions and camera transitions.

@@ -185,8 +185,11 @@ function World({ entered, reducedMotion, progress, planetProgress, chapter, case
     // Aperture: where a lens sits on screen, so the shell can open and close the case through it.
     // Kept in a shared object, not a CSS variable on the root: the lens swings every frame, and a
     // custom property there restyles the whole page each time (Phase 7A Testing: 60 → ~35 fps at 4x CPU).
-    const apertureIndex = caseFiles.findIndex((file, i) => file.aperture && instrumentRefs.current[i]?.visible);
+    const focusedIndex = caseView.current.mix > 0 ? caseView.current.index : chapter.current.index;
+    const apertureIndex = caseFiles[focusedIndex]?.aperture ? focusedIndex : -1;
     const apertureModel = views.current[apertureIndex];
+    apertureScreen.x = NaN;
+    apertureScreen.y = NaN;
     if (apertureModel) {
       const lens = apertureModel.view.getObjectByName(caseFiles[apertureIndex].aperture!);
       if (lens) {

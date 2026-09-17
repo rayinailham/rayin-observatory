@@ -79,6 +79,8 @@ async def measure(browser, url, slug):
     await page.locator('.enter-button').click(timeout=90000)
     await idle(page)
     await page.wait_for_timeout(1500)
+    renderer = await page.locator('canvas').evaluate('''e=>{const gl=e.getContext('webgl2');
+      const ext=gl?.getExtension('WEBGL_debug_renderer_info');return ext?gl.getParameter(ext.UNMASKED_RENDERER_WEBGL):'unavailable'}''')
     segments = {}
 
     async def segment(name, action):
@@ -99,6 +101,18 @@ async def measure(browser, url, slug):
         await idle(page)
     await segment('flight into the case', open_case)
     await page.wait_for_timeout(600)
+    if slug == 'surgeline' and await page.locator('.dispatch-control').count():
+        await land(page, await page.locator('.dispatch-control').evaluate('e=>e.getBoundingClientRect().top+scrollY-100'))
+        async def demonstration():
+            await page.locator('[data-dispatch-action=start]').tap()
+            await page.wait_for_timeout(600)
+            await page.locator('[data-dispatch-action=crash]').tap()
+            await page.wait_for_timeout(600)
+            await page.locator('[data-dispatch-action=resume]').tap()
+            await page.wait_for_selector('.dispatch-room[data-stage=complete]')
+            await page.wait_for_timeout(400)
+        await segment('crash/resume demonstration', demonstration)
+        await land(page, 0)
     await segment('case scroll to Next', lambda: swipe_until(page, cdp, 10 ** 6))
 
     async def back():
@@ -108,7 +122,7 @@ async def measure(browser, url, slug):
         await idle(page)
     await segment('return flight', back)
     await context.close()
-    return {'url': url, 'segments': segments, 'errors': errors,
+    return {'url': url, 'renderer': renderer, 'segments': segments, 'errors': errors,
             'pass': not errors and all(s['fps'] >= 45 and s['slowPct'] <= 10 for s in segments.values())}
 
 
@@ -130,7 +144,7 @@ async def main():
     (OUT / f'{args.slug}.json').write_text(json.dumps(report, indent=2) + '\n')
     for label, run in (('current', current), ('baseline', baseline)):
         if run:
-            print(label, run['url'], '; '.join(f"{k} {v['fps']} fps ({v['slowPct']}% slow)" for k, v in run['segments'].items()))
+            print(label, run['url'], 'renderer:', run['renderer'], '; '.join(f"{k} {v['fps']} fps ({v['slowPct']}% slow)" for k, v in run['segments'].items()))
     print(report['status'])
     return current['pass']
 

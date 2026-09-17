@@ -71,6 +71,11 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
   const [flying, setFlying] = useState(false);
   const pageContent = useRef<HTMLDivElement>(null);
   const iris = useRef<HTMLDivElement>(null);
+  const pulse = useRef<HTMLDivElement>(null);
+  // Where the antenna sat on screen when its case was opened; Return restores that scroll, so the pulse lands there.
+  const pulseHome = useRef<IrisCentre & { w: number; h: number } | null>(null);
+  const sceneLayer = useRef<HTMLDivElement>(null);
+  const progressBar = useRef<HTMLDivElement>(null);
   const irisMotion = useRef<gsap.core.Tween | null>(null);
   const [entered, setEntered] = useState(false);
   const [sceneReady, setSceneReady] = useState(false);
@@ -160,7 +165,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
       caseView.current.index = current;
       chapter.current = { reveal: 1, orbit: 0, index: current, transition: 1, outro: 0 };
       root.current?.setAttribute('data-chapter', caseFiles[current].id);
-      root.current?.style.setProperty('--chapter-reveal', '1');
+      sceneLayer.current?.style.setProperty('--chapter-reveal', '1');
       scroller?.scrollTo(0, { immediate: true, force: true });
       window.scrollTo(0, 0);
       context.add(() => gsap.to(caseView.current, { mix: 1, duration: reducedMotion ? 0 : .78, ease: 'power2.inOut' }));
@@ -183,6 +188,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
     // A lens flight leaves the iris covering the screen; the arriving page always uncovers it,
     // including after Back interrupted a departure half way.
     const irisState = iris.current?.dataset.state;
+    if (pulse.current) gsap.set(pulse.current.querySelectorAll('i'), { opacity: 0 });
     if (irisState === 'disc' || irisState === 'hole') {
       const r = parseFloat(iris.current!.style.getPropertyValue('--iris-r')) || 0;
       const reach = irisReach();
@@ -212,7 +218,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
       const trigger = ScrollTrigger.create({ trigger: 'main', start: 'top top', end: 'bottom bottom',
         onUpdate: self => {
           if (readout.current) readout.current.textContent = `${Math.round(self.progress * 100).toString().padStart(3, '0')}%`;
-          root.current?.style.setProperty('--journey', String(self.progress));
+          progressBar.current?.style.setProperty('--journey', String(self.progress));
         },
       });
       const observer = new ResizeObserver(() => ScrollTrigger.refresh());
@@ -244,13 +250,15 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
       const transition = clamp((y - pos.top + height) / height);
       const outro = clamp((y - skillsTop + height) / height);
       chapter.current = { index, reveal, transition, outro, orbit: clamp((y - pos.top) / Math.max(1, pos.height - height)) };
-      root.current?.style.setProperty('--chapter-reveal', String(reveal));
+      // Scroll-driven custom properties live on the element that uses them, never on the root: a root custom
+      // property restyles the whole page on every scroll frame (7B: SurgeLine chapter under the 45 fps gate at 4x CPU).
+      sceneLayer.current?.style.setProperty('--chapter-reveal', String(reveal));
       root.current?.setAttribute('data-chapter', outro >= 1 ? 'outro' : reveal > .4 ? instruments[index].id : 'dome');
       homeSections.forEach((_, i) => {
         const offset = i === index ? 1 - transition : i === index - 1 ? -transition : 2;
-        root.current?.style.setProperty(`--instrument-${i}-offset`, String(offset - (i === index ? outro : 0)));
+        sceneLayer.current?.style.setProperty(`--instrument-${i}-offset`, String(offset - (i === index ? outro : 0)));
         // Chapter-local scan progress (CrossCheck's lane strip): full once passed, empty before reached.
-        root.current?.style.setProperty(`--instrument-${i}-orbit`, (i < index ? 1 : i > index ? 0 : chapter.current.orbit).toFixed(3));
+        homeSections[i].style.setProperty(`--instrument-${i}-orbit`, (i < index ? 1 : i > index ? 0 : chapter.current.orbit).toFixed(3));
       });
     };
     measure();
@@ -262,15 +270,16 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
         if (!live()) return;
         syncChapters();
         if (readout.current) readout.current.textContent = `${Math.round(self.progress * 100).toString().padStart(3, '0')}%`;
-        root.current?.style.setProperty('--journey', String(self.progress));
+        progressBar.current?.style.setProperty('--journey', String(self.progress));
       },
     });
+    const hero = document.getElementById('first-light');
     const heroTrigger = ScrollTrigger.create({
       trigger: '#first-light', start: 'top top', end: 'bottom bottom',
       onUpdate: self => {
         progress.current = self.progress;
-        root.current?.style.setProperty('--hero-journey', String(self.progress));
-        root.current?.style.setProperty('--copy-opacity', String(Math.max(0, 1 - self.progress * 2.8)));
+        hero?.style.setProperty('--hero-journey', String(self.progress));
+        hero?.style.setProperty('--copy-opacity', String(Math.max(0, 1 - self.progress * 2.8)));
       },
     });
     const scan = gsap.fromTo('.portrait-scan img', { clipPath: reducedMotion ? 'inset(0)' : 'inset(0 0 100% 0)' }, {
@@ -416,6 +425,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
     const path = `/work/${caseFiles[index].id}`;
     homeScroll.current = window.scrollY;
     homeChapter.current = { ...chapter.current };
+    pulseHome.current = { ...lensCentre(), w: window.innerWidth, h: window.innerHeight };
     caseView.current.index = index;
     setFlying(true);
     lenis.current?.stop();
@@ -425,7 +435,21 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
       .to(pageContent.current, { opacity: 0, duration: reducedMotion ? 0 : .48, ease: 'power2.out' }, 0)
       .to(caseView.current, { mix: 1, duration: reducedMotion ? 0 : .78, ease: 'power2.inOut' }, 0);
     // Phase 7A: CrossCheck is entered through its lens; the arriving case opens the iris again.
-    if (caseFiles[index].aperture && !reducedMotion) flight.current.add(irisTween(iris.current, irisMotion, 'disc', 0, irisReach(), .5, 'power2.in'), .32);
+    if (caseFiles[index].transition === 'pulse') flight.current.add(pulseFlight('out'), .08);
+    else if (caseFiles[index].aperture && !reducedMotion) flight.current.add(irisTween(iris.current, irisMotion, 'disc', 0, irisReach(), .5, 'power2.in'), .32);
+  }
+
+  function pulseFlight(direction: 'in' | 'out', centre = lensCentre()) {
+    const rings = pulse.current?.querySelectorAll('i');
+    const timeline = gsap.timeline();
+    if (!rings || reducedMotion) return timeline;
+    gsap.set(pulse.current, { x: centre.x, y: centre.y });
+    const far = Math.hypot(window.innerWidth, window.innerHeight) / 80;
+    // Transform/opacity only; position sampled once, no root CSS writes on every frame.
+    timeline.fromTo(rings, { scale: direction === 'out' ? .6 : far, opacity: direction === 'out' ? .85 : 0 },
+      { scale: direction === 'out' ? far : .6, opacity: direction === 'out' ? 0 : .85, duration: .62, stagger: .07, ease: 'power2.inOut' });
+    timeline.to(rings, { opacity: 0, duration: .12 });
+    return timeline;
   }
 
   // Next instrument: the camera backs away from this instrument, sweeps to the next one as the
@@ -451,6 +475,8 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
         audio.current?.transition('in');
       })
       .to(sweep, { transition: 1, duration: reducedMotion ? 0 : .78, ease: 'power2.inOut' });
+    if (caseFiles[from].transition === 'pulse') flight.current.add(pulseFlight('in'), 0);
+    else if (caseFiles[index].transition === 'pulse') flight.current.add(pulseFlight('out'), .68);
   }
 
   function leaveCase(target: number | string = 'return') {
@@ -465,14 +491,18 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
     flight.current = gsap.timeline({ onComplete: () => router.push('/', { scroll: false }) })
       .to(pageContent.current, { opacity: 0, duration: reducedMotion ? 0 : .28, ease: 'power2.out' }, 0);
     // Returning to the chapter closes the inspection field back into the lens first.
-    if (target === 'return' && caseFiles[current].aperture && !reducedMotion) flight.current.add(irisTween(iris.current, irisMotion, 'hole', irisReach(), 0, .48, 'power2.in'), 0);
+    // On the case page the antenna has usually scrolled away; aim at the chapter antenna the visitor left from.
+    const home = pulseHome.current;
+    const sameView = home && home.w === window.innerWidth && home.h === window.innerHeight && homeScroll.current !== null;
+    if (target === 'return' && caseFiles[current].transition === 'pulse') flight.current.add(pulseFlight('in', sameView ? home : lensCentre()), 0);
+    else if (target === 'return' && caseFiles[current].aperture && !reducedMotion) flight.current.add(irisTween(iris.current, irisMotion, 'hole', irisReach(), 0, .48, 'power2.in'), 0);
   }
 
   function returnToDome() { scrollFromMenu(0); }
   function goToWork() { scrollFromMenu('#crosscheck'); }
 
   return <div ref={root} className={`observatory ${entered ? 'has-entered' : ''}`} data-motion={reducedMotion ? 'reduced' : 'full'} data-route={isCase ? 'case' : 'home'} data-flight={flying ? 'moving' : 'idle'} data-scene={failed ? 'fallback' : sceneReady ? 'ready' : 'loading'}>
-    <div className="scene-layer" aria-hidden="true">
+    <div ref={sceneLayer} className="scene-layer" aria-hidden="true">
       {!failed && <Scene reducedMotion={reducedMotion} entered={entered} progress={progress} planetProgress={planetProgress} chapter={chapter} caseView={caseView} loadInstruments={ready} onReady={onReady} onFailure={onFailure} onInstrumentTap={onInstrumentTap} />}
       {failed && !isCase && <><div className="scene-fallback" />{instruments.map((item, i) => <div key={item.id} className={`instrument-fallback ${item.id}-fallback`} style={{ backgroundImage: `url('/images/${item.id}-fallback.png')`, transform: `translateY(calc(var(--instrument-${i}-offset, 2) * 100svh))` }} />)}</>}
     </div>
@@ -515,8 +545,9 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
         }
       }}>{children}</div>
       <div ref={iris} className="lens-iris" data-state="hidden" aria-hidden="true" />
+      <div ref={pulse} className="dispatch-pulse" aria-hidden="true"><i /><i /><i /></div>
       <button className="hero-contact" onClick={openContact}>Contact <span aria-hidden="true">↗</span></button>
-      <div className="progress-readout"><span>SCROLL</span><span className="readout-track" aria-hidden="true"><i /></span><output ref={readout} aria-label="Scroll progress">000%</output></div>
+      <div ref={progressBar} className="progress-readout"><span>SCROLL</span><span className="readout-track" aria-hidden="true"><i /></span><output ref={readout} aria-label="Scroll progress">000%</output></div>
       {audioError && <p className="audio-notice" role="status">Sound could not start. Tap the sound control to retry.</p>}
       {failed && <p className="fallback-notice" role="status">Still view. Live 3D is unavailable on this device.</p>}
     </div>

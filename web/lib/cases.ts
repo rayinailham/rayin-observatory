@@ -1,6 +1,6 @@
 // Case file content for all five instruments, in homepage order (PLAN §5 / §7).
-// All five case files owner-approved at the Phase 5 gate (2026-09-15); CrossCheck's hotspot copy is DRAFT
-// again after the Phase 7A rewrite. Every reading traces to its dossier section (`source`);
+// Personal copy approved at gates 7A (CrossCheck) and 7B (SurgeLine).
+// Every reading traces to its dossier section (`source`);
 // portfolio/CAPABILITY_<NAME>.md in the project root. Full table: web/README.md.
 import type { InstrumentId } from './instruments';
 
@@ -21,6 +21,7 @@ export type CaseFile = {
   video: { duration: number; label: string; intro: string };
   // Phase 7A: a named node the case is entered and left through (CrossCheck's middle lens).
   aperture?: string;
+  transition?: 'pulse';
 };
 
 // Screen position (CSS px) of the lens a case is entered through: written by the scene every frame,
@@ -71,7 +72,7 @@ export const caseFiles: readonly CaseFile[] = [
       intro: 'English captions. No audio. Original demo footage, with its progress replay clearly labeled.' },
   },
   {
-    id: 'surgeline', draft: false,
+    id: 'surgeline', draft: false, aperture: 'DishPivot1', transition: 'pulse',
     deck: ['Every row sent once.', 'Every success proven.'],
     brief: [
       'Your platform only accepts data through a web form, and your spreadsheet has thousands of rows. A simple script can stop halfway, and after a restart nobody knows what was sent.',
@@ -81,11 +82,11 @@ export const caseFiles: readonly CaseFile[] = [
     instrumentHeading: ['Four dishes.', 'One work list.'],
     components: [
       { id: 'queue', node: 'DishPivot1', part: 'signal', marker: [12, 33], title: 'Work list', label: 'Loaded once, kept on disk',
-        body: 'I load the spreadsheet into one work list stored on disk. Repeated rows are rejected on arrival, and loading the same file again adds nothing.' },
+        body: '50,000 input rows became 49,950 unique records on disk. Repeated rows stayed out; reloading the file did not erase saved progress.' },
       { id: 'workers', node: 'DishPivot2', part: 'signal', marker: [88, 45], title: 'Parallel workers', label: 'Real browsers, one record each',
-        body: 'Several headless browsers fill the form at the same time. Each record is held by one worker only, so two workers never submit the same row.' },
+        body: 'Each browser claims one record at a time. If it dies, the unfinished record returns after its lease expires. Already confirmed records stay finished.' },
       { id: 'proof', node: 'DishPivot3', part: 'signal', marker: [12, 57], title: 'Confirmation proof', label: 'No number, no success',
-        body: 'A submission only counts as successful when the confirmation number from the result page is saved. Rejected records keep a plain reason instead of disappearing.' },
+        body: '48,273 records finished with a saved receipt. The 844 validation rejections and 833 exhausted retries kept their reasons. Processed does not mean successful.' },
     ],
     flowHeading: ['From spreadsheet', 'to confirmed rows.'],
     flow: [

@@ -34,7 +34,9 @@ BIG = 5_000_000  # videos: size + mtime instead of reading every byte
 
 # name: (command, cwd, timeout s, result JSON relative to ROOT or None, phones env honoured, copy JSON to)
 SUITES = {
-    'room': ([PY, 'verify_crosscheck_room.py'], SCRIPTS, 900, 'assets/renders/personal-crosscheck/dev/verification.json', False, None),
+    'dispatch': ([PY, 'verify_surgeline_room.py'], SCRIPTS, 900, 'assets/renders/personal-surgeline/dev/verification.json', True, None),
+    'perf-surgeline': ([PY, 'perf_quick.py', '--slug', 'surgeline'], SCRIPTS, 600, 'assets/renders/perf-quick/surgeline.json', False, None),
+    'room': ([PY, 'verify_crosscheck_room.py'], SCRIPTS, 900, 'assets/renders/personal-crosscheck/dev/verification.json', True, None),
     'audio': (['node', 'verify_audio.mjs'], SCRIPTS, 300, 'assets/renders/showpiece/dev/audio-verification.json', False, None),
     'mobile': ([PY, 'verify_mobile.py'], SCRIPTS, 420, 'assets/renders/full-observatory/dev/verification.json', True, None),
     'case': ([PY, 'verify_case.py'], SCRIPTS, 300, 'assets/renders/case-crosscheck/dev/verification.json', True, None),
@@ -106,6 +108,8 @@ def main():
         env = dict(os.environ, OBSERVATORY_URL=URL)
         if phones == 'one':
             env['OBSERVATORY_PHONES'] = '390x844'
+            if name == 'room':
+                command = [*command, '--sizes', '390x844']
         print(f'RUN  {name} ({phones} phones)', flush=True)
         started = time.time()
         try:

@@ -77,7 +77,7 @@ async def check_case(page, slug, tag, desktop):
     assert all(0 < p['x'] < p['width'] and 0 < p['y'] < p['height'] for p in endpoints), endpoints
     await position(page, '[aria-labelledby="flow-heading"]', 32)
     await capture(page, f'{slug}-flow-{tag}')
-    if desktop and slug != 'crosscheck':  # CrossCheck: pinned inspection field (Phase 7A), see verify_crosscheck_room.py
+    if desktop and slug not in ('crosscheck', 'surgeline'):  # Personal rooms have their own composition checks.
         flow = await page.locator('.signal-flow li').evaluate_all('(els) => els.map(el => el.getBoundingClientRect().top)')
         assert max(flow) - min(flow) < 2, (slug, 'flow is not horizontal', flow)
     await position(page, '.case-readings', -130)

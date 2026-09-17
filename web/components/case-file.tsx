@@ -6,6 +6,7 @@ import { gsap } from 'gsap';
 import { caseFiles } from '@/lib/cases';
 import { instruments, type InstrumentId } from '@/lib/instruments';
 import { FindingSheet, InspectionField, NextTeaser } from './crosscheck-room';
+import { DispatchRoom, DispatchEvidence } from './surgeline-room';
 
 const lines = (text: readonly string[]) => text.map((line, i) => <Fragment key={line}>{i > 0 && <br />}{line}</Fragment>);
 
@@ -78,8 +79,8 @@ export default function CaseFile({ id }: { id: InstrumentId }) {
     </section>
 
     <div className="case-details">
-      {/* Phase 7A: CrossCheck explains itself as an inspection room; the other four keep the shared flow until their phase. */}
-      {id === 'crosscheck' ? <><InspectionField /><FindingSheet /></> : <section className="case-section" aria-labelledby="flow-heading">
+      {/* Personal rooms replace the shared flow only when their phase is active. */}
+      {id === 'crosscheck' ? <><InspectionField /><FindingSheet /></> : id === 'surgeline' ? <><DispatchRoom /><DispatchEvidence /></> : <section className="case-section" aria-labelledby="flow-heading">
         <p className="section-kicker">How it works</p><h2 id="flow-heading">{lines(file.flowHeading)}</h2>
         <ol className="signal-flow">{file.flow.map(step => <li key={step.title}><span className="signal-node" aria-hidden="true" /><h3>{step.title}</h3><p>{step.body}</p></li>)}</ol>
       </section>}
@@ -110,6 +111,7 @@ export default function CaseFile({ id }: { id: InstrumentId }) {
 
       <section className="case-section case-next" aria-labelledby="next-heading"><p className="section-kicker">Next instrument</p><h2 id="next-heading">{next.name}</h2>
         {id === 'crosscheck' && <NextTeaser lines={caseFiles[(index + 1) % caseFiles.length].deck} />}
+        {id === 'surgeline' && <div className="dispatch-next"><span aria-hidden="true">─ ─ ─ ╱╲ ─ ─</span><p>The dispatch is accounted for. Next, watch what changes between one day and the next.</p></div>}
         <Link onNavigate={event => event.preventDefault()} className="case-button" href={`/work/${next.id}`} data-case-target={next.id}>Open the next case file <span aria-hidden="true">↗</span></Link>
         <Link onNavigate={event => event.preventDefault()} className="case-back" href={`/#${id}`} data-home-target="return">↙ Return to {name}</Link>
       </section>
