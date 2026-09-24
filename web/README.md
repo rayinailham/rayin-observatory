@@ -1,5 +1,16 @@
 # Rayin Observatory · Personal rooms
 
+## Owner revision Q49 — native scroll and curtains (2026-09-24)
+
+Owner request: scrolling must only scroll; the animations are played by the visitor. Transitions become curtains, a different one per case. This supersedes the pinned/scroll-scrubbed motion and the lens/pulse/ribbon/ring/prism flights described in the phase sections below.
+
+- **Scroll:** native wheel and touch (Lenis `smoothWheel: false`; Lenis still animates menu jumps and locks scroll during a flight). Nothing is pinned: the hero, the five chapters and the CrossCheck inspection field are one screen each.
+- **Instrument turn:** drag sideways across a chapter to turn the instrument; tap it to play the whole turn, tap again to wind it back. Vertical drags stay a scroll. Chapter illustrations (lanes, trace, rail, beam) follow the same turn. Reduced motion shows them complete.
+- **CrossCheck scan:** plays once when the field is in view; each step can be clicked, and "Replay the scan" restarts it.
+- **Curtains** (`cases.ts` `curtain`, `observatory-shell.tsx` `curtainMove`): CrossCheck `stage` (theatre curtain parts from the middle), SurgeLine `blinds` (eight lanes lift in order), DriftWatch `roller` (chart paper rolls up), DueWatch `louvre` (six time slots slide away, alternating sides), BrandWall `prism` (five spectrum pleats split up/down from the centre). Open case closes the target case's curtain; Return closes the current one; Next closes the current one and the next case opens its own. Reduced motion: no curtain.
+- **New interface copy (DRAFT):** "Drag or tap the instrument to turn it", "Replay the scan".
+- **Verification:** `tsc --noEmit`, `eslint` clean; Playwright Chromium against a temporary dev server (1440×900, 390×844): native scroll, drag/tap turn, all five curtains in and out, CrossCheck scan/step/replay, no console errors. Not yet run: production build, regression runner. Older verify/evidence scripts that measure scroll orbit, pinned stages or the old flights are stale until updated in 7F.
+
 ## Phase 7C — DriftWatch monitoring room (gate passed, 2026-09-17)
 
 The owner accepted the 21/21 Testing pack and all findings on 2026-09-17. Copy is approved, including the
@@ -342,7 +353,7 @@ source column records how the wording was produced, not its current status.
 | The toolkit; Behind the instruments; Start a conversation; Email me | DRAFT labels, PLAN §4 / §6 / §9 |
 | Daily work (Skills group) | PLAN §9 "Kerja harian"; owner confirmation 2026-09-15 |
 | rayinailham9@gmail.com; LinkedIn / GitHub / Upwork links labeled "Rayina Ilham" | Owner-supplied destinations, chat 2026-09-15 |
-| Open case file; Scroll to orbit the instrument; menu/readout/error text; Back to the dome | DRAFT interface copy, PLAN §6. "Case file preview", "The full case file is coming soon." and the dialog's "Return to the instrument" were removed with the preview dialogs in Phase 5 |
+| Open case file; Scroll to orbit the instrument (replaced by "Drag or tap the instrument to turn it", DRAFT, Q49); menu/readout/error text; Back to the dome | DRAFT interface copy, PLAN §6. "Case file preview", "The full case file is coming soon." and the dialog's "Return to the instrument" were removed with the preview dialogs in Phase 5 |
 | Tap to observe · detector off, wave pattern / detector on, particle pattern | Owner-approved 2026-09-15 (revision): BrandWall observer readout replaces its orbit hint; double-slit metaphor, no project claim |
 
 ### Skill-to-project source map

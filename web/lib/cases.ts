@@ -21,8 +21,11 @@ export type CaseFile = {
   video: { duration: number; label: string; intro: string };
   // Phase 7A: a named node the case is entered and left through (CrossCheck's middle lens).
   aperture?: string;
-  transition?: 'pulse' | 'ribbon' | 'time' | 'prism';
+  // Curtain the case is opened and left behind; each instrument draws its own (see observatory-shell.tsx).
+  curtain: Curtain;
 };
+
+export type Curtain = 'stage' | 'blinds' | 'roller' | 'louvre' | 'prism';
 
 // Screen position (CSS px) of the lens a case is entered through: written by the scene every frame,
 // read by the shell's iris. A plain object on purpose — see observatory-scene.tsx.
@@ -31,7 +34,7 @@ export const apertureScreen = { x: NaN, y: NaN };
 export const caseFiles: readonly CaseFile[] = [
   {
     // Phase 7A: hotspot copy rewritten as inspection results (DRAFT until the owner approves it).
-    id: 'crosscheck', draft: false, aperture: 'Lens2',
+    id: 'crosscheck', draft: false, aperture: 'Lens2', curtain: 'stage',
     deck: ['Find the gaps.', 'Bring back proof.'],
     brief: [
       'Your app can work in one browser and fail in another. Different screens and user permissions make the gaps harder to spot.',
@@ -72,7 +75,7 @@ export const caseFiles: readonly CaseFile[] = [
       intro: 'English captions. No audio. Original demo footage, with its progress replay clearly labeled.' },
   },
   {
-    id: 'surgeline', draft: false, aperture: 'DishPivot1', transition: 'pulse',
+    id: 'surgeline', draft: false, aperture: 'DishPivot1', curtain: 'blinds',
     deck: ['Every row sent once.', 'Every success proven.'],
     brief: [
       'Your platform only accepts data through a web form, and your spreadsheet has thousands of rows. A simple script can stop halfway, and after a restart nobody knows what was sent.',
@@ -112,7 +115,7 @@ export const caseFiles: readonly CaseFile[] = [
       intro: 'English captions. No audio. Live footage comes from a separate 3,000-record demonstration run, labeled on screen.' },
   },
   {
-    id: 'driftwatch', draft: false, aperture: 'NeedlePivot', transition: 'ribbon',
+    id: 'driftwatch', draft: false, aperture: 'NeedlePivot', curtain: 'roller',
     deck: ['Keep yesterday.', 'Explain today.'],
     brief: [
       'Scrapers rarely break loudly. A page layout changes, a column goes empty, and the data keeps flowing until someone finds weeks of wrong reports.',
@@ -153,7 +156,7 @@ export const caseFiles: readonly CaseFile[] = [
       intro: 'English captions. No audio. Terminal footage was recorded in a disposable copy of the project.' },
   },
   {
-    id: 'duewatch', draft: false, aperture: 'OrbitPivot0', transition: 'time',
+    id: 'duewatch', draft: false, aperture: 'OrbitPivot0', curtain: 'louvre',
     deck: ['Know when to act.', 'Know when to hand over.'],
     brief: [
       'A contract sheet is only checked when someone remembers, and a busy inbox invites rushed automatic replies. One missed renewal or one wrong answer to an angry customer costs more than the time saved.',
@@ -193,7 +196,7 @@ export const caseFiles: readonly CaseFile[] = [
       intro: 'English captions. No audio. Its seven-day segment replays simulated business dates; the real timer record is in the notes under Readings.' },
   },
   {
-    id: 'brandwall', draft: false, aperture: 'PrismPivot', transition: 'prism',
+    id: 'brandwall', draft: false, aperture: 'PrismPivot', curtain: 'prism',
     deck: ['Put the brand under light.', 'Show exactly what breaks.'],
     brief: [
       'A white-label product looks tidy with one demo logo. Then real brands arrive: very wide wordmarks, white logos on light themes, long names in other scripts and files that fail to load.',

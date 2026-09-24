@@ -3,7 +3,6 @@
 import { Fragment, useEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties } from 'react';
 import Image from 'next/image';
 import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { crosscheckRun as run } from '@/lib/crosscheck-run';
 import { findings, findingsIntro, inspectionNote, inspectionSteps, scanLanes, type Finding } from '@/lib/crosscheck-room';
 import { useReducedMotion } from './use-reduced-motion';
@@ -22,9 +21,11 @@ const ease = (n: number) => { const t = clamp(n); return t * t * (3 - 2 * t); };
 const span = (p: number, from: number, to: number) => ease((p - from) / (to - from));
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
-// Story beats on the scroll progress of the pinned section (0–1). Each beat is a pure function of
-// progress, so scrolling back plays the scan in reverse and a fast flick can never queue animations.
+// Story beats on the scan's progress (0–1). Each beat is a pure function of progress, so replaying
+// or jumping back to a step runs the scan in reverse and a click can never queue animations.
 const BEATS = { map: [0, .12], scan: [.12, .5], sort: [.52, .76], hand: [.78, .96] } as const;
+// Where each step's beat finishes: a step button plays (or rewinds) the scan to there.
+const stepEnd = [BEATS.map[1], BEATS.scan[1], BEATS.sort[1], 1];
 const stepAt = (p: number) => p < BEATS.scan[0] + .02 ? 0 : p < BEATS.sort[0] ? 1 : p < BEATS.hand[0] ? 2 : 3;
 
 type Layout = ReturnType<typeof layoutFor>;
@@ -78,6 +79,8 @@ export function InspectionField() {
   const section = useRef<HTMLElement>(null);
   const svg = useRef<SVGSVGElement>(null);
   const [step, setStep] = useState(reducedMotion ? 3 : 0);
+  // The scan plays by itself once it comes into view; the visitor can replay it or jump to a step.
+  const playTo = useRef<(to: number, from?: number) => void>(() => {});
   const allRows = useMemo(() => run.matrix.map((_, i) => i), []);
   const passPath = useMemo(() => cellsPath(layout, allRows, false, true), [layout, allRows]);
   const removedRows = useMemo(() => allRows.filter(r => !issueRows.has(r)), [allRows]);
@@ -88,7 +91,6 @@ export function InspectionField() {
     const root = svg.current;
     const stage = section.current;
     if (!root || !stage) return;
-    gsap.registerPlugin(ScrollTrigger);
     const q = <T extends Element>(selector: string) => Array.from(root.querySelectorAll<T>(selector));
     const reveal = root.querySelector<SVGRectElement>('[data-part=reveal]')!;
     const scanBar = root.querySelector<SVGGElement>('[data-part=scan-bar]')!;
@@ -116,9 +118,6 @@ export function InspectionField() {
       else element.style.setProperty(name, text);
     };
     let shown = -1;
-    let eased = reducedMotion ? 1 : 0;
-    let target = eased;
-    let drawn = -1;
 
     const draw = (p: number) => {
       const map = span(p, ...BEATS.map);
@@ -157,24 +156,20 @@ export function InspectionField() {
       root.dataset.progress = p.toFixed(3);
     };
 
-    if (reducedMotion) { draw(1); return; }
-    const trigger = ScrollTrigger.create({ trigger: stage, start: 'top top', end: 'bottom bottom',
-      onUpdate: self => { target = self.progress; },
-      onRefresh: self => { target = self.progress; },
-    });
-    target = trigger.progress;
-    eased = target;
-    // Touch scrolling is native (Lenis only smooths wheels), so ease toward the scroll position.
-    const tick = () => {
-      eased += (target - eased) * .2;
-      if (Math.abs(target - eased) < .0004) eased = target;
-      if (Math.abs(eased - drawn) < .0002) return;
-      drawn = eased;
-      draw(eased);
+    if (reducedMotion) { draw(1); playTo.current = () => {}; return; }
+    const tween = { p: 0 };
+    playTo.current = (to, from = tween.p) => {
+      gsap.killTweensOf(tween);
+      gsap.fromTo(tween, { p: from }, { p: to, duration: Math.max(.6, Math.abs(to - from) * 7), ease: 'power1.inOut', onUpdate: () => draw(tween.p) });
     };
-    draw(eased);
-    gsap.ticker.add(tick);
-    return () => { gsap.ticker.remove(tick); trigger.kill(); };
+    draw(0);
+    const seen = new IntersectionObserver(entries => {
+      if (!entries.some(entry => entry.isIntersecting)) return;
+      seen.disconnect();
+      playTo.current(1);
+    }, { threshold: .45 });
+    seen.observe(stage);
+    return () => { seen.disconnect(); gsap.killTweensOf(tween); };
   }, [layout, reducedMotion]);
 
   const { width, height } = layout;
@@ -193,8 +188,9 @@ export function InspectionField() {
         <h2 id="flow-heading">From page visits<br />to a clear report.</h2>
         <ol className="inspection-steps">{inspectionSteps.map((item, i) => <li key={item.title} data-active={i === step} data-done={i < step}>
           <span className="inspection-step-index" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
-          <h3>{item.title}</h3><p>{item.body}</p><p className="inspection-readout">{item.readout}</p>
+          <h3><button className="inspection-step-button" aria-pressed={i === step} onClick={() => playTo.current(stepEnd[i])}>{item.title}</button></h3><p>{item.body}</p><p className="inspection-readout">{item.readout}</p>
         </li>)}</ol>
+        <button className="inspection-replay" onClick={() => playTo.current(1, 0)}>Replay the scan <span aria-hidden="true">↻</span></button>
         <div className="inspection-detail" aria-hidden="true"><p>{inspectionSteps[step].body}</p><p className="inspection-readout">{inspectionSteps[step].readout}</p></div>
       </div>
       <figure className="inspection-figure">

@@ -1,8 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type MutableRefObject, type ReactNode } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { apertureScreen, caseFiles, caseIndex, type CaseView } from '@/lib/cases';
+import { caseFiles, caseIndex, type CaseView, type Curtain } from '@/lib/cases';
 import { useProgress } from '@react-three/drei';
 import Lenis from 'lenis';
 import { gsap } from 'gsap';
@@ -17,43 +17,47 @@ import { useReducedMotion } from './use-reduced-motion';
 const SOUND_KEY = 'rayin-observatory:sound';
 const caseOf = (path: string) => caseIndex(path.startsWith('/work/') ? path.slice('/work/'.length) : null);
 
-// Lens iris (Phase 7A): ink between a lens and the screen edge. A `disc` grows out of the lens and
-// covers the screen; a `hole` opens in the ink and uncovers it. The centre follows the scene's
-// apertureScreen (kept on screen), or stays where the last cover closed so a case opens from the
-// lens it was entered through, even when that lens now sits below the fold.
-type IrisState = 'hidden' | 'disc' | 'hole';
-type IrisCentre = { x: number; y: number };
-const irisReach = () => Math.hypot(window.innerWidth, window.innerHeight);
-let irisCentre: IrisCentre = { x: 0, y: 0 };
-function lensCentre(): IrisCentre {
-  const w = window.innerWidth;
-  const h = window.innerHeight;
-  const x = Number.isFinite(apertureScreen.x) ? apertureScreen.x : w / 2;
-  const y = Number.isFinite(apertureScreen.y) ? apertureScreen.y : h * .45;
-  return { x: Math.min(w * .9, Math.max(w * .1, x)), y: Math.min(h * .86, Math.max(h * .14, y)) };
-}
-function setIris(element: HTMLElement | null, state: IrisState, r = 0, centre = irisCentre) {
-  if (!element) return;
-  element.dataset.state = state;
-  element.style.setProperty('--iris-x', `${centre.x.toFixed(1)}px`);
-  element.style.setProperty('--iris-y', `${centre.y.toFixed(1)}px`);
-  element.style.setProperty('--iris-r', `${r.toFixed(1)}px`);
-  element.style.setProperty('--iris-ring', Math.max(0, 1 - r / irisReach()).toFixed(3));
-}
-function irisTween(element: HTMLElement | null, motion: MutableRefObject<gsap.core.Tween | null>, state: 'disc' | 'hole', from: number, to: number, duration: number, ease: string, delay = 0, follow = true) {
-  motion.current?.kill();
-  const proxy = { r: from };
-  const place = () => { if (follow) irisCentre = lensCentre(); setIris(element, state, proxy.r); };
-  place();
-  const tween = gsap.to(proxy, { r: to, duration, ease, delay,
-    onUpdate: place,
-    onComplete: () => {
-      if (state === 'disc' ? to <= 0 : to >= irisReach() * .98) setIris(element, 'hidden');
-      if (motion.current === tween) motion.current = null;
-    },
-  });
-  motion.current = tween;
-  return tween;
+// Curtains: every case has its own. Closed, all of them are the same solid ink, so a hand-over
+// between two cases can swap the style while the screen is covered. Transform/opacity only.
+type Pose = gsap.TweenVars;
+const curtains: Record<Curtain, { panels: number; stagger: number; open: (i: number, n: number) => Pose }> = {
+  // CrossCheck: a theatre curtain parts from the middle.
+  stage: { panels: 2, stagger: 0, open: i => ({ xPercent: i ? 101 : -101 }) },
+  // SurgeLine: eight lanes lift one after another, like records dispatched in order.
+  blinds: { panels: 8, stagger: .045, open: () => ({ scaleY: 0, transformOrigin: '50% 0%' }) },
+  // DriftWatch: one sheet of chart paper rolls up.
+  roller: { panels: 1, stagger: 0, open: () => ({ yPercent: -101 }) },
+  // DueWatch: time slots slide away, alternating sides.
+  louvre: { panels: 6, stagger: .05, open: i => ({ scaleX: 0, transformOrigin: i % 2 ? '100% 50%' : '0% 50%' }) },
+  // BrandWall: spectrum pleats split up and down from the centre.
+  prism: { panels: 5, stagger: .05, open: i => ({ yPercent: i % 2 ? 101 : -101 }) },
+};
+const CLOSED: Pose = { xPercent: 0, yPercent: 0, scaleX: 1, scaleY: 1 };
+const panelsOf = (element: HTMLElement, style: Curtain) => Array.from(element.children).slice(0, curtains[style].panels) as HTMLElement[];
+// Centre-out order for the pleats; left-to-right for the rest.
+const delayOf = (style: Curtain, i: number, n: number) => curtains[style].stagger * (style === 'prism' ? Math.abs(i - (n - 1) / 2) : i);
+
+function curtainMove(element: HTMLElement | null, style: Curtain, direction: 'close' | 'open') {
+  const timeline = gsap.timeline();
+  if (!element) return timeline;
+  const panels = panelsOf(element, style);
+  const n = panels.length;
+  if (direction === 'close') {
+    gsap.killTweensOf(element.children);
+    element.dataset.style = style;
+    element.dataset.state = 'moving';
+    gsap.set(element.children, { clearProps: 'transform' });
+    panels.forEach((panel, i) => {
+      gsap.set(panel, curtains[style].open(i, n));
+      timeline.to(panel, { ...CLOSED, duration: .55, ease: 'power3.inOut' }, delayOf(style, i, n));
+    });
+    timeline.call(() => { element.dataset.state = 'closed'; });
+  } else {
+    element.dataset.state = 'moving';
+    panels.forEach((panel, i) => timeline.to(panel, { ...curtains[style].open(i, n), duration: .75, ease: 'power3.inOut' }, delayOf(style, i, n)));
+    timeline.call(() => { element.dataset.state = 'open'; });
+  }
+  return timeline;
 }
 
 export default function ObservatoryShell({ children }: { children: ReactNode }) {
@@ -70,16 +74,9 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
   const flight = useRef<gsap.core.Timeline | null>(null);
   const [flying, setFlying] = useState(false);
   const pageContent = useRef<HTMLDivElement>(null);
-  const iris = useRef<HTMLDivElement>(null);
-  const pulse = useRef<HTMLDivElement>(null);
-  const ribbon = useRef<HTMLDivElement>(null);
-  const timeRing = useRef<HTMLDivElement>(null);
-  const prism = useRef<HTMLDivElement>(null);
-  // Where the antenna sat on screen when its case was opened; Return restores that scroll, so the pulse lands there.
-  const pulseHome = useRef<IrisCentre & { w: number; h: number } | null>(null);
+  const curtain = useRef<HTMLDivElement>(null);
   const sceneLayer = useRef<HTMLDivElement>(null);
   const progressBar = useRef<HTMLDivElement>(null);
-  const irisMotion = useRef<gsap.core.Tween | null>(null);
   const [entered, setEntered] = useState(false);
   const [sceneReady, setSceneReady] = useState(false);
   const [fontsReady, setFontsReady] = useState(false);
@@ -96,6 +93,8 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
   const progress = useRef(0);
   const planetProgress = useRef(0);
   const chapter = useRef<ChapterState>({ reveal: 0, orbit: 0, index: 0, transition: 0, outro: 0 });
+  // How far the visitor has turned each instrument (0–1), by dragging or tapping it. Scroll never touches it.
+  const orbits = useRef(instruments.map(() => 0));
   const lenis = useRef<Lenis | null>(null);
   const audio = useRef<ObservatoryAudio | null>(null);
   const [modelProgress, setModelProgress] = useState(0);
@@ -136,7 +135,8 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
-    const scroller = new Lenis({ autoRaf: false, smoothWheel: !reducedMotion, syncTouch: false, lerp: .085 });
+    // Wheel and touch scroll natively; Lenis only animates menu jumps and locks scroll during a flight.
+    const scroller = new Lenis({ autoRaf: false, smoothWheel: false, syncTouch: false });
     lenis.current = scroller;
     scroller.stop();
     scroller.on('scroll', ScrollTrigger.update);
@@ -188,26 +188,18 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
       });
       homeTarget.current = null;
     }
-    // A lens flight leaves the iris covering the screen; the arriving page always uncovers it,
-    // including after Back interrupted a departure half way.
-    const irisState = iris.current?.dataset.state;
-    if (prism.current) {
-      const sheet = prism.current;
-      gsap.killTweensOf(sheet);
-      context.add(() => gsap.to(sheet, { opacity: 0, duration: reducedMotion ? 0 : .32, ease: 'power2.out', onComplete: () => { sheet.dataset.direction = 'idle'; } }));
-    }
-    if (timeRing.current) { gsap.killTweensOf(timeRing.current); gsap.set(timeRing.current, { opacity: 0 }); timeRing.current.dataset.direction = 'idle'; }
-    if (ribbon.current) { gsap.killTweensOf(ribbon.current); gsap.set(ribbon.current, { opacity: 0 }); ribbon.current.dataset.direction = 'idle'; }
-    if (pulse.current) gsap.set(pulse.current.querySelectorAll('i'), { opacity: 0 });
-    if (irisState === 'disc' || irisState === 'hole') {
-      const r = parseFloat(iris.current!.style.getPropertyValue('--iris-r')) || 0;
-      const reach = irisReach();
-      if (reducedMotion) setIris(iris.current, 'hidden');
-      else if (irisState === 'disc') {
-        if (isCase && r >= reach * .98) irisTween(iris.current, irisMotion, 'hole', 0, reach, .75, 'power2.out', .12, false); // the inspection field opens from the lens
-        else irisTween(iris.current, irisMotion, 'disc', r, 0, cameFromCase ? .72 : .3, 'power2.inOut', cameFromCase ? .08 : 0);
-      } else if (!isCase && r <= 1) irisTween(iris.current, irisMotion, 'disc', reach, 0, .72, 'power2.inOut', .08); // the view settles back into the chapter lens
-      else irisTween(iris.current, irisMotion, 'hole', r, reach, .3, 'power2.out');
+    // A departure leaves the curtain closed; the arriving page always opens it, including after
+    // Back interrupted a departure half way. A fully closed curtain opens in the arriving case's own style.
+    const sheet = curtain.current;
+    if (sheet && sheet.dataset.state !== 'open') {
+      const covered = sheet.dataset.state === 'closed';
+      const style = (isCase && covered ? caseFiles[current].curtain : sheet.dataset.style) as Curtain;
+      if (reducedMotion) { gsap.killTweensOf(sheet.children); sheet.dataset.state = 'open'; }
+      else {
+        if (style !== sheet.dataset.style) { gsap.set(sheet.children, { clearProps: 'transform' }); sheet.dataset.style = style; }
+        gsap.killTweensOf(sheet.children);
+        curtainMove(sheet, style, 'open').delay(.12);
+      }
     }
     context.add(() => gsap.fromTo(pageContent.current, { opacity: 0 }, { opacity: 1, duration: reducedMotion ? 0 : .55, delay: reducedMotion ? 0 : .25, ease: 'power2.out',
       onComplete: () => {
@@ -259,7 +251,8 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
       const reveal = clamp((y - positions[0].top + height) / height);
       const transition = clamp((y - pos.top + height) / height);
       const outro = clamp((y - skillsTop + height) / height);
-      chapter.current = { index, reveal, transition, outro, orbit: clamp((y - pos.top) / Math.max(1, pos.height - height)) };
+      const lead = index > 0 ? .55 - orbits.current[index - 1] * 1.5 : undefined;
+      chapter.current = { index, reveal, transition, outro, lead, orbit: orbits.current[index] };
       // Scroll-driven custom properties live on the element that uses them, never on the root: a root custom
       // property restyles the whole page on every scroll frame (7B: SurgeLine chapter under the 45 fps gate at 4x CPU).
       sceneLayer.current?.style.setProperty('--chapter-reveal', String(reveal));
@@ -267,10 +260,67 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
       homeSections.forEach((_, i) => {
         const offset = i === index ? 1 - transition : i === index - 1 ? -transition : 2;
         sceneLayer.current?.style.setProperty(`--instrument-${i}-offset`, String(offset - (i === index ? outro : 0)));
-        // Chapter-local scan progress (CrossCheck's lane strip): full once passed, empty before reached.
-        homeSections[i].style.setProperty(`--instrument-${i}-orbit`, (i < index ? 1 : i > index ? 0 : chapter.current.orbit).toFixed(3));
       });
     };
+    // Each chapter plays when the visitor asks: drag across the stage to turn the instrument by hand,
+    // or tap it to play the whole turn (and tap again to wind it back). Scroll only moves the page.
+    const turn = (i: number, value: number) => {
+      orbits.current[i] = clamp(value);
+      if (chapter.current.index === i) chapter.current.orbit = orbits.current[i];
+      else if (chapter.current.index === i + 1) chapter.current.lead = .55 - orbits.current[i] * 1.5;
+      // Chapter-local illustration (lane strip, trace, rail…) follows the same turn.
+      homeSections[i].style.setProperty(`--instrument-${i}-orbit`, orbits.current[i].toFixed(3));
+    };
+    const turns = homeSections.map(() => ({ value: 0 }));
+    const cleanups = homeSections.map((section, i) => {
+      const stage = section.querySelector<HTMLElement>('.instrument-stage')!;
+      let start: { x: number; y: number; orbit: number; id: number } | null = null;
+      let dragged = false;
+      const interactive = (target: EventTarget | null) => (target as HTMLElement).closest('button, a, summary, dialog');
+      const down = (event: PointerEvent) => {
+        if (event.button !== 0 || interactive(event.target)) return;
+        start = { x: event.clientX, y: event.clientY, orbit: orbits.current[i], id: event.pointerId };
+        dragged = false;
+      };
+      const move = (event: PointerEvent) => {
+        if (!start || event.pointerId !== start.id) return;
+        const dx = event.clientX - start.x;
+        if (!dragged) {
+          // Vertical intent stays a scroll; only a sideways pull turns the instrument.
+          if (Math.abs(event.clientY - start.y) > 10 && Math.abs(event.clientY - start.y) > Math.abs(dx)) { start = null; return; }
+          if (Math.abs(dx) < 8) return;
+          dragged = true;
+          gsap.killTweensOf(turns[i]);
+          stage.setPointerCapture(event.pointerId);
+          stage.dataset.turning = 'true';
+        }
+        turn(i, start.orbit - dx / Math.max(260, stage.clientWidth * .55));
+      };
+      const up = (event: PointerEvent) => {
+        if (!start || event.pointerId !== start.id) return;
+        start = null;
+        delete stage.dataset.turning;
+        if (dragged || reducedMotion) return;
+        // BrandWall's tap already switches its detector; it keeps that, and plays the turn too.
+        const from = orbits.current[i];
+        turns[i].value = from;
+        gsap.killTweensOf(turns[i]);
+        gsap.to(turns[i], { value: from < .5 ? 1 : 0, duration: 2.6 * Math.abs((from < .5 ? 1 : 0) - from) + .4, ease: 'power1.inOut',
+          onUpdate: () => turn(i, turns[i].value) });
+      };
+      stage.addEventListener('pointerdown', down);
+      stage.addEventListener('pointermove', move);
+      stage.addEventListener('pointerup', up);
+      stage.addEventListener('pointercancel', up);
+      homeSections[i].style.setProperty(`--instrument-${i}-orbit`, (reducedMotion ? 1 : orbits.current[i]).toFixed(3));
+      return () => {
+        gsap.killTweensOf(turns[i]);
+        stage.removeEventListener('pointerdown', down);
+        stage.removeEventListener('pointermove', move);
+        stage.removeEventListener('pointerup', up);
+        stage.removeEventListener('pointercancel', up);
+      };
+    });
     measure();
     syncChapters();
     const trigger = ScrollTrigger.create({
@@ -285,7 +335,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
     });
     const hero = document.getElementById('first-light');
     const heroTrigger = ScrollTrigger.create({
-      trigger: '#first-light', start: 'top top', end: 'bottom bottom',
+      trigger: '#first-light', start: 'top top', end: 'bottom top',
       onUpdate: self => {
         progress.current = self.progress;
         hero?.style.setProperty('--hero-journey', String(self.progress));
@@ -302,6 +352,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
     const observer = new ResizeObserver(() => ScrollTrigger.refresh());
     observer.observe(document.querySelector('main')!);
     return () => {
+      cleanups.forEach(cleanup => cleanup());
       trigger.kill();
       heroTrigger.kill();
       observer.disconnect();
@@ -377,7 +428,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
     const media = gsap.matchMedia();
     media.add('(min-width: 1024px)', () => {
       gsap.to('.hero-copy', { y: -90, ease: 'none', scrollTrigger: {
-        trigger: '#first-light', start: 'top top', end: 'bottom bottom', scrub: .8,
+        trigger: '#first-light', start: 'top top', end: 'bottom top', scrub: .8,
       } });
       gsap.utils.toArray<HTMLElement>('.text-section').forEach(section => {
         gsap.fromTo(section.querySelectorAll(':scope > h2, :scope > .section-intro'),
@@ -430,88 +481,24 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
       if (typeof target === 'string') document.querySelector<HTMLElement>(`${target} h2`)?.focus({ preventScroll: true });
     } });
   }
+  // Every flight draws a curtain first; the route changes behind it and the arriving page opens it.
   function openCase(index: number) {
     if (flying || flight.current) return;
     const path = `/work/${caseFiles[index].id}`;
     homeScroll.current = window.scrollY;
     homeChapter.current = { ...chapter.current };
-    pulseHome.current = { ...lensCentre(), w: window.innerWidth, h: window.innerHeight };
     caseView.current.index = index;
     setFlying(true);
     lenis.current?.stop();
     router.prefetch(path);
     audio.current?.transition('in');
     flight.current = gsap.timeline({ onComplete: () => router.push(path, { scroll: false }) })
-      .to(pageContent.current, { opacity: 0, duration: reducedMotion ? 0 : .48, ease: 'power2.out' }, 0)
-      .to(caseView.current, { mix: 1, duration: reducedMotion ? 0 : .78, ease: 'power2.inOut' }, 0);
-    // Phase 7A: CrossCheck is entered through its lens; the arriving case opens the iris again.
-    if (caseFiles[index].transition === 'prism') flight.current.add(prismFlight('out'), 0);
-    else if (caseFiles[index].transition === 'time') flight.current.add(timeFlight('out'), 0);
-    else if (caseFiles[index].transition === 'ribbon') flight.current.add(ribbonFlight('out'), .08);
-    else if (caseFiles[index].transition === 'pulse') flight.current.add(pulseFlight('out'), .08);
-    else if (caseFiles[index].aperture && !reducedMotion) flight.current.add(irisTween(iris.current, irisMotion, 'disc', 0, irisReach(), .5, 'power2.in'), .32);
+      .to(pageContent.current, { opacity: 0, duration: reducedMotion ? 0 : .48, ease: 'power2.out' }, 0);
+    if (!reducedMotion) flight.current.add(curtainMove(curtain.current, caseFiles[index].curtain, 'close'), 0);
   }
 
-  // Phase 7E: the prism's light fans into a gallery plane. Arrival uncovers the new page.
-  function prismFlight(direction: 'in' | 'out', centre = lensCentre()) {
-    const sheet = prism.current;
-    const timeline = gsap.timeline();
-    if (!sheet || reducedMotion) return timeline;
-    const ray = { x: centre.x, y: centre.y, scaleX: .015, scaleY: .035, rotation: -18 };
-    const gallery = { x: 0, y: window.innerHeight * .25, scaleX: 1, scaleY: 1, rotation: 0 };
-    timeline.set(sheet, { opacity: .85, ...(direction === 'out' ? ray : gallery) })
-      .call(() => { sheet.dataset.direction = direction; })
-      .to(sheet, { ...(direction === 'out' ? gallery : ray), duration: .72, ease: 'power2.inOut' });
-    if (direction === 'in') timeline.to(sheet, { opacity: 0, duration: .12 });
-    return timeline;
-  }
-
-  // Phase 7D: a local orbit opens into an agenda rail, then folds back to its saved origin.
-  function timeFlight(direction: 'in' | 'out', centre = lensCentre()) {
-    const ring = timeRing.current;
-    const timeline = gsap.timeline();
-    if (!ring || reducedMotion) return timeline;
-    const orbit = { x: centre.x, y: centre.y, scaleX: .65, scaleY: .65, rotation: -28 };
-    const agenda = { x: window.innerWidth / 2, y: window.innerHeight * .43,
-      scaleX: Math.min(window.innerWidth - 48, 1000) / 180, scaleY: .13, rotation: 0 };
-    timeline.set(ring, { opacity: .85, ...(direction === 'out' ? orbit : agenda) })
-      .call(() => { ring.dataset.direction = direction; })
-      .to(ring, { ...(direction === 'out' ? agenda : orbit), duration: .72, ease: 'power2.inOut' })
-      .to(ring, { opacity: 0, duration: .18 })
-      .call(() => { ring.dataset.direction = 'idle'; });
-    return timeline;
-  }
-
-  function ribbonFlight(direction: 'in' | 'out', centre = lensCentre()) {
-    const sheet = ribbon.current;
-    const timeline = gsap.timeline();
-    if (!sheet || reducedMotion) return timeline;
-    // One local layer; transform/opacity only. Full-width paper unrolls from the needle.
-    const collapsed = { x: centre.x, y: centre.y, scaleX: .012, scaleY: .12 };
-    const expanded = { x: 0, y: window.innerHeight * .46, scaleX: 1, scaleY: 1 };
-    timeline.set(sheet, { opacity: .95, transformOrigin: '0 50%', ...(direction === 'out' ? collapsed : expanded) })
-      .call(() => { sheet.dataset.direction = direction; })
-      .to(sheet, { ...(direction === 'out' ? expanded : collapsed), duration: .7, ease: 'power2.inOut' })
-      .to(sheet, { opacity: 0, duration: .14 })
-      .call(() => { sheet.dataset.direction = 'idle'; });
-    return timeline;
-  }
-
-  function pulseFlight(direction: 'in' | 'out', centre = lensCentre()) {
-    const rings = pulse.current?.querySelectorAll('i');
-    const timeline = gsap.timeline();
-    if (!rings || reducedMotion) return timeline;
-    gsap.set(pulse.current, { x: centre.x, y: centre.y });
-    const far = Math.hypot(window.innerWidth, window.innerHeight) / 80;
-    // Transform/opacity only; position sampled once, no root CSS writes on every frame.
-    timeline.fromTo(rings, { scale: direction === 'out' ? .6 : far, opacity: direction === 'out' ? .85 : 0 },
-      { scale: direction === 'out' ? far : .6, opacity: direction === 'out' ? 0 : .85, duration: .62, stagger: .07, ease: 'power2.inOut' });
-    timeline.to(rings, { opacity: 0, duration: .12 });
-    return timeline;
-  }
-
-  // Next instrument: the camera backs away from this instrument, sweeps to the next one as the
-  // homepage chapter change does, then the arriving route flies in. Return then goes to that chapter.
+  // Next instrument: this case's curtain closes, the instrument is swapped behind it, and the next
+  // case opens its own curtain. Return then goes to that chapter.
   function chainCase(index: number) {
     if (flying || flight.current || !isCase) return;
     const path = `/work/${caseFiles[index].id}`;
@@ -522,25 +509,15 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
     lenis.current?.stop();
     router.prefetch(path);
     audio.current?.transition('out');
-    const sweep = { reveal: 1, orbit: 0, outro: 0, index, from, transition: 0 };
     flight.current = gsap.timeline({ onComplete: () => router.push(path, { scroll: false }) })
-      .to(pageContent.current, { opacity: 0, duration: reducedMotion ? 0 : .4, ease: 'power2.out' }, 0)
-      .to(caseView.current, { mix: 0, duration: reducedMotion ? 0 : .65, ease: 'power2.inOut' }, 0)
-      .call(() => {
-        caseView.current.index = index;
-        chapter.current = sweep;
-        root.current?.setAttribute('data-chapter', caseFiles[index].id);
-        audio.current?.transition('in');
-      })
-      .to(sweep, { transition: 1, duration: reducedMotion ? 0 : .78, ease: 'power2.inOut' });
-    if (caseFiles[from].transition === 'prism') flight.current.add(prismFlight('in'), 0);
-    else if (caseFiles[from].transition === 'time') flight.current.add(timeFlight('in'), 0);
-    else if (caseFiles[from].transition === 'ribbon') flight.current.add(ribbonFlight('in'), 0);
-    else if (caseFiles[from].transition === 'pulse') flight.current.add(pulseFlight('in'), 0);
-    if (caseFiles[index].transition === 'prism') flight.current.add(prismFlight('out'), .68);
-    else if (caseFiles[index].transition === 'time') flight.current.add(timeFlight('out'), .68);
-    else if (caseFiles[index].transition === 'ribbon') flight.current.add(ribbonFlight('out'), .78);
-    else if (caseFiles[index].transition === 'pulse' && caseFiles[from].transition !== 'pulse') flight.current.add(pulseFlight('out'), .68);
+      .to(pageContent.current, { opacity: 0, duration: reducedMotion ? 0 : .4, ease: 'power2.out' }, 0);
+    if (!reducedMotion) flight.current.add(curtainMove(curtain.current, caseFiles[from].curtain, 'close'), 0);
+    flight.current.call(() => {
+      caseView.current.index = index;
+      chapter.current = { reveal: 1, orbit: 0, outro: 0, index, from, transition: 1 };
+      root.current?.setAttribute('data-chapter', caseFiles[index].id);
+      audio.current?.transition('in');
+    });
   }
 
   function leaveCase(target: number | string = 'return') {
@@ -554,15 +531,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
     audio.current?.transition('out');
     flight.current = gsap.timeline({ onComplete: () => router.push('/', { scroll: false }) })
       .to(pageContent.current, { opacity: 0, duration: reducedMotion ? 0 : .28, ease: 'power2.out' }, 0);
-    // Returning to the chapter closes the inspection field back into the lens first.
-    // On the case page the antenna has usually scrolled away; aim at the chapter antenna the visitor left from.
-    const home = pulseHome.current;
-    const sameView = home && home.w === window.innerWidth && home.h === window.innerHeight && homeScroll.current !== null;
-    if (target === 'return' && caseFiles[current].transition === 'prism') flight.current.add(prismFlight('in', sameView ? home : lensCentre()), 0);
-    else if (target === 'return' && caseFiles[current].transition === 'time') flight.current.add(timeFlight('in', sameView ? home : lensCentre()), 0);
-    else if (target === 'return' && caseFiles[current].transition === 'ribbon') flight.current.add(ribbonFlight('in', sameView ? home : lensCentre()), 0);
-    else if (target === 'return' && caseFiles[current].transition === 'pulse') flight.current.add(pulseFlight('in', sameView ? home : lensCentre()), 0);
-    else if (target === 'return' && caseFiles[current].aperture && !reducedMotion) flight.current.add(irisTween(iris.current, irisMotion, 'hole', irisReach(), 0, .48, 'power2.in'), 0);
+    if (!reducedMotion) flight.current.add(curtainMove(curtain.current, caseFiles[current].curtain, 'close'), 0);
   }
 
   function returnToDome() { scrollFromMenu(0); }
@@ -611,11 +580,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
           scrollFromMenu(id);
         }
       }}>{children}</div>
-      <div ref={iris} className="lens-iris" data-state="hidden" aria-hidden="true" />
-      <div ref={prism} className="brand-flight" data-direction="idle" aria-hidden="true"><i /><i /><i /></div>
-      <div ref={timeRing} className="time-flight" data-direction="idle" aria-hidden="true"><i /><i /><i /></div>
-      <div ref={ribbon} className="monitor-ribbon" data-direction="idle" aria-hidden="true"><svg viewBox="0 0 600 80" preserveAspectRatio="none"><path d="M0 40H250L264 35L278 46L296 40H600" /></svg><span>SNAPSHOT / COMPARE / RECORD</span></div>
-      <div ref={pulse} className="dispatch-pulse" aria-hidden="true"><i /><i /><i /></div>
+      <div ref={curtain} className="curtain" data-state="open" data-style="stage" aria-hidden="true">{Array.from({ length: 8 }, (_, i) => <i key={i} />)}</div>
       <button className="hero-contact" onClick={openContact}>Contact <span aria-hidden="true">↗</span></button>
       <div ref={progressBar} className="progress-readout"><span>SCROLL</span><span className="readout-track" aria-hidden="true"><i /></span><output ref={readout} aria-label="Scroll progress">000%</output></div>
       {audioError && <p className="audio-notice" role="status">Sound could not start. Tap the sound control to retry.</p>}

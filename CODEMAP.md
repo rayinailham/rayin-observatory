@@ -1,6 +1,8 @@
 # CODEMAP — Peta kode Rayin Observatory
 
-Update terbaru 2026-09-24 · Claude Code: **Gate 7E lolos → `done`**. DRAFT BrandWall dilepas (`cases.ts` `draft:false`, `page.tsx` strip "Illustration", komentar `brandwall-room.ts`/`instruments.ts`/`globals.css`; tes `verify_mobile.py` `DRAFTS = set()`, `verify_cases.py`, `verify_brandwall_room.py`, `brandwall_room_evidence.py` mengharapkan 0 DRAFT). Perbaikan izin pemilik: `brandwall-room.tsx` hook `useWide` + prop `view` di `Capture` (HP memakai `phoneView` bila ada), `brandwall-room.ts` `phoneView` pasangan Overflow, `globals.css` label mono 7E 8 → 10 px; `web/README.md` 7E = gate passed. Runner 11 suite + `perf-brandwall` passed (sumber `4bf13e4158597b83`). Lihat entri "Gate 7E" di §4.
+Update terbaru 2026-09-24 · Claude Code: **Revisi pemilik Q49 — scroll native + tirai** (pasca-gate 7E, di luar checklist fase). Chapter/hero/inspection field tidak lagi di-pin; putaran instrumen = geser/tap pengunjung (`orbits` ref di shell), bukan scroll; iris/pulsa/pita/cincin/prisma diganti satu `.curtain` dengan lima gaya per case (`cases.ts` `curtain`). Skrip verifikasi lama yang mengasumsikan scroll-orbit/iris/flight **basi** sampai diperbarui (7F). Lihat entri "Revisi Q49" di §4.
+
+Sebelumnya 2026-09-24 · Claude Code: **Gate 7E lolos → `done`**. DRAFT BrandWall dilepas (`cases.ts` `draft:false`, `page.tsx` strip "Illustration", komentar `brandwall-room.ts`/`instruments.ts`/`globals.css`; tes `verify_mobile.py` `DRAFTS = set()`, `verify_cases.py`, `verify_brandwall_room.py`, `brandwall_room_evidence.py` mengharapkan 0 DRAFT). Perbaikan izin pemilik: `brandwall-room.tsx` hook `useWide` + prop `view` di `Capture` (HP memakai `phoneView` bila ada), `brandwall-room.ts` `phoneView` pasangan Overflow, `globals.css` label mono 7E 8 → 10 px; `web/README.md` 7E = gate passed. Runner 11 suite + `perf-brandwall` passed (sumber `4bf13e4158597b83`). Lihat entri "Gate 7E" di §4.
 
 Sebelumnya 2026-09-24 · Claude Code: **7E Testing → `awaiting-gate`** (aturan ringan Q47). Skrip bukti baru `web/scripts/brandwall_room_evidence.py` → paket `assets/renders/personal-brandwall/evidence/` 17/17 pass (memanggil `verify_brandwall_room.viewport` 390×844 + 1440×900 dan `edges`); tanpa perubahan kode app. Pohon berkas kini memuat berkas 7E (dulu belum tercatat). Lihat entri "Fase 7E — Testing" di §4.
 
@@ -279,6 +281,20 @@ Rayin Observatory/
 ```
 
 ## 4. Modul dan berkas
+
+### Revisi Q49 — scroll native + tirai per case (2026-09-24, Claude Code)
+
+Permintaan pemilik (PLAN §3 Q49): scroll tidak boleh "menjalankan animasi dulu"; animasi dimainkan pengunjung sendiri; transisi = tirai, beda per case. Menggantikan deskripsi pin/iris/flight di entri 2, 7A–7E dan §5 di bawah bila bertentangan.
+
+- `web/app/globals.css`: `#first-light` tanpa tinggi 178svh; `.hero-stage`, `.instrument-stage`, `.inspection-stage` `position: relative` (bukan sticky); `.instrument-journey` tanpa 270svh, `.inspection-field` tanpa 380/330svh. `.instrument-stage` `touch-action: pan-y`, `cursor: grab`, `[data-turning]` grabbing. `.dome-caption` opacity = `--copy-opacity`. CSS `.lens-iris`, `.dispatch-pulse`, `.monitor-ribbon`, `.time-flight`, `.brand-flight` dihapus; blok baru `.curtain` (`data-state` open/moving/closed, `data-style` stage/blinds/roller/louvre/prism, 8 `<i>`; panel lebih dari jumlah gaya disembunyikan). `.inspection-step-button`, `.inspection-replay`.
+- `web/components/observatory-shell.tsx`: Lenis `smoothWheel: false` (wheel/touch native). Modul-level `curtains` (jumlah panel, stagger, pose terbuka per indeks), `curtainMove(el, style, 'close'|'open')` — transform saja. `openCase` menutup tirai case tujuan; `chainCase` menutup tirai case asal lalu menukar instrumen di balik tirai (tanpa sapuan kamera); `leaveCase` menutup tirai case sekarang. Layout effect pathname selalu membuka tirai yang belum `open` (tirai tertutup penuh di case → gaya case yang tiba; interupsi Back → gaya yang sedang jalan); tidak dimasukkan ke `gsap.context` supaya revert tidak menutupnya lagi. Ref `orbits` (0–1 per instrumen); `syncChapters` membaca `orbit = orbits[index]` dan `lead = .55 − orbits[index−1]·1.5`. Per `.instrument-stage`: pointer down/move/up — geser horizontal > 8 px = putar manual (lebar `max(260, 55% stage)` = satu putaran), gerak vertikal dilepas ke scroll, tap = tween `orbit` ke 1 atau 0 (≤ 3 s). `--instrument-<i>-orbit` ditulis dari putaran itu (reduced motion = 1). Hero trigger `end: 'bottom top'`. Dihapus: `setIris/irisTween/lensCentre/irisCentre`, `prismFlight/timeFlight/ribbonFlight/pulseFlight`, `pulseHome`, ref `iris/pulse/ribbon/timeRing/prism`.
+- `web/components/observatory-scene.tsx`: `baseAngle` saat serah terima chapter = `lerp(lead ?? −.95, .55 − orbit·1.5, transition)` → kamera mulai dari sudut yang ditinggalkan pengunjung (tanpa lompatan).
+- `web/lib/instruments.ts`: `ChapterState.lead?`; komentar `orbit` = putaran pengunjung.
+- `web/lib/cases.ts`: `transition?` diganti wajib `curtain: Curtain` (`stage` CrossCheck, `blinds` SurgeLine, `roller` DriftWatch, `louvre` DueWatch, `prism` BrandWall); `aperture` tetap (scene masih menulis `apertureScreen`, kini tanpa konsumen).
+- `web/components/crosscheck-room.tsx`: tanpa ScrollTrigger. `InspectionField` bermain sendiri sekali saat ≥45% terlihat (IntersectionObserver, 0→1 ±7 s), tombol step `.inspection-step-button` memutar ke akhir beat step itu (`stepEnd`), `.inspection-replay` 0→1. `draw(p)` tetap fungsi murni.
+- `web/app/page.tsx`: hint `.orbit-hint` "Drag or tap the instrument to turn it" di chapter selain BrandWall (DRAFT interface copy).
+- Verifikasi sesi ini: `tsc --noEmit`, `eslint` bersih; Playwright Chromium di dev server sementara :8768 (1440×900 + 390×844): wheel 1000 px → section bergeser 1000 px; geser 0 → .27, tap → 1.0; lima tirai `moving` → `open` masuk dan kembali; scan CrossCheck 1.0 / step 2 → .5 / Replay; 0 error. **Belum**: `next build` + server :8767 (masih build lama), runner regresi, geser sentuh di HP fisik.
+- **Tes basi (perlu diperbarui di 7F):** skrip yang mengukur scroll-orbit, pin (`stage top 0`), iris/pulsa/pita/cincin/prisma, atau scrub inspection field — antara lain `verify_crosscheck_room.py`, `verify_surgeline_room.py`, `verify_driftwatch_room.py`, `verify_duewatch_room.py`, `verify_brandwall_room.py`, `verify_mobile.py` ("sticky chapters"), `verify_showpiece.py`, `chapter_walkthrough.py`, dan skrip `*_evidence.py`.
 
 ### Gate 7E lolos (2026-09-24, Claude Code)
 - `web/lib/cases.ts` BrandWall `draft: false`; `web/app/page.tsx` tanpa label DRAFT BrandWall, strip chapter "Specimen → measure → compare · Illustration".
@@ -920,7 +936,7 @@ Brief personal + tabel sumber copy DRAFT: `web/README.md` bagian Phase 7A.
 - **Catatan:** title memakai Rayina Ilham / Rayin Observatory; meta launch lengkap Fase 8.
 
 ### `web/app/page.tsx`
-- **Peran:** homepage statis: hero, lima section sticky, Skills, About, Contact.
+- **Peran:** homepage statis: hero, lima section chapter satu layar (tidak di-pin sejak Q49), Skills, About, Contact.
 - **Ekspor utama:** `Home`; anchors `#first-light`, lima project ID, `#skills`, `#about`, `#contact`;
   `[data-open-case]`, `[data-skill-project]`, `[data-scroll-target]` untuk delegasi shell.
 - **Dipakai oleh:** route `/`, ScrollTrigger/ResizeObserver shell, scene chapter mapping.
@@ -939,7 +955,7 @@ Brief personal + tabel sumber copy DRAFT: `web/README.md` bagian Phase 7A.
   `.scan-line`, `.text-section`, `.contact-links`, `.email-cta`.
 - **Dipakai oleh:** layout, page, shell.
 - **Bergantung pada:** tiga TTF, fallback PNG lokal (image paths disuplai shell), portrait.
-- **State / efek samping:** transform/opacity, highlight skill target, sticky stages, fixed readout.
+- **State / efek samping:** transform/opacity, highlight skill target, stage chapter satu layar (Q49), tirai `.curtain`, fixed readout.
   `data-chapter` selain dome menyembunyikan CTA hero; outro mempertahankan notice still view.
 - **Catatan:** 431–1023px mempertahankan komposisi HP 430px; mulai 1024px komposisi desktop penuh (Fase 6). Accordion native tetap keyboard-usable.
   `.fallback-notice` `margin:0` (default `<p>` 9px dulu menimpa copy chapter); di chapter `top:82px`.

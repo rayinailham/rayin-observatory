@@ -57,7 +57,8 @@ export default function Home() {
                   <div className="time-chapter-track" aria-hidden="true"><i /><span>Active</span><span>Due soon</span><span>Renewal</span></div>
                   <small>Contract agenda / separate message triage · Illustration</small>
                 </div>
-              : <p className="orbit-hint">Scroll to orbit the instrument</p>}
+              : null}
+          {instrument.id !== 'brandwall' && <p className="orbit-hint">Drag or tap the instrument to turn it</p>}
         </div>
       </div>
     </section>)}

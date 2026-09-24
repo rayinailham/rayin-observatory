@@ -21,4 +21,6 @@ export const instruments = [
 
 export type InstrumentId = typeof instruments[number]['id'];
 // `from` is set only during a case-to-case chain: the outgoing instrument is then not index − 1.
-export type ChapterState = { reveal: number; orbit: number; index: number; transition: number; outro: number; from?: number };
+// `orbit` is the visitor's own turn of the instrument (drag or tap), never scroll; `lead` is the camera
+// angle the previous chapter was left at, so the hand-over to the next one starts where it stood.
+export type ChapterState = { reveal: number; orbit: number; index: number; transition: number; outro: number; from?: number; lead?: number };

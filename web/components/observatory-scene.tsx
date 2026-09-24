@@ -131,9 +131,10 @@ function World({ entered, reducedMotion, progress, planetProgress, chapter, case
     const scroll = reducedMotion ? 0 : heroScroll.current;
     const reveal = chapter.current.reveal;
     const orbit = chapter.current.orbit;
-    const { index, transition, outro, from } = chapter.current;
+    const { index, transition, outro, from, lead } = chapter.current;
     const { mix, index: caseIndex } = caseView.current;
-    const baseAngle = (index > 0 || from !== undefined) && transition < 1 ? MathUtils.lerp(-.95, .55, transition) : (.55 - orbit * 1.5) * reveal;
+    const turned = .55 - orbit * 1.5;
+    const baseAngle = (index > 0 || from !== undefined) && transition < 1 ? MathUtils.lerp(lead ?? -.95, turned, transition) : turned * reveal;
     cameraAngle.current = MathUtils.damp(cameraAngle.current, reducedMotion ? .35 : MathUtils.lerp(baseAngle, .55, mix), 9, step);
     const angle = cameraAngle.current + arrival * .2;
     const elevation = MathUtils.lerp(.25 * reveal, .25, mix) + arrival * .07;
