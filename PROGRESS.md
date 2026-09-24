@@ -9,7 +9,7 @@
 
 | Hal | Isi |
 |---|---|
-| Fase aktif | **Fase 8 — Launch ready** · `ready-for-test` → tahap Testing (Development selesai 2026-09-24; tes di URL Vercel, Q40) |
+| Fase aktif | **Fase 8 — Launch ready** · `done` (gate 2026-09-24, "terima semua"; F1 WebKit headless diterima). Fase 9 tetap `deferred` |
 | Status fase | 7F `done` (gate 2026-09-24, "saya accept semua itu lulus"). 7D `done` (gate 2026-09-18, "semuanya approved"); 7A/7B/7C `done`. 7E `done` (gate 2026-09-24, "saya sudah approve"). 7A–7E `done`. |
 | Bagian PLAN.md yang relevan | §3 Q40–Q50, §7, §10–§12 (Fase 8 launch). |
 | Blocker | — |
@@ -58,7 +58,7 @@ Tanpa tes ulang/rebuild utama pada sesi integrasi. Belum gate 7D, belum commit/p
 | 7D | DueWatch — time control room | `done` | 2026-09-18 |
 | 7E | BrandWall — visual studio | `done` | 2026-09-24 |
 | 7F | Five rooms, one observatory | `done` | 2026-09-24 |
-| 8 | Launch ready | `ready-for-test` | — |
+| 8 | Launch ready | `done` | 2026-09-24 |
 | 9 | Accessibility | `deferred` | — |
 
 ---
@@ -762,16 +762,16 @@ Instruksi domain (untuk pemilik; agent tidak menyentuh domain/DNS):
 Bahan Development Fase 8 (2026-09-24): lint/typecheck/build exit 0; build simulasi env Vercel produksi → head memuat canonical/og/twitter absolut + `index, follow`, build lokal → `noindex` + robots `Disallow: /`; runner `mobile,cases` 390×844 passed (sumber `fc3373987c815ca1`); produksi: `/`, lima case, `/og/*`, ikon, GLB, video, robots, sitemap 200, slug asing 404; smoke Playwright Chromium 390×844 + 1440×900 di URL Vercel: Enter → chapter → case CrossCheck, judul per case, 1 Canvas, 0 error, 0 respons ≥400. `.gitignore` root/web diperketat (`.vercel/`, log, cache, editor, kunci) — 0 berkas terlacak yang kini ter-ignore; `web/.vercelignore` mengecualikan `scripts/` + catatan agen dari upload.
 
 Testing (Claude Code / Antigravity) — **semua tes memakai URL Vercel, bukan preview lokal (Q40)**:
-- [ ] QA lintas browser (Chromium/Firefox/WebKit) + viewport HP/tablet/desktop di URL Vercel
-- [ ] CrossCheck: scan/matriks/temuan, entry lensa dan return tetap utuh di produksi
-- [ ] SurgeLine: antrean/crash/resume, konfirmasi vs kegagalan, transisi antena tetap utuh
-- [ ] DriftWatch: snapshot/diff/alarm, label tanggal dan transisi pita tetap utuh
-- [ ] DueWatch: dua modul, eskalasi manusia, label simulasi/video dan transisi waktu tetap utuh
-- [ ] BrandWall: specimen/tema, kontrol sebelum/sesudah dan transisi prisma tetap utuh
-- [ ] Cek preview share (WhatsApp/LinkedIn) dari URL Vercel
-- [ ] Paket bukti `assets/renders/launch/evidence/` dikirim
-- [ ] Tes manual pemilik di HP fisik (satu-satunya; rasa scroll, fps, suara, 4G)
-- [ ] Gate
+- [x] QA lintas browser (Chromium/Firefox/WebKit) + viewport HP/tablet/desktop di URL Vercel — Chromium 3/3 + Firefox 3/3 lolos; WebKit headless crash di case file (temuan F1) **diterima pemilik apa adanya**; cek iPhone Safari = tindak lanjut pemilik
+- [x] CrossCheck: scan/matriks/temuan, entry lensa dan return tetap utuh di produksi (Chromium HP + desktop)
+- [x] SurgeLine: antrean/crash/resume, konfirmasi vs kegagalan, transisi antena tetap utuh
+- [x] DriftWatch: snapshot/diff/alarm, label tanggal dan transisi pita tetap utuh
+- [x] DueWatch: dua modul, eskalasi manusia, label simulasi/video dan transisi waktu tetap utuh
+- [x] BrandWall: specimen/tema, kontrol sebelum/sesudah dan transisi prisma tetap utuh
+- [x] Cek preview share (WhatsApp/LinkedIn/Facebook sebagai crawler) dari URL Vercel — 6 halaman, kartu 1200×630 ≤77 KB, `share-previews.jpg`
+- [x] Paket bukti `assets/renders/launch/evidence/` dikirim (evidence.json: 17 pass / 1 fail)
+- [ ] Tes manual pemilik di HP fisik (rasa scroll, fps, suara, 4G; sekaligus buka case file di iPhone Safari untuk F1) — tindak lanjut pemilik, tidak menahan gate
+- [x] Gate: pemilik menyatakan "terima semua" (2026-09-24) → Fase 8 `done`; temuan F1 diterima; commit + push + redeploy produksi atas permintaan pemilik
 
 ### Fase 9 — Accessibility (ditunda)
 - [ ] Mode gerak minimal, keyboard, screen reader
@@ -816,6 +816,7 @@ Testing (Claude Code / Antigravity) — **semua tes memakai URL Vercel, bukan pr
 
 ## Log sesi
 
+- **2026-09-24 · Claude Code · Fase 8 Testing (putaran penuh, URL Vercel)** — Skrip baru `web/scripts/launch_evidence.py` (memakai ulang mesin 7F lewat `OBSERVATORY_URL`, keluaran `assets/renders/launch/evidence/`; `--redo-browsers` ulang bagian browser saja). Hasil: lima project × HP+desktop Chromium, rantai Next 5 hop, history/direct+refresh, interupsi, model diblok, share (3 crawler × 6 halaman), robots/sitemap/ikon/404, fps (HP 4× CPU 56.7–59.5, desktop 60), 0 error/0 ≥400 → pass. Transfer sebelum Enter di produksi 2,388,027 B (Development lokal 787 KB tidak setara: cache mati + semua aset). **FAIL: `browsers`** — headless WebKit (Playwright WPE) crash "Page crashed" di setiap case file, juga di build lokal; bisect: JS mati tetap crash, membuang `<source type="video/mp4">` menghentikan crash, halaman kosong dengan `<video><source>` sama tidak crash. Dengan workaround harness (buang `<source>`) WebKit masih tidak stabil (390×844 gagal 2×, 768/1440 lolos). Tidak bisa dibedakan bug situs vs keterbatasan build WPE; iPhone Safari belum dites. Tanpa perubahan kode app, tanpa deploy/commit. Langkah berikut: keputusan pemilik (lihat laporan): perbaikan defensif video (buat `<source>` saat play) + redeploy, atau terima dan cek di iPhone.
 - **2026-09-24 · Claude Code · Fix parallax HP (pasca-gate 7F, di luar checklist Fase 8)** — Laporan pemilik dari deploy di HP: artefak goyang/glitch saat scroll dan menimpa teks. Penyebab: model WebGL di canvas `fixed` digeser dari `scrollY` (main thread) sedangkan teks digeser compositor → tertinggal 1–2 frame; canvas `inset:0` juga resize saat URL bar HP naik-turun. Fix revisi 2 (revisi 1 = tukar-skala, ditolak pemilik: artefak lenyap saat scroll sedikit): HP tetap meluncur bareng teks, tapi jarak diukur dalam tinggi section (svh) bukan canvas; ukuran home HP `.37`→`.33`; `.scene-layer` tinggi `100lvh`. Desktop tidak berubah. Verifikasi: typecheck/lint, foto 390×844 5 titik scroll (tanpa tumpang tindih), build, `run_regressions --suites mobile,cases --phone-only` passed (sumber `df2db954c24eb457`). Belum diuji di HP fisik/deploy; belum di-deploy/commit. Langkah berikut: pemilik cek di HP setelah deploy.
 - **2026-09-24 · Claude Code · Fase 8 Development → ready-for-test** — Meta/OG/Twitter + canonical (`lib/site.ts`, `layout.tsx`, `generateMetadata` case), `robots.ts`/`sitemap.ts` (index hanya produksi Vercel), ikon kubah (`app/icon.svg`, `apple-icon.png`, `favicon.ico`), 6 share card 1200×630 70–77 KB dari skrip baru `web/scripts/build_share_cards.py` (copy approved dibaca dari source, bukan diketik ulang). `.gitignore` root/web diperketat atas permintaan pemilik; `web/.vercelignore` baru. Pemilik izinkan deploy → `vercel link` project baru `chhrones-projects/rayin-observatory` + `vercel deploy --prod`: https://rayin-observatory.vercel.app. Verifikasi: lint/typecheck/build exit 0; head HTML dicek di build env Vercel simulasi + lokal; runner `mobile,cases` 390×844 passed (sumber `fc3373987c815ca1`); curl produksi semua aset 200; smoke Playwright 390×844 + 1440×900 di produksi 0 error. DRAFT: format judul/alt/teks sosial share. Berikutnya: Fase 8 Testing putaran penuh di URL Vercel (Q40).
 
