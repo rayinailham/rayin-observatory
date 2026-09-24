@@ -1,6 +1,10 @@
 # CODEMAP — Peta kode Rayin Observatory
 
-Update terbaru 2026-09-24 · Claude Code: **Gate 7F lolos → `done`**. Tanpa perubahan kode; hanya PLAN §3 Q50 + PROGRESS. Peta kode di bawah tetap berlaku untuk Fase 8.
+Update terbaru 2026-09-24 · Claude Code: **Fix parallax HP** — `observatory-scene.tsx` (loop instrumen): di bawah 1024 px artefak tidak meluncur mengikuti `scrollY` (jitter + menimpa teks), melainkan diam dan bertukar lewat skala `handOver` (keluar `transition` 0–.18, masuk .82–1, outro menyusut); ukuran home HP .33, pusat 0; `globals.css` `.scene-layer` `height: 100lvh` (canvas tak resize saat URL bar bergerak). Desktop tetap meluncur. Belum di-deploy.
+
+Sebelumnya Update terbaru 2026-09-24 · Claude Code: **Fase 8 Development → `ready-for-test`**. Meta/OG/Twitter (`lib/site.ts`, `layout.tsx`, `generateMetadata` di `work/[slug]/page.tsx`), `robots.ts`/`sitemap.ts`, ikon (`app/icon.svg`, `apple-icon.png`, `favicon.ico`), share card `public/og/*.jpg` dari `scripts/build_share_cards.py`, `.vercelignore`, `.gitignore` diperketat; deploy produksi `https://rayin-observatory.vercel.app`. Lihat entri "Fase 8 — Development" di §4.
+
+Sebelumnya Update terbaru 2026-09-24 · Claude Code: **Gate 7F lolos → `done`**. Tanpa perubahan kode; hanya PLAN §3 Q50 + PROGRESS. Peta kode di bawah tetap berlaku untuk Fase 8.
 
 Sebelumnya Update terbaru 2026-09-24 · Claude Code: **7F Testing → `awaiting-gate`** (putaran penuh). Skrip bukti baru `web/scripts/observatory_evidence.py` → paket `assets/renders/personal-observatory/evidence/` 17/17 pass (sumber `2e90c092c607038b`, runner 18/18 skip = hijau); tanpa perubahan kode app. Catatan: skrip `*_evidence.py` fase lama tak bisa diimpor lagi (`crosscheck_room_evidence.py` → `field_at` hilang) — helper disalin ke skrip baru. Lihat entri "Fase 7F — Testing" di §4.
 
@@ -111,6 +115,8 @@ Semua dari root project kecuali disebut lain.
 | `npm run start --prefix web` | Preview produksi `0.0.0.0:8767`. |
 | `npm run dev --prefix web` | Dev server port 8767; gunakan saat produksi tidak berjalan. |
 | `npm run lint --prefix web` / `npm run typecheck --prefix web` | ESLint / TypeScript terpisah. |
+| `/home/rayin/Projects/Testing/crosscheck/.venv/bin/python web/scripts/build_share_cards.py` | Fase 8: regenerasi share card `web/public/og/*.jpg` + ikon `web/app/{icon.svg,apple-icon.png,favicon.ico}` dari copy approved; ulang bila copy chapter/deck/hero berubah. |
+| `cd web && vercel deploy --prod --yes` | Fase 8: deploy produksi ke `https://rayin-observatory.vercel.app` (project `chhrones-projects/rayin-observatory`). **Hanya atas permintaan eksplisit pemilik.** Redeploy wajib setelah domain pemilik tersambung (URL meta dibakar saat build). |
 | `cd web/scripts && timeout 1500 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python desktop_evidence.py` | Paket bukti Testing Fase 6 → `assets/renders/desktop/evidence/`: 21 item pass/fail, MP4 1440×900, contact sheet, sheet desktop/resize/HP, `evidence.json`; exit 1 bila ada fail. Jalankan setelah regresi dev (item `phones` membaca status JSON-nya). Server :8767 aktif. |
 | `timeout 900 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python web/scripts/verify_desktop.py` | Development Fase 6: HP → tiga desktop, layout + 5-case chain/history/hotspot/fallback → `assets/renders/desktop/dev/`. |
 | `timeout 300 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python web/scripts/verify_case.py` | Tes fokus Fase 4: tiga viewport HP, route/return/history, Canvas sama, hotspot, readings, video, direct URL + fallback → `assets/renders/case-crosscheck/dev/`. |
@@ -150,19 +156,23 @@ Rayin Observatory/
 ├── PROMPT.md                       prompt sesi; 2026-09-16 + aturan commit/push wajib tiap akhir fase
 ├── PROGRESS.md                     status fase + checklist + log
 ├── CODEMAP.md                      peta ini
-├── .gitignore                      root: assets/, *.blend1, Python cache/venv, env, OS files
+├── .gitignore                      root: assets/, *.blend1, Python cache/venv, node/.next, .vercel/, env/keys/logs, editor, agent scratch
 ├── web/
 │   ├── package.json               npm commands + pinned dependencies
 │   ├── package-lock.json          generated npm dependency graph
 │   ├── tsconfig.json              strict TypeScript / alias @/*
 │   ├── next.config.ts             React strict / three transpilation
 │   ├── eslint.config.mjs          Next core-web-vitals + TypeScript
-│   ├── .gitignore                 excludes generated output / local env
+│   ├── .gitignore                 excludes generated output / local env / .vercel/
+│   ├── .vercelignore              Fase 8: scripts/ + agent notes/README tidak ikut upload deploy
+│   ├── .vercel/                   (untracked) link CLI → project `chhrones-projects/rayin-observatory`
 │   ├── README.md                  run, gate, provenance, scope, verification
 │   ├── app/
 │   │   ├── layout.tsx             root persistent shell, fonts CSS, metadata, hero asset preloads
 │   │   ├── page.tsx               hero + five chapters + Skills/About/Contact, approved copy
-│   │   ├── work/[slug]/page.tsx   five prerendered case routes → client CaseFile
+│   │   ├── work/[slug]/page.tsx   five prerendered case routes → client CaseFile + per-case generateMetadata
+│   │   ├── robots.ts / sitemap.ts Fase 8: index hanya di deploy produksi Vercel; sitemap 6 URL
+│   │   ├── icon.svg, apple-icon.png, favicon.ico  Fase 8 GENERATED (build_share_cards.py): tanda kubah + bintang amber
 │   │   └── globals.css            locked tokens, mobile + desktop composition, gate/menu
 │   ├── components/
 │   │   ├── case-file.tsx           case template: brief, hotspots, flow, readings, tools, video, Next
@@ -183,6 +193,7 @@ Rayin Observatory/
 │   ├── lib/driftwatch-room.ts      Fase 7C (DRAFT): illustrative snapshots, five scenarios, source ledger, steps
 │   ├── lib/ambient.ts             original hum + five clicks + camera sweeps / mute / lifecycle
 │   ├── lib/instruments.ts         ordered chapter copy, readings, dialog context + types
+│   ├── lib/site.ts                Fase 8: siteUrl (VERCEL_PROJECT_PRODUCTION_URL), indexable, caseShare(id)
 │   ├── lib/skills.ts              grouped skills and evidence-project IDs
 │   ├── scripts/build_crosscheck_run.py  Phase 7A data + evidence crops from the CrossCheck run (asserted)
 │   ├── scripts/verify_crosscheck_room.py  Phase 7A focused checks, six viewports + edges
@@ -197,6 +208,7 @@ Rayin Observatory/
 │   ├── scripts/observatory_evidence.py  Phase 7F Testing evidence pack, full round (5 projects × phone/desktop, Next chain, interruptions, fallback, chain fps)
 │   ├── scripts/verify_brandwall_room.py  Phase 7E Development tests (suite `studio`), imported by the evidence pack
 │   ├── scripts/duewatch_room_evidence.py  Phase 7D Testing evidence pack (pointer, ring, hand/signal traces, reminder sequence, interruptions, slow motion, fps, sources)
+│   ├── scripts/build_share_cards.py  Fase 8: public/og/{home,<slug>}.jpg 1200×630 ≤300 KB + ikon app/ dari copy approved
 │   ├── scripts/run_regressions.py  Q42 regression runner + ledger (skip suites already green on the same source)
 │   ├── scripts/perf_quick.py      Q42 Development fps gate (4x CPU, one phone); 7F: + hand-turn segment
 │   ├── scripts/q49.py             7F helpers: land/to_chapter, turn (drag), tap, curtain watch/log (imported by the suites)
@@ -222,6 +234,7 @@ Rayin Observatory/
 │       ├── images/                dome + five fallback PNGs; five demo posters; approved portrait copy
 │       ├── images/brandwall/      Fase 7E: 6 PNG bukti English BrandWall (byte-identik arsip)
 │       ├── images/crosscheck/     Fase 7A: 7 crops of CrossCheck's own evidence images (CC-001/003/015/017)
+│       ├── og/                    Fase 8 GENERATED (build_share_cards.py): home + five case share cards 1200×630 JPEG
 │       └── draco/                 WASM decoder + wrapper + README.md + LICENSE.txt
 └── assets/
     ├── blender/
@@ -293,6 +306,31 @@ Rayin Observatory/
 ```
 
 ## 4. Modul dan berkas
+
+### Fase 8 — Development (2026-09-24, Claude Code)
+
+#### `web/lib/site.ts`
+- **Peran:** satu sumber URL publik + teks share. `siteUrl` = `https://$VERCEL_PROJECT_PRODUCTION_URL` (dibaca saat **build**), lokal `http://localhost:8767`; `indexable` = `VERCEL_ENV === 'production'`.
+- **Ekspor:** `siteUrl`, `indexable`, `siteName`, `author`, `siteDescription` (kalimat posisi hero approved), `caseShare(id)` → `{title, description (pitch), social (deck + reading + unit + context), image {url:/og/<id>.jpg, 1200×630, alt}}`.
+- **Dipakai oleh:** `layout.tsx`, `work/[slug]/page.tsx`, `robots.ts`, `sitemap.ts`. Bergantung `lib/cases.ts` (deck) + `lib/instruments.ts` (pitch/reading/unit/context).
+- **Catatan:** domain pemilik tersambung → **redeploy** agar canonical/og:url/og:image memakai domain itu (nilai dibakar saat build). Format judul/alt/`social` = copy baru DRAFT; isinya potongan copy approved.
+
+#### `web/app/layout.tsx` (Fase 8)
+- `metadata`: `metadataBase: siteUrl`, title default + template `%s | Rayina Ilham`, description, canonical `/`, robots index hanya produksi, openGraph (website, en_US, `/og/home.jpg`), twitter `summary_large_image`.
+
+#### `web/app/work/[slug]/page.tsx` (Fase 8)
+- `generateMetadata` per slug dari `caseShare`: title "<Name> · <Category>", description = pitch, OG/Twitter `article` + card `/og/<slug>.jpg`, canonical `/work/<slug>`. OG di level page mengganti OG root (Next shallow merge) → `siteName`/`locale` diulang.
+
+#### `web/app/robots.ts`, `web/app/sitemap.ts`
+- Robots: produksi `Allow: /` + `Sitemap:`; lainnya `Disallow: /`. Sitemap: `/` + lima `/work/<slug>` absolut dari `siteUrl`.
+
+#### `web/scripts/build_share_cards.py`
+- **Peran:** generator share card + ikon. Membaca copy dari `instruments.ts` (regex blok `{ id: ...}`), deck dari `cases.ts` (`id: '<x>', draft:`), hero dari `page.tsx`; gagal bila tak ketemu 5 instrumen/deck/hero.
+- **Keluaran:** `web/public/og/{home,crosscheck,surgeline,driftwatch,duewatch,brandwall}.jpg` (1200×630, JPEG progresif, dipaksa ≤300,000 B untuk WhatsApp; build pertama 70–77 KB), render `public/images/<slug>-fallback.png`/`dome-fallback.png` di kanan, langit gradasi + bintang seed tetap; `web/app/icon.svg` (SVG sumber = konstanta `ICON_SVG`), `apple-icon.png` 180 (latar ink penuh), `favicon.ico` 16/32/48 (rasterisasi SVG via Playwright Chromium).
+- **Jalankan:** `/home/rayin/Projects/Testing/crosscheck/.venv/bin/python web/scripts/build_share_cards.py`, ulang bila copy chapter/deck/hero berubah.
+
+#### Deploy Vercel
+- `web/` di-link ke `chhrones-projects/rayin-observatory` (`.vercel/` untracked). Produksi: `https://rayin-observatory.vercel.app` (deploy pertama `dpl_CFmRsnzmH2xtNJQXh7wBo2DXoBK7`). Deploy ulang: `cd web && vercel deploy --prod --yes` — hanya atas permintaan pemilik.
 
 ### Fase 7F — Testing (2026-09-24, Claude Code)
 
@@ -967,8 +1005,8 @@ Brief personal + tabel sumber copy DRAFT: `web/README.md` bagian Phase 7A.
 - **Ekspor utama:** `RootLayout`, `metadata`, `viewport`; `HERO_ASSETS` (dome/ambient GLB + wrapper/wasm Draco).
 - **Dipakai oleh:** Next.js untuk semua route.
 - **Bergantung pada:** `ObservatoryShell`, `globals.css`, CSS Lenis, `preload` react-dom.
-- **State / efek samping:** tidak ada server state; metadata preview noindex, English `lang`. `preload(href, {as:'fetch', crossOrigin:'anonymous'})` → `<link rel=preload>` di head; cocok dengan request FileLoader three (cors + same-origin credentials) sehingga dipakai ulang (waterfall: satu request per berkas). Ganti path model/decoder → ubah daftar ini juga.
-- **Catatan:** title memakai Rayina Ilham / Rayin Observatory; meta launch lengkap Fase 8.
+- **State / efek samping:** tidak ada server state; metadata dari `lib/site.ts` (index hanya produksi Vercel), English `lang`. `preload(href, {as:'fetch', crossOrigin:'anonymous'})` → `<link rel=preload>` di head; cocok dengan request FileLoader three (cors + same-origin credentials) sehingga dipakai ulang (waterfall: satu request per berkas). Ganti path model/decoder → ubah daftar ini juga.
+- **Catatan:** meta launch Fase 8 (lihat entri "Fase 8 — Development" di §4).
 
 ### `web/app/page.tsx`
 - **Peran:** homepage statis: hero, lima section chapter satu layar (tidak di-pin sejak Q49), Skills, About, Contact.

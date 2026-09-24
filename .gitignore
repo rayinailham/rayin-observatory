@@ -3,18 +3,35 @@
 
 # Python
 __pycache__/
-*.pyc
+*.py[cod]
 .venv/
+
+# Node / Next.js (web/.gitignore covers the app's own build output too)
+node_modules/
+.next/
+*.tsbuildinfo
+npm-debug.log*
+.eslintcache
+
+# Vercel CLI link + pulled env (`vercel link`, `vercel env pull`); never commit
+.vercel/
 
 # OS / editor
 .DS_Store
 Thumbs.db
+.vscode/
+.idea/
+*.swp
 
-# Local env
+# Local env and keys
 .env*
+*.pem
+*.log
 
 # Local-only source assets (Blender, renders, evidence, photos); runtime copies live in web/public
 assets/
 
-# Playwright MCP scratch output
+# Agent / MCP scratch output
 .playwright-mcp/
+.serena/
+graphify-out/

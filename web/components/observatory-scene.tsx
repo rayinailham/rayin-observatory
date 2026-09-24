@@ -162,15 +162,19 @@ function World({ entered, reducedMotion, progress, planetProgress, chapter, case
       const incoming = i === index;
       const outgoing = i === (from ?? index - 1) && transition < 1;
       group.visible = mix > .001 && i === caseIndex || (mix < .999 && reveal > 0 && outro < 1 && (incoming || outgoing));
-      const offset = incoming ? -(1 - transition) : transition;
+      // Desktop slides the instrument with the page. On a phone the page scrolls on the compositor while this
+      // canvas follows scrollY a frame or two later, so a sliding model jitters and rides over the copy.
+      // There it stays put and the chapters hand over by scale: out fast, in only once the next copy is nearly in place, so nothing rides over the text passing by.
+      const offset = desktop ? (incoming ? -(1 - transition) : transition) : 0;
+      const handOver = desktop ? 1 : (incoming ? MathUtils.smootherstep(transition, .82, 1) : 1 - MathUtils.smootherstep(transition, 0, .18)) * (1 - MathUtils.smootherstep(outro, 0, .7));
       const fit = i === 0 ? 4.4 : 3.5;
-      const homeScale = Math.min(viewport.width * (desktop ? .48 : .82), viewport.height * (desktop ? .66 : .37)) / fit;
+      const homeScale = Math.min(viewport.width * (desktop ? .48 : .82), viewport.height * (desktop ? .66 : .33)) / fit * Math.max(handOver, .001);
       const caseScale = desktop
         ? Math.min((stageRect?.width ?? size.width * .55) * .76, size.height * .60) / zoom / fit
         : Math.min(viewport.width * .62, viewport.height * .33) / fit;
       const inCase = i === caseIndex ? mix : 0;
       group.scale.setScalar(MathUtils.lerp(homeScale, caseScale, inCase));
-      group.position.copy(cameraUp).multiplyScalar(MathUtils.lerp(viewport.height * (-.03 + offset + outro), casePosition.current, inCase));
+      group.position.copy(cameraUp).multiplyScalar(MathUtils.lerp(viewport.height * ((desktop ? -.03 : 0) + offset + (desktop ? outro : 0)), casePosition.current, inCase));
       group.position.addScaledVector(cameraRight, MathUtils.lerp(homeX, caseX, inCase));
       if (group.visible) moving.rig.update(time);
     });

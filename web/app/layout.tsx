@@ -1,13 +1,25 @@
 import type { Metadata, Viewport } from 'next';
 import { preload } from 'react-dom';
 import ObservatoryShell from '@/components/observatory-shell';
+import { author, indexable, siteDescription, siteName, siteUrl } from '@/lib/site';
 import 'lenis/dist/lenis.css';
 import './globals.css';
 
+const homeImage = { url: '/og/home.jpg', width: 1200, height: 630, alt: `${siteName}: ${author}, automation engineer. I automate. I test.` };
 export const metadata: Metadata = {
-  title: 'Rayin Observatory | Rayina Ilham',
-  description: 'First light. A portfolio by Rayina Ilham.',
-  robots: { index: false, follow: false },
+  metadataBase: siteUrl,
+  title: { default: `${siteName} | ${author}`, template: `%s | ${author}` },
+  description: siteDescription,
+  applicationName: siteName,
+  authors: [{ name: author }],
+  creator: author,
+  alternates: { canonical: '/' },
+  robots: indexable ? { index: true, follow: true } : { index: false, follow: false },
+  openGraph: {
+    type: 'website', siteName, locale: 'en_US', url: '/',
+    title: `${siteName} | ${author}`, description: siteDescription, images: [homeImage],
+  },
+  twitter: { card: 'summary_large_image', title: `${siteName} | ${author}`, description: siteDescription, images: [homeImage] },
 };
 export const viewport: Viewport = { themeColor: '#0B1020', width: 'device-width', initialScale: 1 };
 

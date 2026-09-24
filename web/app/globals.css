@@ -15,7 +15,8 @@ button { transition: color .18s, background-color .18s, scale .12s ease-out; }
   button:hover:not(:disabled) { color: var(--amber); }
 }
 .observatory { --journey: 0; --hero-journey: 0; --chapter-reveal: 0; --copy-opacity: 1; min-height: 100svh; }
-.scene-layer { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: linear-gradient(180deg, #010207 0%, #050916 15%, var(--ink) 30%, #10172D); }
+/* Height is the large viewport, not inset:0: a phone's URL bar sliding in and out would otherwise resize the canvas mid-scroll. */
+.scene-layer { position: fixed; inset: 0 0 auto; height: 100vh; height: 100lvh; z-index: 0; pointer-events: none; background: linear-gradient(180deg, #010207 0%, #050916 15%, var(--ink) 30%, #10172D); }
 .scene-layer::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 80%, var(--ink)); }
 .scene-fallback { position: absolute; inset: 31% -5% 4%; background: url('/images/dome-fallback.png') center / contain no-repeat; }
 .site-content { position: relative; z-index: 1; opacity: 0; transition: opacity .8s; }
