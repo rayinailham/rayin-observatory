@@ -36,7 +36,7 @@ export default function Home() {
           <div className="proof-reading"><strong>{instrument.reading}</strong><span>{instrument.id === 'surgeline' ? 'input rows · 49,950 unique' : instrument.unit}<br /><small>{instrument.context}</small></span></div>
           <button className="case-button" data-open-case={instrument.id}>Open case file <span aria-hidden="true">↗</span></button>
           {instrument.id === 'brandwall'
-            ? <p className="orbit-hint" id="observer-readout" data-observed="false">Tap to observe · <b className="when-off">detector off, wave pattern</b><b className="when-on">detector on, particle pattern</b></p>
+            ? <><div className="brand-chapter" role="img" aria-label="Illustration: light separates into light and dark specimens, then a measured comparison"><div className="brand-chapter-beam" aria-hidden="true"><i /><i /><i /></div><div className="brand-chapter-specimens" aria-hidden="true"><span>Light<i /></span><span>Dark<i /></span></div><small>Specimen → measure → compare · Illustration</small></div><p className="orbit-hint" id="observer-readout" data-observed="false">Tap to observe · <b className="when-off">detector off, wave pattern</b><b className="when-on">detector on, particle pattern</b></p></>
             : instrument.id === 'crosscheck'
               // Phase 7A (approved at gate 2026-09-16): the lenses sweep three browser lanes; each lane fills its 3 screen sizes × 3 roles as you orbit.
               ? <div className="scan-strip" role="img" aria-label="Scan pattern: three browsers, each checked at three screen sizes as three user roles">{scanLanes.map((lane, i) => <div key={lane} className="scan-lane" data-lane={i}>

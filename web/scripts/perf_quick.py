@@ -139,6 +139,17 @@ async def measure(browser, url, slug):
             await page.wait_for_timeout(500)
         await segment('business time and handoff', time_controls)
         await land(page, 0)
+    if slug == 'brandwall' and await page.locator('.brand-studio').count():
+        async def visual_comparison():
+            for specimen in ('portrait', 'contrast', 'name'):
+                await land(page, await page.locator('.brand-contact-sheet').evaluate('e=>e.getBoundingClientRect().top+scrollY-110'))
+                await page.locator(f'[data-specimen-choice={specimen}]').tap()
+                await land(page, await page.locator('.brand-view-controls').evaluate('e=>e.getBoundingClientRect().top+scrollY-110'))
+                for mode in ('split', 'after', 'before'):
+                    await page.locator(f'[data-brand-view={mode}]').tap()
+                    await page.wait_for_timeout(300)
+        await segment('visual comparisons', visual_comparison)
+        await land(page, 0)
     await segment('case scroll to Next', lambda: swipe_until(page, cdp, 10 ** 6))
 
     async def back():
@@ -163,7 +174,7 @@ async def main():
         current = await measure(browser, url, args.slug)
         baseline = await measure(browser, args.baseline.rstrip('/'), args.slug) if args.baseline else None
         await browser.close()
-    report = {'status': 'passed' if current['pass'] else 'failed', 'slug': args.slug, 'finishedAt': datetime.now(timezone.utc).isoformat(),
+    report = {'status': 'passed' if current['pass'] else 'failed', 'slug': args.slug, 'fingerprint': __import__('run_regressions').fingerprint()[0], 'finishedAt': datetime.now(timezone.utc).isoformat(),
               'rule': '4x CPU, 390x844 DPR 2, sound on: every segment ≥ 45 fps and ≤ 10% frames slower than 45 fps',
               'current': current, 'baseline': baseline}
     OUT.mkdir(parents=True, exist_ok=True)

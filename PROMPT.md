@@ -21,12 +21,13 @@ TAHAP FASE (mulai Fase 3; lihat PLAN §12 dan kolom tahap di PROGRESS.md):
 - Development (Codex utama / Claude Code): bangun item checklist Development. Verifikasi
   sendiri: lint, typecheck, build, tes fokus. Selesai → status `ready-for-test`.
   JANGAN menanyakan gate.
-- Testing (Claude Code / Antigravity): tes otomatis SETIAP item checklist fase dengan
-  Playwright (390×844 dulu, lalu 360×740 dan 430×932; engine/viewport lain bila fase
-  meminta). Perbaiki bug yang ditemukan lalu tes ulang; bila butuh kerja besar, kembalikan
+- Testing (Claude Code / Antigravity): tes otomatis item checklist fase aktif saja (fitur
+  baru, bukan fitur fase lama) dengan Playwright 390×844 + 1440×900; aturan ringan Q47 di
+  PLAN §12.3 (regresi terbatas, 2 video pendek, fps dari Development). 7F dan Fase 8 tetap
+  putaran penuh. Perbaiki bug yang ditemukan lalu tes ulang; bila butuh kerja besar, kembalikan
   fase ke Development dengan daftar bug di PROGRESS.md. Susun paket bukti di
   assets/renders/<slug-fase>/evidence/: PNG per item, video MP4 alur utama, contact sheet
-  JPG berlabel, evidence.json pass/fail per item. Kirim ke pemilik → status `awaiting-gate`.
+  JPG berlabel, evidence.json pass/fail per item. Target ±20 menit waktu mesin. Kirim ke pemilik → status `awaiting-gate`.
 - Pemilik TIDAK diminta tes manual di HP sampai Fase 8.
 
 CARA KERJA:

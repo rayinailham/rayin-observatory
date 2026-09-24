@@ -85,6 +85,8 @@ Fase 0–7 menjadi fondasi yang sudah lolos; fase personalisasi 7A–7F mendahul
 | Q44 | Gate 7B SurgeLine | (2026-09-17) Gate 7B lolos dari paket bukti Testing 18/18 ("lulus semua"); copy baru 7B di-approve, label DRAFT SurgeLine dilepas. Temuan diterima: Cut boleh ditekan sebelum B sampai Form (B beku di tengah lane, Resume normal); refresh `/work/surgeline` mengulang ilustrasi dari awal. Fase aktif berikut 7C |
 | Q45 | Gate 7C DriftWatch | (2026-09-17) Gate 7C lolos dari paket bukti Testing 21/21 ("saya approve semua untuk 7C ini"); copy baru 7C di-approve termasuk ilustrasi bernomor Day 1–3, label DRAFT DriftWatch dilepas. Temuan diterima: di HP sebab/aksi/kode alarm perlu scroll sedikit sesudah Compare; fix Testing jendela clip trace menjadi motion approved. 7D berjalan paralel di salinan terpisah (Codex), integrasi setelah 7C stabil |
 | Q46 | Gate 7D DueWatch | (2026-09-18) Gate 7D lolos dari paket bukti Testing 22/22 ("semuanya approved"); copy baru 7D di-approve (chapter + strip pointer, brief, 3 hotspot, ruang agenda/triage/pengingat, bukti rekaman + 7 temuan audit, teaser BrandWall), label DRAFT DueWatch dilepas; strip chapter berlabel "Illustration". Temuan diterima: cincin → rail tipis (garis rambut) dan tick dial tanpa label. Fase aktif berikut 7E |
+| Q47 | Testing ringan | (2026-09-18, pasca-gate 7D) Pemilik: Testing jangan banyak dan lama, cukup fitur yang baru dibuat. Berlaku mulai 7E Testing (7F dan 8 tetap putaran penuh): (1) cakupan = item checklist fase aktif saja; fitur fase lama tidak dites ulang; (2) regresi = suite fase aktif + `cases` + `mobile` 390×844 lewat runner, suite lain hanya bila berkas bersama (shell, `globals.css`, scene, `cases.ts`) diubah fase itu; runner 16 suite penuh hanya di 7F/8; (3) viewport Testing 390×844 + 1440×900; 360/430/768/1920 cukup dari tes Development pada sidik jari sama; (4) paket bukti: 1 video HP + 1 video desktop (masing-masing ≤ ±90 dtk, alur utama fitur baru), PNG per item, satu contact sheet, `evidence.json`; tanpa reel slow-motion kecuali ada temuan motion; (5) fps: pakai hasil `perf_quick.py` Development bila sidik jari sumber sama, tidak diukur ulang; (6) edge (reduced motion, model gagal, Back saat transisi, resize) satu kali di 390×844. Target Testing ±20 menit waktu mesin. Detail §12.3 |
+| Q48 | Gate 7E BrandWall | (2026-09-24) Gate 7E lolos dari paket bukti Testing ringan 17/17 ("untuk saat ini saya sudah approve"); copy baru 7E di-approve, label DRAFT BrandWall dilepas, strip chapter berlabel "Illustration". Pemilik mengizinkan perbaikan yang dinilai perlu: label mono 8 px di studio/chapter → 10 px; pasangan Overflow di HP memakai crop lebih tinggi (`phoneView` 706×599, tetangga tetap terlihat, skala 0.458 → 0.481). Header fixed yang menumpuk konten saat scroll tetap perilaku lama. Fase aktif berikut 7F |
 
 ---
 
@@ -318,6 +320,7 @@ DueWatch terukur; BrandWall kaya pembanding visual. Mengganti warna dan judul sa
   komposisi/polish desktop → regresi mobile. Desktop tetap presentasi utama: ruang, hierarki,
   detail cahaya, kamera, dan bukti dimanfaatkan sengaja, bukan sekadar memperbesar versi HP.
 - Uji mobile 390×844 → 360×740 → 430×932; tablet 768×1024; desktop 1440×900 dan 1920×1080.
+  Q47: keenamnya diverifikasi di Development; Testing 7E cukup 390×844 + 1440×900; putaran penuh di 7F/8.
   Konten utama dan bukti setara; mobile boleh menyederhanakan partikel, lapisan, dan orbit.
   Fungsi penjelas tidak boleh hanya tersedia lewat hover atau drag presisi.
 - Setiap animasi punya tujuan: menjelaskan proses, memberi feedback, atau menjaga orientasi.
@@ -494,6 +497,12 @@ ketahuan di Development. Alat ada di `web/scripts/` (perintah lengkap CODEMAP §
    `desktop-a/-b` tetap. Hasil phone-only tidak menggantikan putaran penuh sebelum Fase 8.
 5. **Urutan sesi Testing:** runner (skip yang sudah hijau) → skrip bukti → cek visual → fix kecil →
    runner lagi (hanya suite terdampak) → skrip bukti. Bug besar → kembali ke Development, jangan diperbaiki di Testing.
+6. **Testing ringan (Q47, mulai 7E Testing; 7F dan 8 tetap penuh):** uji hanya fitur baru fase aktif.
+   Regresi = suite fase aktif + `cases` + `mobile` (`--phone-only`); suite lain hanya bila fase menyentuh berkas bersama
+   (shell, `globals.css`, scene, `cases.ts`). Viewport Testing 390×844 + 1440×900 (sisanya dari tes Development pada sidik jari
+   sama). Paket: 1 video HP + 1 video desktop ≤ ±90 dtk, PNG per item, satu contact sheet, `evidence.json`; slow-motion hanya
+   bila ada temuan motion. fps memakai hasil `perf_quick.py` Development bila sidik jari sama. Edge sekali di 390×844.
+   Target ±20 menit waktu mesin.
 
 ---
 

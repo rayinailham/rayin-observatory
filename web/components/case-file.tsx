@@ -9,6 +9,7 @@ import { FindingSheet, InspectionField, NextTeaser } from './crosscheck-room';
 import { DispatchRoom, DispatchEvidence } from './surgeline-room';
 import { MonitoringRoom, MonitoringEvidence } from './driftwatch-room';
 import { TimeControlRoom, TimeEvidence } from './duewatch-room';
+import { VisualStudio, StudioEvidence } from './brandwall-room';
 
 const lines = (text: readonly string[]) => text.map((line, i) => <Fragment key={line}>{i > 0 && <br />}{line}</Fragment>);
 
@@ -82,7 +83,7 @@ export default function CaseFile({ id }: { id: InstrumentId }) {
 
     <div className="case-details">
       {/* Personal rooms replace the shared flow only when their phase is active. */}
-      {id === 'crosscheck' ? <><InspectionField /><FindingSheet /></> : id === 'surgeline' ? <><DispatchRoom /><DispatchEvidence /></> : id === 'driftwatch' ? <><MonitoringRoom /><MonitoringEvidence /></> : id === 'duewatch' ? <><TimeControlRoom /><TimeEvidence /></> : <section className="case-section" aria-labelledby="flow-heading">
+      {id === 'crosscheck' ? <><InspectionField /><FindingSheet /></> : id === 'surgeline' ? <><DispatchRoom /><DispatchEvidence /></> : id === 'driftwatch' ? <><MonitoringRoom /><MonitoringEvidence /></> : id === 'duewatch' ? <><TimeControlRoom /><TimeEvidence /></> : id === 'brandwall' ? <><VisualStudio /><StudioEvidence /></> : <section className="case-section" aria-labelledby="flow-heading">
         <p className="section-kicker">How it works</p><h2 id="flow-heading">{lines(file.flowHeading)}</h2>
         <ol className="signal-flow">{file.flow.map(step => <li key={step.title}><span className="signal-node" aria-hidden="true" /><h3>{step.title}</h3><p>{step.body}</p></li>)}</ol>
       </section>}
@@ -113,6 +114,7 @@ export default function CaseFile({ id }: { id: InstrumentId }) {
 
       <section className="case-section case-next" aria-labelledby="next-heading"><p className="section-kicker">Next instrument</p><h2 id="next-heading">{next.name}</h2>
         {id === 'crosscheck' && <NextTeaser lines={caseFiles[(index + 1) % caseFiles.length].deck} />}
+        {id === 'brandwall' && <p className="brand-next">The image has its evidence. Next, look through CrossCheck’s three lenses: browsers, permissions and the work a user needs to finish.</p>}
         {id === 'duewatch' && <p className="time-next">The schedule has its limits. Next, turn to BrandWall’s visual studio: compare brand assets across surfaces and see exactly where layouts break.</p>}
         {id === 'driftwatch' && <p className="monitor-next">The data has a history. Next, give the work a schedule — with DueWatch’s contract checks and human handoff.</p>}
         {id === 'surgeline' && <div className="dispatch-next"><span aria-hidden="true">─ ─ ─ ╱╲ ─ ─</span><p>The dispatch is accounted for. Next, watch what changes between one day and the next.</p></div>}

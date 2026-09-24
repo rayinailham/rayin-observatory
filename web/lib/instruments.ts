@@ -1,4 +1,5 @@
 // Homepage copy approved at Phase 3; DriftWatch revision approved at gate 7C (2026-09-17); DueWatch revision at gate 7D (2026-09-18).
+// BrandWall chapter revision: Phase 7E, approved at gate 7E (2026-09-24).
 // Exact dossier sections and proof context: web/README.md, Copy provenance.
 export const instruments = [
   { id: 'crosscheck', name: 'CrossCheck', category: 'Web QA',
@@ -14,8 +15,8 @@ export const instruments = [
     pitch: 'I make renewal dates visible and build message workflows with a human handoff — then test where their safeguards break.',
     reading: '200', unit: 'contracts checked per run', context: 'Synthetic contracts · mock delivery' },
   { id: 'brandwall', name: 'BrandWall', category: 'Visual design QA',
-    pitch: 'I test brand assets across your product surfaces and themes, then report where layouts break and which CSS rules fix them.',
-    reading: '300', unit: 'screenshots per run', context: 'Generated brands · owned test app' },
+    pitch: 'I put extreme brand assets under light, measure where your layouts break and compare what changes after the fix.',
+    reading: '300', unit: 'screenshots per run', context: '30 synthetic assets · 5 surfaces · 2 themes' },
 ] as const;
 
 export type InstrumentId = typeof instruments[number]['id'];

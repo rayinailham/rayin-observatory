@@ -74,6 +74,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
   const pulse = useRef<HTMLDivElement>(null);
   const ribbon = useRef<HTMLDivElement>(null);
   const timeRing = useRef<HTMLDivElement>(null);
+  const prism = useRef<HTMLDivElement>(null);
   // Where the antenna sat on screen when its case was opened; Return restores that scroll, so the pulse lands there.
   const pulseHome = useRef<IrisCentre & { w: number; h: number } | null>(null);
   const sceneLayer = useRef<HTMLDivElement>(null);
@@ -190,6 +191,11 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
     // A lens flight leaves the iris covering the screen; the arriving page always uncovers it,
     // including after Back interrupted a departure half way.
     const irisState = iris.current?.dataset.state;
+    if (prism.current) {
+      const sheet = prism.current;
+      gsap.killTweensOf(sheet);
+      context.add(() => gsap.to(sheet, { opacity: 0, duration: reducedMotion ? 0 : .32, ease: 'power2.out', onComplete: () => { sheet.dataset.direction = 'idle'; } }));
+    }
     if (timeRing.current) { gsap.killTweensOf(timeRing.current); gsap.set(timeRing.current, { opacity: 0 }); timeRing.current.dataset.direction = 'idle'; }
     if (ribbon.current) { gsap.killTweensOf(ribbon.current); gsap.set(ribbon.current, { opacity: 0 }); ribbon.current.dataset.direction = 'idle'; }
     if (pulse.current) gsap.set(pulse.current.querySelectorAll('i'), { opacity: 0 });
@@ -439,10 +445,25 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
       .to(pageContent.current, { opacity: 0, duration: reducedMotion ? 0 : .48, ease: 'power2.out' }, 0)
       .to(caseView.current, { mix: 1, duration: reducedMotion ? 0 : .78, ease: 'power2.inOut' }, 0);
     // Phase 7A: CrossCheck is entered through its lens; the arriving case opens the iris again.
-    if (caseFiles[index].transition === 'time') flight.current.add(timeFlight('out'), 0);
+    if (caseFiles[index].transition === 'prism') flight.current.add(prismFlight('out'), 0);
+    else if (caseFiles[index].transition === 'time') flight.current.add(timeFlight('out'), 0);
     else if (caseFiles[index].transition === 'ribbon') flight.current.add(ribbonFlight('out'), .08);
     else if (caseFiles[index].transition === 'pulse') flight.current.add(pulseFlight('out'), .08);
     else if (caseFiles[index].aperture && !reducedMotion) flight.current.add(irisTween(iris.current, irisMotion, 'disc', 0, irisReach(), .5, 'power2.in'), .32);
+  }
+
+  // Phase 7E: the prism's light fans into a gallery plane. Arrival uncovers the new page.
+  function prismFlight(direction: 'in' | 'out', centre = lensCentre()) {
+    const sheet = prism.current;
+    const timeline = gsap.timeline();
+    if (!sheet || reducedMotion) return timeline;
+    const ray = { x: centre.x, y: centre.y, scaleX: .015, scaleY: .035, rotation: -18 };
+    const gallery = { x: 0, y: window.innerHeight * .25, scaleX: 1, scaleY: 1, rotation: 0 };
+    timeline.set(sheet, { opacity: .85, ...(direction === 'out' ? ray : gallery) })
+      .call(() => { sheet.dataset.direction = direction; })
+      .to(sheet, { ...(direction === 'out' ? gallery : ray), duration: .72, ease: 'power2.inOut' });
+    if (direction === 'in') timeline.to(sheet, { opacity: 0, duration: .12 });
+    return timeline;
   }
 
   // Phase 7D: a local orbit opens into an agenda rail, then folds back to its saved origin.
@@ -512,10 +533,12 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
         audio.current?.transition('in');
       })
       .to(sweep, { transition: 1, duration: reducedMotion ? 0 : .78, ease: 'power2.inOut' });
-    if (caseFiles[from].transition === 'time') flight.current.add(timeFlight('in'), 0);
+    if (caseFiles[from].transition === 'prism') flight.current.add(prismFlight('in'), 0);
+    else if (caseFiles[from].transition === 'time') flight.current.add(timeFlight('in'), 0);
     else if (caseFiles[from].transition === 'ribbon') flight.current.add(ribbonFlight('in'), 0);
     else if (caseFiles[from].transition === 'pulse') flight.current.add(pulseFlight('in'), 0);
-    if (caseFiles[index].transition === 'time') flight.current.add(timeFlight('out'), .68);
+    if (caseFiles[index].transition === 'prism') flight.current.add(prismFlight('out'), .68);
+    else if (caseFiles[index].transition === 'time') flight.current.add(timeFlight('out'), .68);
     else if (caseFiles[index].transition === 'ribbon') flight.current.add(ribbonFlight('out'), .78);
     else if (caseFiles[index].transition === 'pulse' && caseFiles[from].transition !== 'pulse') flight.current.add(pulseFlight('out'), .68);
   }
@@ -535,7 +558,8 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
     // On the case page the antenna has usually scrolled away; aim at the chapter antenna the visitor left from.
     const home = pulseHome.current;
     const sameView = home && home.w === window.innerWidth && home.h === window.innerHeight && homeScroll.current !== null;
-    if (target === 'return' && caseFiles[current].transition === 'time') flight.current.add(timeFlight('in', sameView ? home : lensCentre()), 0);
+    if (target === 'return' && caseFiles[current].transition === 'prism') flight.current.add(prismFlight('in', sameView ? home : lensCentre()), 0);
+    else if (target === 'return' && caseFiles[current].transition === 'time') flight.current.add(timeFlight('in', sameView ? home : lensCentre()), 0);
     else if (target === 'return' && caseFiles[current].transition === 'ribbon') flight.current.add(ribbonFlight('in', sameView ? home : lensCentre()), 0);
     else if (target === 'return' && caseFiles[current].transition === 'pulse') flight.current.add(pulseFlight('in', sameView ? home : lensCentre()), 0);
     else if (target === 'return' && caseFiles[current].aperture && !reducedMotion) flight.current.add(irisTween(iris.current, irisMotion, 'hole', irisReach(), 0, .48, 'power2.in'), 0);
@@ -588,6 +612,7 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
         }
       }}>{children}</div>
       <div ref={iris} className="lens-iris" data-state="hidden" aria-hidden="true" />
+      <div ref={prism} className="brand-flight" data-direction="idle" aria-hidden="true"><i /><i /><i /></div>
       <div ref={timeRing} className="time-flight" data-direction="idle" aria-hidden="true"><i /><i /><i /></div>
       <div ref={ribbon} className="monitor-ribbon" data-direction="idle" aria-hidden="true"><svg viewBox="0 0 600 80" preserveAspectRatio="none"><path d="M0 40H250L264 35L278 46L296 40H600" /></svg><span>SNAPSHOT / COMPARE / RECORD</span></div>
       <div ref={pulse} className="dispatch-pulse" aria-hidden="true"><i /><i /><i /></div>

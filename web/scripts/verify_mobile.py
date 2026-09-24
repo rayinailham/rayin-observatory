@@ -18,6 +18,7 @@ PHONES = [tuple(map(int, s.split('x'))) for s in os.environ.get('OBSERVATORY_PHO
 SLUGS = ['crosscheck', 'surgeline', 'driftwatch', 'duewatch', 'brandwall']
 NAMES = ['CrossCheck', 'SurgeLine', 'DriftWatch', 'DueWatch', 'BrandWall']
 READINGS = ['1,080', '50,000', '11/11', '200', '300']
+DRAFTS = set()  # chapters whose copy awaits an owner's gate (none since gate 7E)
 CONTACTS = ['mailto:rayinailham9@gmail.com', 'https://www.linkedin.com/in/rayinailham/',
             'https://github.com/rayinailham', 'https://www.upwork.com/freelancers/~0107019e8124d357e2']
 REPORT = {'status': 'running', 'startedAt': datetime.now(timezone.utc).isoformat(), 'url': URL,
@@ -119,7 +120,8 @@ async def run():
                 assert await page.locator('.observatory').get_attribute('data-chapter') == slug
                 assert abs((await section.locator('.instrument-stage').bounding_box())['y']) < 2
                 assert await section.locator('.proof-reading strong').inner_text() == reading
-                assert await page.locator('.draft-label').count() == 0
+                assert await page.locator('.draft-label').count() == len(DRAFTS)
+                assert await section.locator('.draft-label').count() == (1 if slug in DRAFTS else 0)
                 assert await page.evaluate('document.documentElement.scrollWidth <= innerWidth')
                 cta = section.get_by_role('button', name='Open case file', exact=True)
                 box = await cta.bounding_box()

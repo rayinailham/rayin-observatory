@@ -34,6 +34,8 @@ BIG = 5_000_000  # videos: size + mtime instead of reading every byte
 
 # name: (command, cwd, timeout s, result JSON relative to ROOT or None, phones env honoured, copy JSON to)
 SUITES = {
+    'studio': ([PY, 'verify_brandwall_room.py'], SCRIPTS, 900, 'assets/renders/personal-brandwall/dev/verification.json', True, None),
+    'perf-brandwall': ([PY, 'perf_quick.py', '--slug', 'brandwall'], SCRIPTS, 600, 'assets/renders/perf-quick/brandwall.json', False, None),
     'time': ([PY, 'verify_duewatch_room.py'], SCRIPTS, 900, 'assets/renders/personal-duewatch/dev/verification.json', True, None),
     'time-state': (['node', 'verify_duewatch_state.mjs'], SCRIPTS, 60, None, False, None),
     'perf-duewatch': ([PY, 'perf_quick.py', '--slug', 'duewatch'], SCRIPTS, 600, 'assets/renders/perf-quick/duewatch.json', False, None),

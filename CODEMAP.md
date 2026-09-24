@@ -1,6 +1,16 @@
 # CODEMAP — Peta kode Rayin Observatory
 
-Update terbaru 2026-09-18 · Claude Code: **Gate 7D lolos → `done`** ("semuanya approved"): copy 7D approved, label DRAFT DueWatch dilepas (`cases.ts`, strip `page.tsx` "Illustration", komentar `duewatch-room.ts/.tsx`/`instruments.ts`/`globals.css`, tes `verify_duewatch_room.py`/`verify_cases.py`/`duewatch_room_evidence.py` mengharapkan 0 DRAFT); regresi `time`, `cases`/`mobile` 390×844 passed (sumber `de8440d2274dbcd4`). Lihat entri "Gate 7D" di §4.
+Update terbaru 2026-09-24 · Claude Code: **Gate 7E lolos → `done`**. DRAFT BrandWall dilepas (`cases.ts` `draft:false`, `page.tsx` strip "Illustration", komentar `brandwall-room.ts`/`instruments.ts`/`globals.css`; tes `verify_mobile.py` `DRAFTS = set()`, `verify_cases.py`, `verify_brandwall_room.py`, `brandwall_room_evidence.py` mengharapkan 0 DRAFT). Perbaikan izin pemilik: `brandwall-room.tsx` hook `useWide` + prop `view` di `Capture` (HP memakai `phoneView` bila ada), `brandwall-room.ts` `phoneView` pasangan Overflow, `globals.css` label mono 7E 8 → 10 px; `web/README.md` 7E = gate passed. Runner 11 suite + `perf-brandwall` passed (sumber `4bf13e4158597b83`). Lihat entri "Gate 7E" di §4.
+
+Sebelumnya 2026-09-24 · Claude Code: **7E Testing → `awaiting-gate`** (aturan ringan Q47). Skrip bukti baru `web/scripts/brandwall_room_evidence.py` → paket `assets/renders/personal-brandwall/evidence/` 17/17 pass (memanggil `verify_brandwall_room.viewport` 390×844 + 1440×900 dan `edges`); tanpa perubahan kode app. Pohon berkas kini memuat berkas 7E (dulu belum tercatat). Lihat entri "Fase 7E — Testing" di §4.
+
+Sebelumnya 2026-09-24 · Claude Code: **7E Development → `ready-for-test`**. Verifikasi final di sumber `d97d12160a89721c`: lint/typecheck/build, `perf-brandwall` (GPU Intel) + runner regresi passed; fix tes basi DRAFT di `verify_mobile.py` (`DRAFTS`) dan `verify_case.py` (cakup `.case-page`). Tanpa perubahan app.
+
+Sebelumnya 2026-09-18 · Codex: **7E Development — BrandWall visual studio**. Mobile 390/360/430 selesai sebelum desktop. Modul dan bukti baru di entri 7E di bawah.
+
+Update terbaru 2026-09-18 · Claude Code: **aturan Testing ringan Q47** (dokumen saja: PLAN §3/§8.2/§12.3, PROGRESS kontrak + checklist 7E, PROMPT). Mulai 7E Testing: fitur baru saja, 390×844 + 1440×900, regresi suite fase + `cases`/`mobile`, 2 video pendek; alat `run_regressions.py --suites`/`--phone-only` dan `perf_quick.py` tetap sama. 7F/8 penuh.
+
+Sebelumnya 2026-09-18 · Claude Code: **Gate 7D lolos → `done`** ("semuanya approved"): copy 7D approved, label DRAFT DueWatch dilepas (`cases.ts`, strip `page.tsx` "Illustration", komentar `duewatch-room.ts/.tsx`/`instruments.ts`/`globals.css`, tes `verify_duewatch_room.py`/`verify_cases.py`/`duewatch_room_evidence.py` mengharapkan 0 DRAFT); regresi `time`, `cases`/`mobile` 390×844 passed (sumber `de8440d2274dbcd4`). Lihat entri "Gate 7D" di §4.
 
 Sebelumnya 2026-09-17 · Claude Code: **7D Testing → `awaiting-gate`** — build utama terintegrasi dites: runner 16/16 passed (sumber `f19aac05262f34b3`), skrip bukti baru `duewatch_room_evidence.py` 22/22 (memanggil `verify_duewatch_room.viewport/edges`), fix tes basi `verify_cases.py`; tanpa perubahan kode app. Lihat entri "Fase 7D — Testing" di §4.
 
@@ -21,7 +31,8 @@ Sebelumnya · Codex: urutan delapan planet + perbaikan gerak/fade; lihat “Revi
 > menunjuknya dan berkas akan diubah. Update setiap berkas dibuat/diubah/dipindah/dihapus.
 > Entri tidak cocok dengan kode = bug; perbaiki saat ditemukan.
 
-**Terakhir diperbarui:** 2026-09-17 · Codex · 7D terintegrasi, sumber siap Testing dengan catatan verifikasi; lihat entri 7D.
+**Terakhir diperbarui:** 2026-09-24 · Claude Code · Gate 7E lolos → `done`; lihat entri "Gate 7E" di §4.
+Sebelumnya: 2026-09-18 · Codex · 7E Development.
 Sebelumnya: 2026-09-17 · Claude Code · **Gate 7C lolos → `done`**; commit + push. Lihat entri "Gate 7C" di §4.
 Sebelumnya: 2026-09-17 · Claude Code · **7C Testing → `awaiting-gate`**: `web/scripts/driftwatch_room_evidence.py` baru (paket `assets/renders/personal-driftwatch/evidence/`, 21/21, 3 MP4), `driftwatch-room.tsx` jendela clip trace, `globals.css` baris `.monitor-trace-reveal` dihapus, `web/README.md` kontrak motion 7C. Lihat entri "Fase 7C — Testing" di §4.
 Sebelumnya: 2026-09-17 · Codex · handoff 7C tetap `ready-for-test`; catatan status basi di entri `PROGRESS.md`/`CODEMAP.md` diperbaiki, log sesi PROGRESS ditambah. JSON Development dan ledger dibaca ulang; Testing belum dimulai (PLAN §12.2: Claude Code / Antigravity). Lihat entri "Fase 7C — DriftWatch Development" di §4.
@@ -72,6 +83,8 @@ Semua dari root project kecuali disebut lain.
 | `cd web/scripts && timeout 1500 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python showpiece_evidence.py` | Paket bukti Testing Fase 7 → `assets/renders/showpiece/evidence/`: 14 item (termasuk `enterEarly`: urutan unduh instrumen sesudah Enter + scroll/case dini), MP4 390×844 **dengan audio asli situs**, performa PLAN §11 (gate slow 4G + CPU 4×, fps 4×/6×, GLB, DPR), contact sheet, `evidence.json`; exit 1 bila ada fail. Jalankan setelah 6 suite regresi (item `phones` membaca JSON-nya). Server :8767 aktif. |
 | `/home/rayin/Projects/Testing/crosscheck/.venv/bin/python web/scripts/run_regressions.py [--suites a,b] [--phone-only mobile,case,cases,showpiece] [--force] [--list]` | **Q42 — pakai ini untuk semua regresi.** Suite berurutan (room, audio, mobile, case, cases, showpiece, desktop-a, desktop-b, perf-crosscheck); lewati suite yang sudah `passed` pada sidik jari sumber sama (`assets/renders/regression-ledger.json`); `--phone-only` = 390×844 saja; menolak jalan bila build lebih tua dari sumber. Dari root, server :8767 aktif. |
 | `cd web/scripts && timeout 600 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python perf_quick.py --slug <project> [--baseline <url>]` | **Q42 — gerbang fps Development** sebelum `ready-for-test`: 390×844 DPR 2, suara nyala, CPU 4×, chapter → terbang → scroll case → Return; tiap segmen ≥45 fps dan ≤10% frame lambat → `assets/renders/perf-quick/<slug>.json`. `--baseline` = build pembanding (mis. salinan HEAD di port lain) untuk atribusi. |
+| `cd web/scripts && timeout 1500 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python brandwall_room_evidence.py` | Paket bukti Testing 7E (Q47 ringan) → `assets/renders/personal-brandwall/evidence/` (17 item, 8 kategori, 2 MP4 ≤ ±90 dtk, `contact-sheet.jpg`, strip `i01`…`i12`, `dev-checks/`, `evidence.json`); memanggil `verify_brandwall_room.viewport` (390×844, 1440×900) + `edges`; fps dibaca dari `perf-quick/brandwall.json` bila sidik jari sama; exit 1 bila ada fail. Server :8767 aktif; ±4 menit. |
+| `cd web/scripts && timeout 900 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python verify_brandwall_room.py [--sizes WxH,...] [--no-edges]` | Fase 7E Development (suite `studio`): chapter spektrum, prisma, hotspot, 3 pasangan × 3 mode, batas safe/broken, aturan, Return/Next/history/reload; edge reduced/fallback/slow/Back saat flight + resize → `assets/renders/personal-brandwall/dev/`. Server :8767 aktif. |
 | `cd web/scripts && timeout 2700 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python duewatch_room_evidence.py [--only mobile,desktop,back,slow,reduced,viewports,fps] [--remeasure-fps]` | Paket bukti Testing 7D → `assets/renders/personal-duewatch/evidence/` (22 item, 8 kategori, 3 MP4, contact sheet HP + desktop, `evidence.json`); memanggil `verify_duewatch_room.viewport/edges` (Q42). `--only` tetap menghapus paket dulu. Jalankan sesudah runner regresi; ±30 menit. |
 | `cd web/scripts && timeout 900 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python verify_duewatch_room.py [--sizes WxH,...] [--no-edges]` | Fase 7D Development (suite `time`): pointer chapter, cincin, 3 hotspot, 6 batas hari + Bad data, 6 kategori pesan + handoff, pengingat 24 jam/replay/dibalas/reset, tap cepat, state antar modul, audit, Return/Next/history/reload, layout dua meja; edge reduced/fallback/slow + Back saat cincin; 390/360/430 → 768 → 1440/1920 → `assets/renders/personal-duewatch/dev/`. Server :8767 aktif. |
 | `cd web/scripts && timeout 2700 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python driftwatch_room_evidence.py [--only mobile,desktop,back,slow,reduced,viewports,fps] [--remeasure-fps]` | Paket bukti Testing 7C → `assets/renders/personal-driftwatch/evidence/` (21 item, 8 kategori, 3 MP4, contact sheet HP + desktop, `evidence.json`); memanggil `verify_driftwatch_room.viewport/edges` (Q42). `--remeasure-fps` = pertahankan paket, ukur ulang fps saja (percobaan lama tetap di `measurements.fps4xAttempts`). Jalankan sesudah runner regresi; ±25 menit. |
@@ -144,6 +157,7 @@ Rayin Observatory/
 │   │   ├── case-file.tsx           case template: brief, hotspots, flow, readings, tools, video, Next
 │   │   ├── crosscheck-room.tsx     Fase 7A: InspectionField (SVG matrix scrub), FindingSheet, NextTeaser
 │   │   ├── surgeline-room.tsx      Fase 7B: DispatchRoom (GSAP dispatch board A–F, crash/resume, ledger), DispatchEvidence
+│   │   ├── brandwall-room.tsx      Fase 7E (approved): VisualStudio (3 pasangan rekaman, Before/Compare/After clip), StudioEvidence (batas, 7 aturan, batas bukti)
 │   │   ├── driftwatch-room.tsx     Fase 7C (DRAFT): MonitoringRoom (5 situations, Day 1–3 snapshots, trace, diff/alarm), MonitoringEvidence
 │   │   ├── observatory-shell.tsx  entry/loading/audio/menu/scroll ownership
 │   │   ├── observatory-scene.tsx  one Canvas, dome/Saturn + five instrument groups
@@ -151,6 +165,7 @@ Rayin Observatory/
 │   │   ├── instrument-motion.ts   per-instrument idle rigs + Saturn rig (moons, ring dust)
 │   │   └── sky.tsx                full-screen sky shader: gradient, stars, nebula
 │   ├── lib/cases.ts                five case files (CrossCheck approved 7A; SurgeLine approved 7B) + CaseView + aperture
+│   ├── lib/brandwall-room.ts       Fase 7E (approved): specimens (+ phoneView), boundaries, studioRules (dossier BrandWall)
 │   ├── lib/crosscheck-room.ts      Fase 7A copy (approved 7A): lanes, four steps' readouts, four findings
 │   ├── lib/crosscheck-run.ts       GENERATED run data: 40×27 matrix, 18 issues, access/flows, evidence cells
 │   ├── lib/surgeline-room.ts       Fase 7B (approved): stage reducer, board poses/sends/notes, recorded outcomes
@@ -167,6 +182,8 @@ Rayin Observatory/
 │   ├── scripts/verify_duewatch_room.py  Phase 7D focused checks (chapter pointer, ring, agenda/triage/reminders), six viewports + edges
 │   ├── scripts/verify_duewatch_state.mjs  Phase 7D illustration state boundaries (node)
 │   ├── scripts/driftwatch_room_evidence.py  Phase 7C Testing evidence pack (chapter trace, ribbon, five comparisons traced, interruptions, slow motion, fps, sources)
+│   ├── scripts/brandwall_room_evidence.py  Phase 7E Testing evidence pack, Q47 light (flight traces, 9 comparator states, probes, sources, fps from Development)
+│   ├── scripts/verify_brandwall_room.py  Phase 7E Development tests (suite `studio`), imported by the evidence pack
 │   ├── scripts/duewatch_room_evidence.py  Phase 7D Testing evidence pack (pointer, ring, hand/signal traces, reminder sequence, interruptions, slow motion, fps, sources)
 │   ├── scripts/run_regressions.py  Q42 regression runner + ledger (skip suites already green on the same source)
 │   ├── scripts/perf_quick.py      Q42 Development fps gate (4x CPU, one phone)
@@ -190,6 +207,7 @@ Rayin Observatory/
 │       ├── models/                dome/ambient + five instrument GLBs, Draco
 │       ├── fonts/                 3 WOFF2 subset (served) + approved 3 TTF (source) + 3 OFL copies
 │       ├── images/                dome + five fallback PNGs; five demo posters; approved portrait copy
+│       ├── images/brandwall/      Fase 7E: 6 PNG bukti English BrandWall (byte-identik arsip)
 │       ├── images/crosscheck/     Fase 7A: 7 crops of CrossCheck's own evidence images (CC-001/003/015/017)
 │       └── draco/                 WASM decoder + wrapper + README.md + LICENSE.txt
 └── assets/
@@ -220,6 +238,8 @@ Rayin Observatory/
     │   ├── personal-driftwatch/dev/  Phase 7C Development PNGs + verification.json (verify_driftwatch_room)
     │   ├── personal-driftwatch/evidence/  Phase 7C Testing gate pack (MP4 ×3, sheets, evidence.json)
     │   ├── personal-duewatch/dev/  Phase 7D Development PNGs + verification.json (verify_duewatch_room)
+    │   ├── personal-brandwall/dev/  Phase 7E Development results + source checks
+    │   ├── personal-brandwall/evidence/  Phase 7E Testing gate pack (MP4 ×2, contact sheet, strips, dev-checks/, evidence.json)
     │   ├── personal-duewatch/evidence/  Phase 7D Testing gate pack (MP4 ×3, sheets, evidence.json)
     │   ├── perf-quick/<slug>.json  Q42 fps gate results
     │   ├── regression-ledger.json  Q42 runner ledger (suite → source fingerprint, status)
@@ -259,6 +279,99 @@ Rayin Observatory/
 ```
 
 ## 4. Modul dan berkas
+
+### Gate 7E lolos (2026-09-24, Claude Code)
+- `web/lib/cases.ts` BrandWall `draft: false`; `web/app/page.tsx` tanpa label DRAFT BrandWall, strip chapter "Specimen → measure → compare · Illustration".
+- `web/components/brandwall-room.tsx`: `useWide()` (`useSyncExternalStore`, `(min-width: 1024px)`, server = false); `Capture` menerima `view`; kedua capture pasangan selalu memakai view yang sama; di bawah 1024 px pakai `phoneView` bila specimen punya.
+- `web/lib/brandwall-room.ts`: `phoneView: '134 92 706 599'` untuk specimen `name` (mengisi bidang 290 px HP, kartu tetangga tetap terlihat). Thumbnail contact sheet tetap `view`.
+- `web/app/globals.css` blok 7E: label mono chapter/seam/kepala probe/observer 8–9 px → 10 px.
+- Tes: `verify_mobile.py` `DRAFTS = set()`; `verify_cases.py` BrandWall `draft: False`; `verify_brandwall_room.py` + `brandwall_room_evidence.py` mengharapkan 0 DRAFT.
+
+### Fase 7E — Testing (2026-09-24, Claude Code)
+
+#### `web/scripts/brandwall_room_evidence.py`
+- **Peran:** paket bukti Testing 7E menurut aturan ringan Q47 (fitur baru saja, 390×844 touch DPR 2 + 1440×900 wheel).
+- **Ekspor utama:** async `run()`; `ITEMS` (17 item, 8 kategori), `flight_summary`, `pair_ok`, `sources_check`, `fps_verdict`, `ledger_verdict`, `sheets`.
+- **Dipakai oleh:** sesi Testing/gate 7E (dijalankan manual, bukan suite runner).
+- **Bergantung pada:** `verify_brandwall_room` (viewport/edges/position), helper `crosscheck_room_evidence` (Walk, encode, swipe, wheel), `case_files_evidence.tile`, `perf_quick` (GPU, land), `run_regressions.fingerprint`, ffmpeg.
+- **State / efek samping:** menghapus lalu menulis `assets/renders/personal-brandwall/evidence/`. Tidak mengubah app/ledger; membaca `perf-quick/brandwall.json` + `regression-ledger.json` (wajib sidik jari sama).
+- **Catatan:** jejak rAF `.brand-flight` (ray → bidang galeri, Return merapat ke titik asal); 9 state pembanding dicek clip/viewBox/frame/hit-test (efek tidak menutupi spesimen); sumber dari teks `.case-page` (`textContent`) + `instruments.ts`/`brandwall-room.ts` karena nilai probe/measure dirender satu per satu. Video dipotong: loading gate, hotspot, tap cepat dan ekor history tidak difilmkan (tetap dites + difoto; detik yang dipertahankan di `evidence.json.filmed`).
+
+#### `assets/renders/personal-brandwall/evidence/`
+- **Peran:** paket gate 7E. `walkthrough-mobile.mp4` (±45 dtk), `walkthrough-desktop.mp4` (±27 dtk), `contact-sheet.jpg` (20 frame), strip `i01`…`i12`, PNG `m*`/`d*`, `dev-checks/` (hasil `viewport`/`edges`), `evidence.json`.
+- **Dipakai oleh:** pemilik saat gate 7E; PROGRESS.
+
+### Fase 7E — BrandWall visual studio (2026-09-18, Codex)
+
+#### `web/components/brandwall-room.tsx`
+- **Peran:** studio visual personal pengganti flow generik BrandWall.
+- **Ekspor utama:** `VisualStudio`, `StudioEvidence`; helper `Capture` menampilkan PNG asli dalam SVG crop.
+- **Dipakai oleh:** `case-file.tsx`, suite `studio` dan `perf-brandwall`.
+- **Bergantung pada:** `lib/brandwall-room.ts`, React state/useId, enam PNG lokal.
+- **State / efek samping:** specimen crop/contrast/name; Before/Compare/After; tiga sumbu probe,
+  safe/broken, tema ilustrasi. State bertahan ketika scroll, reset saat route/reload. Tidak ada request ke
+  backend BrandWall, data pengunjung, classifier, atau pengukuran live.
+- **Catatan:** pasangan memakai viewBox dan clip SVG sama; footer after digeser −29 px sumber agar posisi
+  kontainernya sejajar. Pixel tidak direcolor. Full capture tertaut. Reveal clip 220ms, tap cepat retarget;
+  reduced motion langsung. Desktop contact sheet sticky + pasangan besar, dua meja batas ukur, tujuh disclosure.
+
+#### `web/lib/brandwall-room.ts`
+- **Peran:** narasi/data studio (approved gate 7E) dengan sumber dossier §3/§6 K3,K5,K6,K7,K15/§9.
+- **Ekspor utama:** `specimens` (3 pasangan rekaman), `boundaries` (BP1/BP3/BP6), `studioRules` (7 kelas).
+- **Dipakai oleh:** studio; tidak mengubah engine/detector asli.
+- **Bergantung pada:** dossier `portfolio/CAPABILITY_BRANDWALL.md`, English gallery asli.
+- **State / efek samping:** readonly. Batas probe bukan batas universal. C4 = 0, tidak mengarang pasangan gagal.
+- **Catatan:** F3 memakai varian monokrom per tema (brightness filter); A8 parsial dan 18 aset ditolak tetap terlihat.
+
+#### `web/public/images/brandwall/`
+- **Peran:** enam PNG bukti English, salinan byte-identik dari `brandwall/data/video/en_evidence/`.
+- **Ekspor utama:** `b08-tall-1x4__S1__light__before.png` / `__after.png`,
+  `b12-white-only__S4__light__before.png` / `__after.png`,
+  `b29-longname__S1__light__before.png` / `__after.png`.
+- **Dipakai oleh:** studio SVG, thumbnail contact sheet, link full capture.
+- **Bergantung pada:** arsip English, bukan hasil run baru. 288006 byte total; 1440×900, kecuali name-before 1550×900.
+- **State / efek samping:** file statis. Hash sumber di `source-assets.json`, audit di `source-check.json`.
+
+#### Perubahan modul bersama (7E)
+- `web/components/case-file.tsx`: BrandWall → `VisualStudio` + `StudioEvidence`, teaser CrossCheck personal.
+- `web/lib/cases.ts`: BrandWall `draft:true`, aperture `PrismPivot`, transition `prism`; deck/brief/hotspot
+  personal, batas sweep berupa rentang, A8 parsial. Angka Readings tetap dari dossier.
+- `web/lib/instruments.ts`: pitch BrandWall DRAFT + konteks 30 synthetic assets / 5 surfaces / 2 themes.
+- `web/app/page.tsx`: DRAFT BrandWall, `.brand-chapter` spektrum + dua specimen; observer tetap sekunder.
+- `web/components/observatory-shell.tsx`: ref `prism`, `prismFlight(in|out)`, layer `.brand-flight`;
+  ray dari proyeksi prisma membuka plane 720ms, arrival fade 320ms, Return merapat ke posisi asal tersimpan,
+  chain memakai penutupan asal/pembukaan tujuan. Timeline pathname cleanup menjaga Back tidak push route basi.
+  Tidak mengganti scene/geometri Blender atau menambah Canvas.
+- `web/app/globals.css`: blok 7E mobile lalu media desktop ≥1024px; namespace `.brand-*` + `#brandwall` saja,
+  contact sheet, pair clip, line probe, rules, disclosure, reduced-motion. Spektrum dekoratif tidak memakai warna status.
+- `web/scripts/verify_cases.py`: BrandWall DRAFT + `.brand-steps li`; judul hotspot dan angka tetap sama.
+- `web/scripts/verify_mobile.py`: `DRAFTS` (sejak gate 7E kosong; homepage 0 DRAFT).
+- `web/scripts/verify_case.py`: cek 0 DRAFT CrossCheck dicakup ke `.case-page` (kicker homepage BrandWall tidak ikut terhitung).
+- `web/scripts/verify_desktop.py`: BrandWall dikecualikan dari flow generik mendatar; layout studio diuji suite sendiri.
+- `web/scripts/run_regressions.py`: registry `studio` dan `perf-brandwall`, aturan ledger Q42 tetap.
+- `web/scripts/perf_quick.py`: segmen `visual comparisons` untuk tiga pasangan/tiga mode; report menyimpan
+  fingerprint sumber agar Testing Q47 dapat memakai fps Development tanpa ukur ulang.
+- `web/README.md`: brief personal, provenance copy/angka/screenshot, perbedaan run ID/EN, motion contract, handoff 7E.
+
+#### `web/scripts/verify_brandwall_room.py`
+- **Peran:** tes Development personal 7E, bukan paket gate.
+- **Ekspor utama:** async `viewport(browser,width,height)`, `edges(browser)`, `position`, `shot`, CLI `--sizes`, `--no-edges`.
+- **Dipakai oleh:** runner `studio`; `brandwall_room_evidence.py` mengimpor `viewport`/`edges`/`position` (dan mengalihkan `OUT` ke `evidence/dev-checks/`).
+- **Bergantung pada:** helper `verify_case`, `perf_quick`, `run_regressions.fingerprint`, Python Playwright Chromium.
+- **State / efek samping:** enam viewport HP→tablet→desktop; chapter maju/balik, prisma, satu Canvas, hotspot,
+  3 pasangan × 3 mode, clip sejajar, tap cepat, 3 batas safe/broken, tema, aturan C4/C5/A8, Return/fokus,
+  Next/Back/Forward/direct/reload; edge reduced/fallback/slow model/Back saat flight/resize. PNG + JSON lokal.
+- **Catatan:** suite fase lama tetap 390×844 melalui runner. Cakupan Testing 7E mengikuti Q47, bukan ulang semua viewport.
+
+#### `assets/renders/personal-brandwall/dev/`
+- **Peran:** hasil Development + sumber; belum paket `evidence/` Testing.
+- **Ekspor utama:** `mobile-before-desktop.json` (3 HP, sumber `caf41715af2ec449`), `viewport-before-source-upgrade.json` (arsip 6 viewport sebelum PNG resolusi asli; edge blocked-model gagal di rig), `mobile-crop-check.json`
+  + `contrast-alignment-390x844.png` (koreksi F3 dan crop sebelum desktop), `verification.json` dan PNG per
+  viewport/edge; `source-assets.json` (6 hash), `source-check.json` (6 salinan asli + fakta dossier), `env-check.md`.
+- **Dipakai oleh:** PROGRESS, sesi Testing; bukan gate pemilik.
+- **Bergantung pada:** suite `studio`, verifikasi aset lokal read-only, 3-engine health check.
+- **State / efek samping:** PNG/verification.json diperbarui oleh suite. Snapshot sebelum desktop dipertahankan.
+- **Catatan:** fps → `assets/renders/perf-quick/brandwall.json` (passed 2026-09-24, GPU Intel; ukur di rig ber-GPU, llvmpipe gagal palsu); status suite/fingerprint → `assets/renders/regression-ledger.json`.
 
 ### Gate 7D lolos (2026-09-18, Claude Code)
 
@@ -1302,7 +1415,7 @@ Brief personal + tabel sumber copy DRAFT: `web/README.md` bagian Phase 7A.
   tahap Development (Codex/Claude Code) lalu Testing (Claude Code/Antigravity, paket bukti di
   `assets/renders/<slug-fase>/evidence/`); lihat PLAN §12 dan `PROMPT.md`.
 - **State / efek samping:** diperbarui setiap sesi; tidak menandai fase done tanpa gate pemilik.
-- **Catatan:** Fase 0–6 `done` (gate 2026-09-14/15). Fase 7 `done` 2026-09-16 (Testing ulang 14/14; jeda instrumen diterima). Fase 7A `done` 2026-09-16 (copy approved; dua temuan diterima). Fase 7B `done` 2026-09-17 (Testing 18/18; copy approved; Cut sebelum Form diterima). Fase 7C `done` 2026-09-17 (Testing 21/21; copy approved; fix jendela clip trace; jarak verdict HP diterima). Fase aktif 7D `ready-for-test` (terintegrasi, pengecualian pemilik tanpa tes ulang; regresi penuh/temuan terbuka di entri 7D); 7E–7F/8 `todo`, 9 `deferred`. `assets/` tidak dilacak git sejak 2026-09-15 (tetap lokal; riwayat commit lama masih memuatnya). Log sesi dijaga ringkas.
+- **Catatan:** Fase 0–6 `done` (gate 2026-09-14/15). Fase 7 `done` 2026-09-16 (Testing ulang 14/14; jeda instrumen diterima). Fase 7A `done` 2026-09-16 (copy approved; dua temuan diterima). Fase 7B `done` 2026-09-17 (Testing 18/18; copy approved; Cut sebelum Form diterima). Fase 7C `done` 2026-09-17 (Testing 21/21; copy approved; fix jendela clip trace; jarak verdict HP diterima). Fase 7D `done` (gate 2026-09-18; Testing 22/22, copy approved). Fase aktif 7E `in-dev`; 7F/8 `todo`, 9 `deferred`. `assets/` tidak dilacak git sejak 2026-09-15 (tetap lokal; riwayat commit lama masih memuatnya). Log sesi dijaga ringkas.
 
 ## 5. Aset
 

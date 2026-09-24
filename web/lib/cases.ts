@@ -21,7 +21,7 @@ export type CaseFile = {
   video: { duration: number; label: string; intro: string };
   // Phase 7A: a named node the case is entered and left through (CrossCheck's middle lens).
   aperture?: string;
-  transition?: 'pulse' | 'ribbon' | 'time';
+  transition?: 'pulse' | 'ribbon' | 'time' | 'prism';
 };
 
 // Screen position (CSS px) of the lens a case is entered through: written by the scene every frame,
@@ -193,21 +193,21 @@ export const caseFiles: readonly CaseFile[] = [
       intro: 'English captions. No audio. Its seven-day segment replays simulated business dates; the real timer record is in the notes under Readings.' },
   },
   {
-    id: 'brandwall', draft: false,
-    deck: ['Find where brands break.', 'Close it with one rule.'],
+    id: 'brandwall', draft: false, aperture: 'PrismPivot', transition: 'prism',
+    deck: ['Put the brand under light.', 'Show exactly what breaks.'],
     brief: [
       'A white-label product looks tidy with one demo logo. Then real brands arrive: very wide wordmarks, white logos on light themes, long names in other scripts and files that fail to load.',
-      'I test every brand asset on every product surface and theme, measure where the layout breaks and deliver CSS rules that close each type of break.',
+      'I build a visual test studio: try extreme assets, measure the failure and compare the same view after CSS rules change. Missing or empty assets still need to be rejected.',
     ],
     context: 'Owned test app with 30 generated brand assets. No real logos are used, and no brand affiliation is claimed.',
     instrumentHeading: ['Light in.', 'Measured bands out.'],
     components: [
       { id: 'matrix', node: 'brandwallMount', part: 'ceramic', marker: [12, 33], title: 'Test matrix', label: '30 assets · 5 surfaces · 2 themes',
-        body: 'Every generated brand asset is placed on five product surfaces in light and dark themes, then captured automatically. A plain control asset must produce no findings.' },
+        body: 'Thirty synthetic assets meet five surfaces in two themes. That makes 300 captures per run. A healthy control keeps the detector honest: it must produce no findings.' },
       { id: 'measure', node: 'PrismPivot', part: 'Prism', marker: [12, 57], title: 'Measurement', label: 'Numbers, not opinions',
-        body: 'Each finding carries a measured value, its threshold and a screenshot: clipping in pixels, contrast ratios against WCAG 2.1 and name length per script.' },
+        body: 'A cropped logo, unreadable ink or overflowing name gets a measured value and a threshold. Probe sweeps found 11 boundary ranges, with the step size kept visible.' },
       { id: 'fixes', node: 'SpectrumPivot', part: 'Spectrum0', marker: [88, 58], title: 'Fix rules', label: 'One rule per class',
-        body: 'Findings are grouped into seven classes of break. Each class gets one CSS rule, then the same 300 combinations are tested again.' },
+        body: 'Seven CSS rules are checked against the same matrix. Five failure classes close. Missing files and empty ink remain asset rejections; a fallback does not make them repaired.' },
     ],
     flowHeading: ['From thirty assets', 'to seven rules.'],
     flow: [
@@ -221,12 +221,12 @@ export const caseFiles: readonly CaseFile[] = [
     readings: [
       { value: 300, suffix: '', label: 'Screenshots per run', context: '30 assets × 5 surfaces × 2 themes, captured in five consecutive runs with 0 failed cells.', source: '§3.1 / §6 K1 / §7' },
       { value: 18, suffix: '', label: 'Findings left after the fixes', context: 'Down from 186, with 0 new findings. The 18 are a missing file and a hairline logo, rejected at the asset check rather than hidden.', source: '§6 K7 / §7' },
-      { value: 11, suffix: '', label: 'Breakpoints found by sweeps', context: 'Exact limits where a design starts to fail, from 716 measured observations.', source: '§6 K5 / §7' },
+      { value: 11, suffix: '', label: 'Breakpoints found by sweeps', context: 'Tested boundary ranges, with step sizes, from 716 measured observations.', source: '§6 K5 / §7' },
       { value: 0, suffix: '/300', label: 'False changes between identical runs', context: 'Baseline comparison proven twice; swapping one asset was flagged on its own.', source: '§6 K8 / §7' },
     ],
     limits: [
       'Captures ran at desktop sizes (1440×900, and 1200×630 for share cards) in Chromium. Other viewports and browsers belong to a separate QA sweep.',
-      'The English evidence run used for the video recorded 182 findings instead of 186, because English names have different text widths. Both runs are kept separate rather than made to agree.',
+      'The English gallery and video recorded 182 findings instead of 186 because names have different text widths. A8 remains partial: a non-technical person has not yet tested whether the gallery is understandable without explanation.',
     ],
     tools: ['Python', 'Playwright', 'Pillow', 'NumPy', 'FastAPI', 'Jinja2', 'Docker / Docker Compose', 'matplotlib', 'openpyxl', 'GNU Make', 'uv', 'unittest', 'ffmpeg'],
     video: { duration: 124.966667, label: 'BrandWall demo with burned-in English captions',

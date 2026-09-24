@@ -691,3 +691,46 @@ keyboard and reduced motion are final at once.
 
 Gate 2026-09-18 ("semuanya approved"): all new 7D copy approved and DRAFT labels removed (the chapter strip now reads
 "Illustration"). Accepted as they are: the faint hairline ring → rail and the unlabelled dial ticks.
+
+## Phase 7E — BrandWall visual studio (gate passed, 2026-09-24)
+
+Personal brief: a white-label product can look sound with a demo logo and break with a tall mark,
+white ink or a long publication name. The story is specimen → surface/theme → measured break → same-view
+comparison. Mobile presents one large aligned pair with three tap controls. Desktop expands it into an
+editorial contact sheet beside the comparison, then a measurement desk. The existing optical bench remains
+in use; observer physics is a secondary chapter detail. No new 3D assets are needed.
+
+Copy approved at gate 7E (2026-09-24; DRAFT labels removed). At the gate the phone view of the long-name pair
+fills the phone frame with a taller crop that keeps the neighbouring card (`phoneView`, both captures still share one view) and the 8px mono labels
+became 10px. Source: the local
+`portfolio/CAPABILITY_BRANDWALL.md` snapshot, not a fresh run of the original detector.
+
+| Copy / evidence | Source |
+|---|---|
+| Personal pitch, brief, hotspots and CrossCheck Next introduction | BrandWall §1–4, PLAN §5.1/§5.5; DRAFT synthesis |
+| 30 synthetic assets × 5 surfaces × 2 themes = 300 captures/run | §3.1, §7 |
+| Crop, contrast, text overflow recorded pairs | Original English runs `2026-09-05T17-19-21` / `2026-09-05T17-21-24` under `brandwall/data/video/en_evidence/`; six full-resolution PNGs copied byte-identically to `public/images/brandwall/` |
+| BW-C1 overflow >2 px; C3 contrast <3:1; C7 overflow >1 px | §6 K3; recorded detector policy, not a new compliance claim |
+| 1.00→1.25 ratio, 0.30→0.35 luminance, 28→32 Latin name, steps .25/.05/4 | §6 K5, BP1/BP3/BP6; ranges from fixed probes, not universal exact limits |
+| 11 boundaries, 7 CSS rules, 5 classes closed; 186→18 production vs 182→18 English | §6 K5/K7/K15, §7 |
+| Aspect distortion >1%; 0 C4 findings | §6 K3/K7; no invented failed specimen |
+| 18 missing/empty-ink findings; reject source assets | §6 K7, §9 |
+| A8 partial: non-technical comprehension not tested | §9 |
+
+Pairs use the same SVG viewBox for before and after, with full-size originals linked below. The article
+footer after-image is translated up 29 source pixels to align its shifted container; no scale or color edit is applied. No pixels are
+recolored. The sheet includes three selected records, not all 300 captures. Sources/hashes are saved in
+`assets/renders/personal-brandwall/dev/source-assets.json`. Screenshot viewports in the source were desktop;
+viewing these records on mobile does not turn the underlying BrandWall run into mobile QA.
+
+Motion contract: chapter orbit opens a three-band ray then reveals specimen measurement frames (scrub,
+reversible). Open follows the projected `PrismPivot` into a gallery plane over 720 ms, `power2.inOut`;
+arrival uncovers it over 320 ms. Return folds toward the saved chapter origin; a changed viewport uses the
+current projected origin. The shared flight timeline owns Next, interruption and cleanup. Before/Compare/After
+retarget a 220 ms clip reveal with identical image coordinates; no animation queue or precision drag.
+Probe selection changes the specimen and measurement line over 220 ms. Labels do not move. Reduced motion
+shows final states immediately. Illustration theme switching never recalculates archived boundaries.
+
+Verification: `verify_brandwall_room.py` exports `viewport(browser,w,h)` and `edges(browser)` for Testing.
+Runner suites `studio` / `perf-brandwall`; Q47 Testing should reuse Development fps by source fingerprint,
+run only new-feature evidence at 390×844 and 1440×900, and make the two short walkthroughs separately.
