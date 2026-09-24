@@ -1,6 +1,6 @@
 # CODEMAP — Peta kode Rayin Observatory
 
-Update terbaru 2026-09-24 · Claude Code: **Fix parallax HP** — `observatory-scene.tsx` (loop instrumen): di bawah 1024 px artefak tidak meluncur mengikuti `scrollY` (jitter + menimpa teks), melainkan diam dan bertukar lewat skala `handOver` (keluar `transition` 0–.18, masuk .82–1, outro menyusut); ukuran home HP .33, pusat 0; `globals.css` `.scene-layer` `height: 100lvh` (canvas tak resize saat URL bar bergerak). Desktop tetap meluncur. Belum di-deploy.
+Update terbaru 2026-09-24 · Claude Code: **Fix parallax HP (revisi 2)** — `observatory-scene.tsx`: HP tetap meluncur bareng teks (tukar-skala pertama membuat artefak lenyap saat scroll sedikit, dibuang); jarak geser kini diukur dalam tinggi section (`.instrument-stage`, di-cache `stageHeight`, reset saat lebar berubah) bukan tinggi canvas, ukuran home HP .33, pusat .53 section; `globals.css` `.scene-layer` `height: 100lvh` (canvas tak resize saat URL bar bergerak). Desktop tak berubah.
 
 Sebelumnya Update terbaru 2026-09-24 · Claude Code: **Fase 8 Development → `ready-for-test`**. Meta/OG/Twitter (`lib/site.ts`, `layout.tsx`, `generateMetadata` di `work/[slug]/page.tsx`), `robots.ts`/`sitemap.ts`, ikon (`app/icon.svg`, `apple-icon.png`, `favicon.ico`), share card `public/og/*.jpg` dari `scripts/build_share_cards.py`, `.vercelignore`, `.gitignore` diperketat; deploy produksi `https://rayin-observatory.vercel.app`. Lihat entri "Fase 8 — Development" di §4.
 

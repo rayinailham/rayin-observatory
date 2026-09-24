@@ -114,6 +114,8 @@ function World({ entered, reducedMotion, progress, planetProgress, chapter, case
   const desktop = size.width >= 1024;
   const casePosition = useRef(0);
   const projected = useMemo(() => new Vector3(), []);
+  const stageHeight = useRef(0);
+  useEffect(() => { stageHeight.current = 0; }, [size.width]);
   const frames = useRef(0);
   const cameraUp = useMemo(() => new Vector3(), []);
   const cameraRight = useMemo(() => new Vector3(), []);
@@ -156,25 +158,27 @@ function World({ entered, reducedMotion, progress, planetProgress, chapter, case
     state.camera.lookAt(0, 0, 0);
     cameraUp.set(0, 1, 0).applyQuaternion(state.camera.quaternion);
     cameraRight.set(1, 0, 0).applyQuaternion(state.camera.quaternion);
+    // The canvas is the large viewport (stable while a phone's URL bar moves) but each chapter is one small-viewport
+    // screen. On a phone the slide is measured in those screens, so the model travels exactly as fast as the copy.
+    const screenH = desktop ? viewport.height * 100 : (stageHeight.current ||= document.querySelector<HTMLElement>('.instrument-stage')?.offsetHeight ?? viewport.height * 100);
+    const homeY = (offset: number) => desktop
+      ? viewport.height * (-.03 + offset + outro)
+      : (size.height / 2 - screenH * (.53 - offset - outro)) / 100;
     views.current.forEach((moving, i) => {
       const group = instrumentRefs.current[i];
       if (!group) return;
       const incoming = i === index;
       const outgoing = i === (from ?? index - 1) && transition < 1;
       group.visible = mix > .001 && i === caseIndex || (mix < .999 && reveal > 0 && outro < 1 && (incoming || outgoing));
-      // Desktop slides the instrument with the page. On a phone the page scrolls on the compositor while this
-      // canvas follows scrollY a frame or two later, so a sliding model jitters and rides over the copy.
-      // There it stays put and the chapters hand over by scale: out fast, in only once the next copy is nearly in place, so nothing rides over the text passing by.
-      const offset = desktop ? (incoming ? -(1 - transition) : transition) : 0;
-      const handOver = desktop ? 1 : (incoming ? MathUtils.smootherstep(transition, .82, 1) : 1 - MathUtils.smootherstep(transition, 0, .18)) * (1 - MathUtils.smootherstep(outro, 0, .7));
+      const offset = incoming ? -(1 - transition) : transition;
       const fit = i === 0 ? 4.4 : 3.5;
-      const homeScale = Math.min(viewport.width * (desktop ? .48 : .82), viewport.height * (desktop ? .66 : .33)) / fit * Math.max(handOver, .001);
+      const homeScale = Math.min(viewport.width * (desktop ? .48 : .82), viewport.height * (desktop ? .66 : .33)) / fit;
       const caseScale = desktop
         ? Math.min((stageRect?.width ?? size.width * .55) * .76, size.height * .60) / zoom / fit
         : Math.min(viewport.width * .62, viewport.height * .33) / fit;
       const inCase = i === caseIndex ? mix : 0;
       group.scale.setScalar(MathUtils.lerp(homeScale, caseScale, inCase));
-      group.position.copy(cameraUp).multiplyScalar(MathUtils.lerp(viewport.height * ((desktop ? -.03 : 0) + offset + (desktop ? outro : 0)), casePosition.current, inCase));
+      group.position.copy(cameraUp).multiplyScalar(MathUtils.lerp(homeY(offset), casePosition.current, inCase));
       group.position.addScaledVector(cameraRight, MathUtils.lerp(homeX, caseX, inCase));
       if (group.visible) moving.rig.update(time);
     });
