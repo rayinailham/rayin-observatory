@@ -1,6 +1,12 @@
 # CODEMAP — Peta kode Rayin Observatory
 
-Update terbaru 2026-09-24 · Claude Code: **Revisi pemilik Q49 — scroll native + tirai** (pasca-gate 7E, di luar checklist fase). Chapter/hero/inspection field tidak lagi di-pin; putaran instrumen = geser/tap pengunjung (`orbits` ref di shell), bukan scroll; iris/pulsa/pita/cincin/prisma diganti satu `.curtain` dengan lima gaya per case (`cases.ts` `curtain`). Skrip verifikasi lama yang mengasumsikan scroll-orbit/iris/flight **basi** sampai diperbarui (7F). Lihat entri "Revisi Q49" di §4.
+Update terbaru 2026-09-24 · Claude Code: **Gate 7F lolos → `done`**. Tanpa perubahan kode; hanya PLAN §3 Q50 + PROGRESS. Peta kode di bawah tetap berlaku untuk Fase 8.
+
+Sebelumnya Update terbaru 2026-09-24 · Claude Code: **7F Testing → `awaiting-gate`** (putaran penuh). Skrip bukti baru `web/scripts/observatory_evidence.py` → paket `assets/renders/personal-observatory/evidence/` 17/17 pass (sumber `2e90c092c607038b`, runner 18/18 skip = hijau); tanpa perubahan kode app. Catatan: skrip `*_evidence.py` fase lama tak bisa diimpor lagi (`crosscheck_room_evidence.py` → `field_at` hilang) — helper disalin ke skrip baru. Lihat entri "Fase 7F — Testing" di §4.
+
+Sebelumnya Update terbaru 2026-09-24 · Claude Code: **7F Development (Five rooms, one observatory)**. App: `observatory-shell.tsx` label `data-chapter` = chapter yang mengisi layar (bukan chapter berikut yang baru mengintip); `globals.css` tombol Replay CrossCheck di baris kicker pada HP (matriks 360×740 276 → 325 px) dan tinggi step aktif tetap di desktop (tanpa lompatan 9 px saat scan). Tes: helper baru `web/scripts/q49.py` (putar instrumen geser/tap, log tirai) dipakai suite `room`/`dispatch`/`monitor`/`time`/`studio`/`mobile`/`cases` + `perf_quick.py` (segmen `instrument turn (tap)`); `verify_cases.py` memeriksa tirai di kelima hop rantai Next. Lihat entri "Fase 7F — Development" di §4.
+
+Sebelumnya 2026-09-24 · Claude Code: **Revisi pemilik Q49 — scroll native + tirai** (pasca-gate 7E, di luar checklist fase). Chapter/hero/inspection field tidak lagi di-pin; putaran instrumen = geser/tap pengunjung (`orbits` ref di shell), bukan scroll; iris/pulsa/pita/cincin/prisma diganti satu `.curtain` dengan lima gaya per case (`cases.ts` `curtain`). Skrip verifikasi lama yang mengasumsikan scroll-orbit/iris/flight **basi** sampai diperbarui (7F). Lihat entri "Revisi Q49" di §4.
 
 Sebelumnya 2026-09-24 · Claude Code: **Gate 7E lolos → `done`**. DRAFT BrandWall dilepas (`cases.ts` `draft:false`, `page.tsx` strip "Illustration", komentar `brandwall-room.ts`/`instruments.ts`/`globals.css`; tes `verify_mobile.py` `DRAFTS = set()`, `verify_cases.py`, `verify_brandwall_room.py`, `brandwall_room_evidence.py` mengharapkan 0 DRAFT). Perbaikan izin pemilik: `brandwall-room.tsx` hook `useWide` + prop `view` di `Capture` (HP memakai `phoneView` bila ada), `brandwall-room.ts` `phoneView` pasangan Overflow, `globals.css` label mono 7E 8 → 10 px; `web/README.md` 7E = gate passed. Runner 11 suite + `perf-brandwall` passed (sumber `4bf13e4158597b83`). Lihat entri "Gate 7E" di §4.
 
@@ -33,7 +39,9 @@ Sebelumnya · Codex: urutan delapan planet + perbaikan gerak/fade; lihat “Revi
 > menunjuknya dan berkas akan diubah. Update setiap berkas dibuat/diubah/dipindah/dihapus.
 > Entri tidak cocok dengan kode = bug; perbaiki saat ditemukan.
 
-**Terakhir diperbarui:** 2026-09-24 · Claude Code · Gate 7E lolos → `done`; lihat entri "Gate 7E" di §4.
+**Terakhir diperbarui:** 2026-09-24 · Claude Code · 7F Testing → `awaiting-gate`; lihat entri "Fase 7F — Testing" di §4.
+Sebelumnya: 2026-09-24 · Claude Code · 7F Development.
+Sebelumnya: 2026-09-24 · Claude Code · Gate 7E lolos → `done`.
 Sebelumnya: 2026-09-18 · Codex · 7E Development.
 Sebelumnya: 2026-09-17 · Claude Code · **Gate 7C lolos → `done`**; commit + push. Lihat entri "Gate 7C" di §4.
 Sebelumnya: 2026-09-17 · Claude Code · **7C Testing → `awaiting-gate`**: `web/scripts/driftwatch_room_evidence.py` baru (paket `assets/renders/personal-driftwatch/evidence/`, 21/21, 3 MP4), `driftwatch-room.tsx` jendela clip trace, `globals.css` baris `.monitor-trace-reveal` dihapus, `web/README.md` kontrak motion 7C. Lihat entri "Fase 7C — Testing" di §4.
@@ -84,7 +92,8 @@ Semua dari root project kecuali disebut lain.
 |---|---|
 | `cd web/scripts && timeout 1500 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python showpiece_evidence.py` | Paket bukti Testing Fase 7 → `assets/renders/showpiece/evidence/`: 14 item (termasuk `enterEarly`: urutan unduh instrumen sesudah Enter + scroll/case dini), MP4 390×844 **dengan audio asli situs**, performa PLAN §11 (gate slow 4G + CPU 4×, fps 4×/6×, GLB, DPR), contact sheet, `evidence.json`; exit 1 bila ada fail. Jalankan setelah 6 suite regresi (item `phones` membaca JSON-nya). Server :8767 aktif. |
 | `/home/rayin/Projects/Testing/crosscheck/.venv/bin/python web/scripts/run_regressions.py [--suites a,b] [--phone-only mobile,case,cases,showpiece] [--force] [--list]` | **Q42 — pakai ini untuk semua regresi.** Suite berurutan (room, audio, mobile, case, cases, showpiece, desktop-a, desktop-b, perf-crosscheck); lewati suite yang sudah `passed` pada sidik jari sumber sama (`assets/renders/regression-ledger.json`); `--phone-only` = 390×844 saja; menolak jalan bila build lebih tua dari sumber. Dari root, server :8767 aktif. |
-| `cd web/scripts && timeout 600 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python perf_quick.py --slug <project> [--baseline <url>]` | **Q42 — gerbang fps Development** sebelum `ready-for-test`: 390×844 DPR 2, suara nyala, CPU 4×, chapter → terbang → scroll case → Return; tiap segmen ≥45 fps dan ≤10% frame lambat → `assets/renders/perf-quick/<slug>.json`. `--baseline` = build pembanding (mis. salinan HEAD di port lain) untuk atribusi. |
+| `cd web/scripts && timeout 600 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python perf_quick.py --slug <project> [--baseline <url>]` | **Q42 — gerbang fps Development** sebelum `ready-for-test`: 390×844 DPR 2, suara nyala, CPU 4×, scroll masuk chapter → tap putar instrumen (Q49) → tirai ke case → scroll case → Return; tiap segmen ≥45 fps dan ≤10% frame lambat → `assets/renders/perf-quick/<slug>.json`. `--baseline` = build pembanding (mis. salinan HEAD di port lain) untuk atribusi. |
+| `cd web/scripts && timeout 2400 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python observatory_evidence.py [--redo-interruptions \| --redo-fps]` | Paket bukti Testing 7F (putaran penuh) → `assets/renders/personal-observatory/evidence/` (17 item, 8 kategori, `perProjectDevice`, 3 MP4: HP 390×844 touch, desktop 1440×900 wheel, slow-motion 10 hop tirai 0.25×; `contact-sheet-mobile/-desktop.jpg`, strip `i01`…`i13`, `evidence.json`). Lima project × dua device: chapter (geser + tap), tirai masuk/kembali, interaksi ruang, Return; rantai Next 5 hop, Back/Forward, direct+refresh; interupsi, model diblok, fps rantai; 6 viewport + edge + perf_quick dibaca dari ledger sidik jari sama. `--redo-*` = ulang satu bagian ke paket sidik jari sama. Server :8767 aktif; ±15 menit. |
 | `cd web/scripts && timeout 1500 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python brandwall_room_evidence.py` | Paket bukti Testing 7E (Q47 ringan) → `assets/renders/personal-brandwall/evidence/` (17 item, 8 kategori, 2 MP4 ≤ ±90 dtk, `contact-sheet.jpg`, strip `i01`…`i12`, `dev-checks/`, `evidence.json`); memanggil `verify_brandwall_room.viewport` (390×844, 1440×900) + `edges`; fps dibaca dari `perf-quick/brandwall.json` bila sidik jari sama; exit 1 bila ada fail. Server :8767 aktif; ±4 menit. |
 | `cd web/scripts && timeout 900 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python verify_brandwall_room.py [--sizes WxH,...] [--no-edges]` | Fase 7E Development (suite `studio`): chapter spektrum, prisma, hotspot, 3 pasangan × 3 mode, batas safe/broken, aturan, Return/Next/history/reload; edge reduced/fallback/slow/Back saat flight + resize → `assets/renders/personal-brandwall/dev/`. Server :8767 aktif. |
 | `cd web/scripts && timeout 2700 /home/rayin/Projects/Testing/crosscheck/.venv/bin/python duewatch_room_evidence.py [--only mobile,desktop,back,slow,reduced,viewports,fps] [--remeasure-fps]` | Paket bukti Testing 7D → `assets/renders/personal-duewatch/evidence/` (22 item, 8 kategori, 3 MP4, contact sheet HP + desktop, `evidence.json`); memanggil `verify_duewatch_room.viewport/edges` (Q42). `--only` tetap menghapus paket dulu. Jalankan sesudah runner regresi; ±30 menit. |
@@ -185,10 +194,12 @@ Rayin Observatory/
 │   ├── scripts/verify_duewatch_state.mjs  Phase 7D illustration state boundaries (node)
 │   ├── scripts/driftwatch_room_evidence.py  Phase 7C Testing evidence pack (chapter trace, ribbon, five comparisons traced, interruptions, slow motion, fps, sources)
 │   ├── scripts/brandwall_room_evidence.py  Phase 7E Testing evidence pack, Q47 light (flight traces, 9 comparator states, probes, sources, fps from Development)
+│   ├── scripts/observatory_evidence.py  Phase 7F Testing evidence pack, full round (5 projects × phone/desktop, Next chain, interruptions, fallback, chain fps)
 │   ├── scripts/verify_brandwall_room.py  Phase 7E Development tests (suite `studio`), imported by the evidence pack
 │   ├── scripts/duewatch_room_evidence.py  Phase 7D Testing evidence pack (pointer, ring, hand/signal traces, reminder sequence, interruptions, slow motion, fps, sources)
 │   ├── scripts/run_regressions.py  Q42 regression runner + ledger (skip suites already green on the same source)
-│   ├── scripts/perf_quick.py      Q42 Development fps gate (4x CPU, one phone)
+│   ├── scripts/perf_quick.py      Q42 Development fps gate (4x CPU, one phone); 7F: + hand-turn segment
+│   ├── scripts/q49.py             7F helpers: land/to_chapter, turn (drag), tap, curtain watch/log (imported by the suites)
 │   ├── scripts/case_files_evidence.py  Phase 5 Testing evidence pack (all 5 cases + chain)
 │   ├── scripts/desktop_evidence.py  Phase 6 Testing evidence pack (desktop MP4 + 21 items)
 │   ├── scripts/verify_audio.mjs    Phase 7 controlled audio lifecycle checks
@@ -242,6 +253,7 @@ Rayin Observatory/
     │   ├── personal-duewatch/dev/  Phase 7D Development PNGs + verification.json (verify_duewatch_room)
     │   ├── personal-brandwall/dev/  Phase 7E Development results + source checks
     │   ├── personal-brandwall/evidence/  Phase 7E Testing gate pack (MP4 ×2, contact sheet, strips, dev-checks/, evidence.json)
+    │   ├── personal-observatory/evidence/  Phase 7F Testing gate pack (MP4 ×3, contact sheets HP + desktop, strips i01–i13, evidence.json)
     │   ├── personal-duewatch/evidence/  Phase 7D Testing gate pack (MP4 ×3, sheets, evidence.json)
     │   ├── perf-quick/<slug>.json  Q42 fps gate results
     │   ├── regression-ledger.json  Q42 runner ledger (suite → source fingerprint, status)
@@ -282,6 +294,29 @@ Rayin Observatory/
 
 ## 4. Modul dan berkas
 
+### Fase 7F — Testing (2026-09-24, Claude Code)
+
+#### `web/scripts/observatory_evidence.py`
+- **Peran:** paket bukti Testing 7F putaran penuh (bukan suite runner).
+- **Ekspor utama:** async `run()`, `walk_device(browser, wide)` (film per device), `chapter` (swipe/wheel → geser sentuh/mouse → tap; strip chapter berubah, scroll tidak memutar), `through_curtain` (log tirai + kunci scroll diukur saat tirai menutup, sebelum rute berganti), `room` (interaksi khas per ruang), `interruptions`, `fallback`, `chain_fps`, `verdicts`/`project_verdict`, `sources_check`, `sheets`, `films`; `redo_interruptions`/`redo_fps` (CLI `--redo-*`). `ITEMS` 17 item → 8 kategori.
+- **Bergantung pada:** `q49` (land/to_chapter/orbit/turn/tap/watch_curtain), `verify_case` (URL/enter/idle), `verify_cases` (`CASES`, `trace_numbers`), `perf_quick` (GPU, stats), `run_regressions.fingerprint`, `case_files_evidence.tile`, ledger + JSON suite `room/dispatch/monitor/time/studio` + `perf-quick/<slug>.json`, ffmpeg.
+- **State / efek samping:** hapus + tulis ulang `assets/renders/personal-observatory/evidence/` (`--redo-*` hanya menimpa item terkait di `evidence.json`, wajib sidik jari sama). Tidak mengubah app/ledger.
+- **Catatan:** helper Walk/swipe/wheel/encode/slow_motion disalin (skrip arsip 7A tak terimpor sejak Q49). Jebakan terukur: (1) Back sebelum URL berganti (tirai masih menutup di `/`) keluar situs = perilaku browser, maka interupsi Back diuji saat URL sudah `/work/<slug>`; (2) scrollY direset navigasi → kunci scroll diukur saat tirai menutup; (3) `history.length` tidak naik bila entri Forward terpotong → double Open dibuktikan dengan satu Back ke `/`; (4) recorder rAF harus satu generasi (dulu fps berlipat 2×…5× per hop); (5) diff strip = % piksel berubah >24 (pointer DueWatch kecil, 0.3%). Kunci scroll dilepas di ekor pembukaan tirai (±50–320 ms sebelum `open`) — dicatat, bukan bug.
+
+#### `assets/renders/personal-observatory/evidence/`
+- **Peran:** paket gate 7F. `walkthrough-mobile.mp4` (130 dtk), `walkthrough-desktop.mp4` (113 dtk), `slow-motion.mp4` (92 dtk, 10 hop), `contact-sheet-mobile.jpg`/`-desktop.jpg` (20 frame per device), strip `i01`–`i05` per project, `i06` rantai, `i07` history, `i08` interupsi, `i09` beda ruang, `i10` observatorium, `i11` desktop, `i12` 6 viewport × 5 project (foto dev), `i13` fallback; PNG `m*`/`d*`/`f*`, `evidence.json`.
+
+### Fase 7F — Development (2026-09-24, Claude Code)
+
+Integrasi lima ruang setelah Q49. Walkthrough 390×844 + 1440×900: lima chapter diputar lewat tap, rantai Next CrossCheck → … → BrandWall → CrossCheck menutup tirai case asal dan membuka tirai case tujuan, Return/Back/Forward benar, 0 error.
+
+- `web/components/observatory-shell.tsx` (`syncChapters`): `index` tetap berganti saat chapter berikut mulai masuk (serah terima kamera/`lead` tidak berubah); atribut `data-chapter` kini memakai `shown = index − 1` selama `transition < .5`, jadi label/tema = chapter yang mengisi layar. Bug ditemukan `verify_mobile.py` (di puncak CrossCheck label sudah `surgeline`).
+- `web/app/globals.css` (blok 7A): `.inspection-copy { position: relative }`; di HP `.inspection-replay` absolut di kanan baris kicker "How it works"; desktop (≥1024) kembali `position: static; margin-top: 12px`.
+- `web/app/globals.css` (blok 7A desktop): `.case-page .inspection-steps p { min-height: 2lh }` + `.inspection-stage { overflow-anchor: none }`. Dulu di 1440 readout step "Run the checks" terbungkus 2 baris → copy yang di-tengahkan tumbuh 19 px dan scroll anchoring menggeser halaman 9 px saat scan lewat step itu; kini tinggi copy tetap (552 px @1440, 564 @1920) dan scrollY tidak bergerak. Ditemukan `verify_crosscheck_room.py` (cek `stageTop` selama autoplay).
+- `web/scripts/q49.py` (baru): `land`, `to_chapter(slug)`, `orbit(slug)` (baca `--instrument-<i>-orbit`), `turn(slug, v)` (drag horizontal mouse; satu putaran = max(260, 55% stage)), `tap(slug)` (tunggu sampai berhenti di ujung seberang), `watch_curtain`/`curtain_log`/`closed_styles` (rAF log `[state, style, path]`), `CURTAINS` per slug.
+- Suite diperbarui ke Q49 (tanpa scroll-orbit/pin/iris/pulsa/pita/cincin/prisma): `verify_crosscheck_room.py` (strip via `turn`, tap bolak-balik, tirai `stage` masuk/kembali, inspection field autoplay → step button → tap cepat → Replay; edge memeriksa tirai `open`), `verify_surgeline_room.py` (strip via `turn`, `blinds`, hop → `roller`), `verify_driftwatch_room.py` (trace via `turn`, `roller`, hop → `louvre`), `verify_duewatch_room.py` (pointer via `turn`, `louvre`, hop → `prism`), `verify_brandwall_room.py` (beam via `turn`, `prism`), `verify_mobile.py` (tap putar + wheel memindah stage ≥100 px + putaran tidak berubah oleh scroll; toleransi stage 3 px), `verify_cases.py` (tiap hop: `closed_styles == [asal]` dan tirai tujuan `moving`), `perf_quick.py` (segmen `chapter scroll` dari chapter sebelumnya + `instrument turn (tap)`), `verify_case.py` (komentar).
+- Skrip `*_evidence.py` fase lama dan `chapter_walkthrough.py` tetap arsip (mengasumsikan transisi lama); paket 7F Testing memakai skrip baru di tahap Testing.
+
 ### Revisi Q49 — scroll native + tirai per case (2026-09-24, Claude Code)
 
 Permintaan pemilik (PLAN §3 Q49): scroll tidak boleh "menjalankan animasi dulu"; animasi dimainkan pengunjung sendiri; transisi = tirai, beda per case. Menggantikan deskripsi pin/iris/flight di entri 2, 7A–7E dan §5 di bawah bila bertentangan.
@@ -294,7 +329,7 @@ Permintaan pemilik (PLAN §3 Q49): scroll tidak boleh "menjalankan animasi dulu"
 - `web/components/crosscheck-room.tsx`: tanpa ScrollTrigger. `InspectionField` bermain sendiri sekali saat ≥45% terlihat (IntersectionObserver, 0→1 ±7 s), tombol step `.inspection-step-button` memutar ke akhir beat step itu (`stepEnd`), `.inspection-replay` 0→1. `draw(p)` tetap fungsi murni.
 - `web/app/page.tsx`: hint `.orbit-hint` "Drag or tap the instrument to turn it" di chapter selain BrandWall (DRAFT interface copy).
 - Verifikasi sesi ini: `tsc --noEmit`, `eslint` bersih; Playwright Chromium di dev server sementara :8768 (1440×900 + 390×844): wheel 1000 px → section bergeser 1000 px; geser 0 → .27, tap → 1.0; lima tirai `moving` → `open` masuk dan kembali; scan CrossCheck 1.0 / step 2 → .5 / Replay; 0 error. **Belum**: `next build` + server :8767 (masih build lama), runner regresi, geser sentuh di HP fisik.
-- **Tes basi (perlu diperbarui di 7F):** skrip yang mengukur scroll-orbit, pin (`stage top 0`), iris/pulsa/pita/cincin/prisma, atau scrub inspection field — antara lain `verify_crosscheck_room.py`, `verify_surgeline_room.py`, `verify_driftwatch_room.py`, `verify_duewatch_room.py`, `verify_brandwall_room.py`, `verify_mobile.py` ("sticky chapters"), `verify_showpiece.py`, `chapter_walkthrough.py`, dan skrip `*_evidence.py`.
+- **Tes basi → diperbarui di 7F Development (lihat entri 7F; `*_evidence.py` lama tetap arsip):** skrip yang mengukur scroll-orbit, pin (`stage top 0`), iris/pulsa/pita/cincin/prisma, atau scrub inspection field — antara lain `verify_crosscheck_room.py`, `verify_surgeline_room.py`, `verify_driftwatch_room.py`, `verify_duewatch_room.py`, `verify_brandwall_room.py`, `verify_mobile.py` ("sticky chapters"), `verify_showpiece.py`, `chapter_walkthrough.py`, dan skrip `*_evidence.py`.
 
 ### Gate 7E lolos (2026-09-24, Claude Code)
 - `web/lib/cases.ts` BrandWall `draft: false`; `web/app/page.tsx` tanpa label DRAFT BrandWall, strip chapter "Specimen → measure → compare · Illustration".

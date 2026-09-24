@@ -1,4 +1,4 @@
-"""7E Development. Reusable viewport/edges for the separate Testing evidence pack.
+"""7E Development (Q49 update in 7F: hand-turned chapter, prism curtain). Reusable viewport/edges for the separate Testing evidence pack.
 Run via run_regressions.py --suites studio. --sizes allows mobile-before-desktop checks.
 """
 import argparse
@@ -12,6 +12,7 @@ from playwright.async_api import async_playwright
 from verify_case import URL, enter, idle
 from perf_quick import GPU, land
 from run_regressions import fingerprint
+from q49 import to_chapter, turn, watch_curtain, curtain_log, closed_styles
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'assets/renders/personal-brandwall/dev'
@@ -36,18 +37,22 @@ async def viewport(browser, width, height):
     page.on('response', lambda r: bad.append([r.status, r.url]) if r.status >= 400 else None)
     await enter(page)
     await page.evaluate('window.__studioCanvas=document.querySelector("canvas")')
-    chapter = await page.locator('#brandwall').evaluate('e=>({top:e.offsetTop,h:e.offsetHeight})')
+    # Q49: the chapter is one screen; the visitor turns the prism by hand and the beam follows that turn.
+    await to_chapter(page, 'brandwall')
     orbit = []
     for p in (.15, .8, .15):
-        await land(page, chapter['top'] + p * (chapter['h'] - height))
+        await turn(page, 'brandwall', p)
         orbit.append(await page.locator('.brand-chapter-beam').evaluate('e=>getComputedStyle(e).transform'))
     assert orbit[0] != orbit[1] and orbit[0] == orbit[2], orbit
     await shot(page, f'chapter-{tag}')
     origin = await page.evaluate('scrollY')
+    await watch_curtain(page)
     await page.locator('[data-open-case=brandwall]').click()
-    await page.wait_for_function("document.querySelector('.brand-flight').dataset.direction==='out'")
+    await page.wait_for_function("document.querySelector('.curtain').dataset.state==='moving'")
+    await page.wait_for_timeout(260)
     await shot(page, f'prism-{tag}')
-    await page.wait_for_url('**/work/brandwall')
+    log = await curtain_log(page, '/work/brandwall')
+    assert closed_styles(log) == ['prism'], log
     await idle(page)
     assert await page.locator('.case-page .draft-label').count() == 0  # copy approved at gate 7E
     assert await page.evaluate('window.__studioCanvas===document.querySelector("canvas")')
@@ -182,7 +187,7 @@ async def edges(browser):
             await idle(page)
             await page.wait_for_timeout(1800)
             assert page.url == URL + '/'
-            assert await page.locator('.brand-flight').evaluate('e=>Number(getComputedStyle(e).opacity)') == 0
+            assert await page.locator('.curtain').get_attribute('data-state') == 'open'
         await shot(page, mode)
         unexpected = [e for e in errors if not (mode == 'fallback' and e == 'Could not load /models/ambient.glb: Failed to fetch')]
         assert not unexpected, unexpected

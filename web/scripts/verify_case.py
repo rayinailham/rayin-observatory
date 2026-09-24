@@ -107,7 +107,7 @@ async def run():
             assert all(0 < x < width and 100 < y < height for x, y in line_points), line_points
             await page.get_by_role('button', name='Close component card').click()
             assert await page.locator('.instrument-hotspot[aria-expanded=true]').count() == 0
-            # Phase 7A: How it works is the pinned inspection field (four approved steps), details in verify_crosscheck_room.py.
+            # Phase 7A: How it works is the inspection field (one screen since Q49) (four approved steps), details in verify_crosscheck_room.py.
             await scroll_to(page, '#flow-heading', -110)
             assert await page.locator('.inspection-steps li').count() == 4
             assert await page.locator('.inspection-matrix [data-chip]').count() == 18

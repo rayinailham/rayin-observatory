@@ -1,7 +1,7 @@
 """Q42 Development frame-rate gate: catch a PLAN §11 regression before Testing does.
 
 One phone (390x844, DPR 2, touch), sound on as a default visitor, 4x CPU throttle (Phase 7 swipe method):
-homepage chapter of --slug → lens/camera flight into its case → swipe the whole case down to Next → Return.
+scroll into the --slug chapter → tap to turn its instrument (Q49) → curtain flight into its case → swipe the whole case down to Next → Return.
 A segment passes at ≥ 45 fps with ≤ 10% of frames slower than 45 fps. `--baseline URL` measures a second
 preview the same way right after (e.g. a build of HEAD in a scratch copy) so a drop can be attributed.
 Rig limits: headless Chromium, host GPU not throttled — a regression alarm, not a phone fps claim.
@@ -25,6 +25,7 @@ OUT = ROOT / 'assets/renders/perf-quick'
 GPU = ['--use-gl=angle', '--use-angle=gl-egl', '--enable-webgl', '--ignore-gpu-blocklist']
 W, H = 390, 844
 SLOW_MS = 1000 / 45
+SLUGS = ['crosscheck', 'surgeline', 'driftwatch', 'duewatch', 'brandwall']
 FRAMES = "(() => { window.__frames = []; const f = t => { window.__frames.push(t); requestAnimationFrame(f); }; requestAnimationFrame(f); })();"
 
 
@@ -88,12 +89,19 @@ async def measure(browser, url, slug):
         await action()
         segments[name] = stats(await page.evaluate('(n)=>__frames.slice(n)', n0))
 
+    # Q49: chapters are one screen and scroll natively; the visitor turns the instrument with a tap.
     section = await page.locator(f'#{slug}').evaluate('e=>({top:e.getBoundingClientRect().top+scrollY,h:e.offsetHeight})')
-    await land(page, section['top'] - 100)
+    await land(page, max(0, section['top'] - H))
     await page.wait_for_timeout(800)
-    await segment('chapter scroll', lambda: swipe_until(page, cdp, section['top'] + section['h'] - H))
-    await land(page, section['top'] + .45 * (section['h'] - H))
+    await segment('chapter scroll', lambda: swipe_until(page, cdp, section['top']))
+    await land(page, section['top'])
     await page.wait_for_timeout(600)
+
+    async def hand_turn():
+        await page.touchscreen.tap(W / 2, H * .42)
+        await page.wait_for_function(f"getComputedStyle(document.getElementById('{slug}')).getPropertyValue('--instrument-{SLUGS.index(slug)}-orbit')==='1.000'", timeout=8000)
+        await page.wait_for_timeout(300)
+    await segment('instrument turn (tap)', hand_turn)
 
     async def open_case():
         await page.locator(f'[data-open-case={slug}]').tap()

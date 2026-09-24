@@ -256,7 +256,10 @@ export default function ObservatoryShell({ children }: { children: ReactNode }) 
       // Scroll-driven custom properties live on the element that uses them, never on the root: a root custom
       // property restyles the whole page on every scroll frame (7B: SurgeLine chapter under the 45 fps gate at 4x CPU).
       sceneLayer.current?.style.setProperty('--chapter-reveal', String(reveal));
-      root.current?.setAttribute('data-chapter', outro >= 1 ? 'outro' : reveal > .4 ? instruments[index].id : 'dome');
+      // Chapters are one screen (Q49): the next one becomes `index` as soon as it peeks in, for the camera hand-over.
+      // The label names the chapter that fills most of the screen.
+      const shown = index > 0 && transition < .5 ? index - 1 : index;
+      root.current?.setAttribute('data-chapter', outro >= 1 ? 'outro' : reveal > .4 ? instruments[shown].id : 'dome');
       homeSections.forEach((_, i) => {
         const offset = i === index ? 1 - transition : i === index - 1 ? -transition : 2;
         sceneLayer.current?.style.setProperty(`--instrument-${i}-offset`, String(offset - (i === index ? outro : 0)));

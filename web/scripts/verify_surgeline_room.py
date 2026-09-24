@@ -1,4 +1,4 @@
-"""Phase 7B Development. Reusable viewport()/edges() for the future Testing evidence pack.
+"""Phase 7B Development (Q49 update in 7F: hand-turned strip, blinds curtain). Reusable viewport()/edges() for the future Testing evidence pack.
 Real recorded totals stay separate from the fictional A–F state machine. One GPU at a time.
 """
 import asyncio
@@ -9,6 +9,7 @@ from pathlib import Path
 from datetime import datetime, timezone
 from playwright.async_api import async_playwright
 from verify_crosscheck_room import enter, idle, land, GPU, URL
+import q49
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'assets/renders/personal-surgeline/dev'
@@ -26,8 +27,8 @@ STRIP = """()=>{const o=Number(getComputedStyle(document.querySelector('#surgeli
   return {orbit:o,s0:sum(0),s1:sum(1),s0first:tick(0,1,'::before'),s0last:tick(0,8,'::after'),s1last:tick(1,8,'::after'),s2last:tick(2,8,'::after'),cut:em[0],resumed:em[1]}}"""
 
 async def strip_at(page, orbit):
-    box = await page.locator('#surgeline').evaluate("e=>({top:e.getBoundingClientRect().top+scrollY,h:e.offsetHeight,stage:e.querySelector('.instrument-stage').offsetHeight})")
-    await land(page, box['top'] + orbit * (box['h'] - box['stage']))
+    # Q49: the chapter is one screen; the visitor turns the array by hand and the strip follows the turn.
+    await q49.turn(page, 'surgeline', orbit)
     await page.wait_for_timeout(250)
     reading = await page.evaluate(STRIP)
     assert abs(reading['orbit'] - orbit) < .03, ('orbit target missed', orbit, reading)
@@ -145,26 +146,26 @@ async def viewport(browser, width, height):
     page.on('response', lambda r: bad.append([r.status, r.url]) if r.status>=400 else None)
     await enter(page)
     await page.evaluate('window.__canvas=document.querySelector("canvas")')
-    await page.evaluate("""()=>{window.__pulseFrames=[];const tick=()=>{const e=document.querySelector('.dispatch-pulse i');if(e&&Number(getComputedStyle(e).opacity)>.03)window.__pulseFrames.push(getComputedStyle(e).transform);window.__pulseRaf=requestAnimationFrame(tick)};tick()}""")
     assert await page.locator('.dispatch-chapter').count() == 1
     assert 'DRAFT' not in await page.locator('.dispatch-chapter small').inner_text()
-    # Chapter strip is a pure function of orbit: lane 2 freezes while cut (.35–.6), then resumes; reverse scroll reverses it.
+    # Chapter strip is a pure function of the turn: lane 2 freezes while cut (.35–.6), then resumes; turning back reverses it.
+    await q49.to_chapter(page, 'surgeline')
     strips = [await strip_at(page, o) for o in (.2, .42, .55, 1, .2)]
     early, cut1, cut2, done, back = strips
     assert early['cut'] == 0 and early['s0last'] == 0 and early['s0first'] > 0, early
     assert cut1['cut'] > .9 and cut2['cut'] > .9 and cut1['resumed'] == 0, (cut1, cut2)
     assert cut1['s1'] == cut2['s1'] and cut2['s0'] > cut1['s0'], ('lane 2 did not freeze while cut', cut1, cut2)
     assert done['s0last'] == 1 and done['s1last'] == 1 and done['s2last'] == 1 and done['cut'] == 0 and done['resumed'] == 1, done
-    assert back == early, ('reverse scroll did not restore the strip', back, early)
+    assert back == early, ('reverse turn did not restore the strip', back, early)
     await strip_at(page, .48)
     await page.screenshot(path=str(OUT / f'chapter-{tag}.png'))
     origin = await page.evaluate('scrollY')
+    await q49.watch_curtain(page)
     await page.locator('[data-open-case=surgeline]').click()
-    await page.wait_for_url(URL+'/work/surgeline')
+    log = await q49.curtain_log(page, '/work/surgeline')
+    assert q49.closed_styles(log) == ['blinds'], log
     await idle(page)
     assert await page.locator('.case-page .draft-label').count() == 0
-    assert await page.evaluate('new Set(__pulseFrames).size>3'), 'entry pulse did not move'
-    assert await page.locator('.dispatch-pulse i').evaluate_all('els=>els.every(e=>Number(getComputedStyle(e).opacity)===0)')
     await at(page, '#case-instrument', 0)
     for i in range(3):
         await page.locator(f'.hotspot-{i}').click()
@@ -194,8 +195,11 @@ async def viewport(browser, width, height):
     await page.wait_for_url(URL+'/work/surgeline')
     await idle(page)
     await at(page, '.case-next')
+    await q49.watch_curtain(page)
     await page.locator('[data-case-target=driftwatch]').click()
-    await page.wait_for_url(URL+'/work/driftwatch')
+    log = await q49.curtain_log(page, '/work/driftwatch')
+    # Hand-over to DriftWatch: SurgeLine's blinds drop, DriftWatch's chart paper rolls up.
+    assert q49.closed_styles(log) == ['blinds'] and ['moving', 'roller', '/work/driftwatch'] in log, log
     await idle(page)
     await page.go_back()
     await idle(page)
@@ -222,7 +226,7 @@ async def edges(browser):
     await page.go_back()
     await idle(page)
     assert page.url.endswith('/')
-    assert await page.locator('.dispatch-pulse i').evaluate_all('els=>els.every(e=>Number(getComputedStyle(e).opacity)===0)')
+    await page.wait_for_function("document.querySelector('.curtain').dataset.state==='open'", timeout=4000)
     results['interrupt']='passed'
     # Resize in the middle of recovery: the demonstration settles on its outcome at the new layout, nothing duplicated.
     await page.goto(URL+'/work/surgeline')

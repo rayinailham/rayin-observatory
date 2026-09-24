@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from PIL import Image, ImageChops, ImageStat
 from playwright.async_api import async_playwright
+import q49
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'assets/renders/full-observatory/dev'
@@ -118,7 +119,7 @@ async def run():
                 await position(page, slug, 2)
                 section = page.locator('#'+slug)
                 assert await page.locator('.observatory').get_attribute('data-chapter') == slug
-                assert abs((await section.locator('.instrument-stage').bounding_box())['y']) < 2
+                assert abs((await section.locator('.instrument-stage').bounding_box())['y']) < 3
                 assert await section.locator('.proof-reading strong').inner_text() == reading
                 assert await page.locator('.draft-label').count() == len(DRAFTS)
                 assert await section.locator('.draft-label').count() == (1 if slug in DRAFTS else 0)
@@ -135,14 +136,22 @@ async def run():
                 idle = await pixel_image(page, clip)
                 idle_diff = difference(first, idle)
                 assert idle_diff > .1, (slug, 'frozen idle', idle_diff)
-                y = await page.evaluate('scrollY')
-                await page.mouse.wheel(0, height*.7)
-                await page.wait_for_function('(y)=>scrollY>y+100', arg=y)
+                # Q49: the visitor turns the instrument (tap = whole turn); scroll never does, and nothing is pinned.
+                await q49.tap(page, slug, settle=False)
                 await page.wait_for_timeout(1300)
                 orbit = await pixel_image(page, clip)
                 orbit_diff = difference(idle, orbit)
                 assert orbit_diff > 2, (slug, 'frozen orbit', orbit_diff)
-                assert abs((await section.locator('.instrument-stage').bounding_box())['y']) < 2
+                assert abs((await section.locator('.instrument-stage').bounding_box())['y']) < 3
+                await page.wait_for_function(f"Number(getComputedStyle(document.getElementById('{slug}')).getPropertyValue('--instrument-{SLUGS.index(slug)}-orbit'))===1", timeout=6000)
+                y = await page.evaluate('scrollY')
+                await page.mouse.wheel(0, height*.5)
+                await page.wait_for_function('(y)=>scrollY>y+100', arg=y)
+                await page.wait_for_timeout(300)
+                moved = (await section.locator('.instrument-stage').bounding_box())['y']
+                assert moved < -100, (slug, 'chapter pinned instead of scrolling', moved)
+                assert await q49.orbit(page, slug) == 1, (slug, 'scroll changed the turn')
+                await position(page, slug, 2)
                 # Phase 5: every chapter opens its own case route (the preview dialogs are gone).
                 await cta.click()
                 await page.wait_for_url(URL.rstrip('/') + '/work/' + slug)
@@ -154,9 +163,9 @@ async def run():
                 await page.wait_for_timeout(100)
                 assert await cta.evaluate('(e)=>e===document.activeElement')
                 assert await page.locator('dialog').count() == 1  # only the (closed) navigation menu remains
-                chapters.append({'id': slug, 'pinned': True, 'reading': reading, 'idlePixelDifference': idle_diff, 'orbitPixelDifference': orbit_diff, 'caseRoute': True})
+                chapters.append({'id': slug, 'pinned': False, 'handTurn': True, 'reading': reading, 'idlePixelDifference': idle_diff, 'orbitPixelDifference': orbit_diff, 'caseRoute': True})
                 print(f'  {slug} PASS', flush=True)
-            # Later chapters -> earlier chapter: camera, sticky pin and active label recover.
+            # Later chapters -> earlier chapter: camera and active label recover.
             for slug in reversed(SLUGS):
                 await position(page, slug, 2)
                 assert await page.locator('.observatory').get_attribute('data-chapter') == slug

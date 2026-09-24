@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from playwright.async_api import async_playwright
 from verify_case import PHONES, URL, enter, idle, scroll_to
+import q49
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'assets/renders/case-files/dev'
@@ -143,12 +144,17 @@ async def run():
                 details = await inspect(page, case, width, height, shots=True)
                 result['chain'].append({'id': case['id'], **details})
                 nxt = CASES[(n + 1) % 5]
+                await q49.watch_curtain(page)
                 await page.locator('.case-next .case-button').click()
                 await page.wait_for_function("document.querySelector('.observatory').dataset.flight==='moving'")
                 if n == 0 and width == 390:
-                    await page.wait_for_timeout(900)
-                    await page.screenshot(path=str(OUT / f'chain-sweep-{width}x{height}.png'))
-                await page.wait_for_url(f"{URL}/work/{nxt['id']}")
+                    await page.wait_for_timeout(300)
+                    await page.screenshot(path=str(OUT / f'chain-curtain-{width}x{height}.png'))
+                log = await q49.curtain_log(page, f"/work/{nxt['id']}")
+                # 7F hand-over: this case's own curtain closes, the next case opens its own.
+                assert q49.closed_styles(log) == [q49.CURTAINS[case['id']]], (case['id'], log)
+                assert ['moving', q49.CURTAINS[nxt['id']], f"/work/{nxt['id']}"] in log, (nxt['id'], log)
+                result['chain'][-1]['curtains'] = [q49.CURTAINS[case['id']], q49.CURTAINS[nxt['id']]]
                 await idle(page)
             # History inside the chain, then Return lands on the current case's chapter.
             await page.go_back()

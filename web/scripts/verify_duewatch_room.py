@@ -1,4 +1,4 @@
-"""7D Development: reusable viewport/edges checks. Evidence paths resolve from the current project root.
+"""7D Development (Q49 update in 7F: hand-turned chapter, louvre curtain): reusable viewport/edges checks. Evidence paths resolve from the current project root.
 Testing can call viewport/edges in its evidence pack (Q42), without repeating a separate suite.
 """
 import argparse
@@ -8,6 +8,7 @@ import os
 from datetime import datetime, timezone
 from pathlib import Path
 from playwright.async_api import async_playwright
+import q49
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'assets/renders/personal-duewatch/dev'
@@ -55,13 +56,11 @@ async def viewport(browser, w, h):
     page.on('request', lambda r: external.append(r.url) if not r.url.startswith(URL) and r.url.startswith('http') else None)
     await enter(page)
     await page.evaluate("window.__originalCanvas=document.querySelector('canvas')")
-    section = await page.locator('#duewatch').evaluate('e=>({y:e.offsetTop,h:e.offsetHeight})')
+    # Q49: one-screen chapter; the business-time pointer follows the visitor's hand turn, not scroll.
+    await q49.to_chapter(page, 'duewatch')
     positions=[]
     for progress in (.1,.85,.1):
-        y=section['y']+(section['h']-h)*progress
-        for _ in range(5):
-            await page.evaluate('(y)=>scrollTo(0,y)',y)
-            await page.wait_for_timeout(250)
+        await q49.turn(page, 'duewatch', progress)
         positions.append(await page.locator('.time-chapter-track i').evaluate('e=>e.getBoundingClientRect().x'))
     assert positions[1]>positions[0]+40 and abs(positions[2]-positions[0])<5, positions
     track=await page.locator('.time-chapter-track').bounding_box()
@@ -69,10 +68,14 @@ async def viewport(browser, w, h):
     await clean(page)
     await shot(page,'chapter',w,h)
     origin=await page.evaluate('scrollY')
+    await q49.watch_curtain(page)
     await page.locator('[data-open-case=duewatch]').click()
-    await page.wait_for_function("document.querySelector('.time-flight').dataset.direction==='out'",timeout=3000)
-    await shot(page,'ring-entry',w,h)
-    await page.wait_for_url('**/work/duewatch');await idle(page)
+    await page.wait_for_function("document.querySelector('.curtain').dataset.state==='moving'",timeout=3000)
+    await page.wait_for_timeout(260)
+    await shot(page,'louvre-entry',w,h)
+    log=await q49.curtain_log(page,'/work/duewatch')
+    assert q49.closed_styles(log)==['louvre'],log
+    await idle(page)
     assert await page.locator('.case-page .draft-label').count()==0
     assert await page.evaluate("window.__originalCanvas===document.querySelector('canvas')")
     await shot(page,'brief',w,h)
@@ -152,8 +155,10 @@ async def viewport(browser, w, h):
     assert await page.locator('.time-room').count()==1
     await page.go_forward();await idle(page)
     await page.locator('[data-open-case=duewatch]').click();await page.wait_for_url('**/work/duewatch');await idle(page)
-    await land(page,'.case-next');await page.locator('[data-case-target=brandwall]').click()
-    await page.wait_for_url('**/work/brandwall');await idle(page)
+    await land(page,'.case-next');await q49.watch_curtain(page);await page.locator('[data-case-target=brandwall]').click()
+    log=await q49.curtain_log(page,'/work/brandwall');await idle(page)
+    # Hand-over to BrandWall: DueWatch's louvre closes, BrandWall's pleats open.
+    assert q49.closed_styles(log)==['louvre'] and ['moving','prism','/work/brandwall'] in log,log
     await page.go_back();await idle(page)
     await page.reload();await idle(page)
     assert await page.locator('.time-contract-result').get_attribute('data-category')=='active'
@@ -182,7 +187,7 @@ async def edges(browser):
         if mode=='fallback':
             await page.wait_for_function("document.querySelector('.observatory').dataset.scene==='fallback'")
             assert await page.locator('.hotspot-leaders').evaluate("e=>getComputedStyle(e).visibility")=='hidden'
-        elif mode=='reduced':assert await page.locator('.time-flight').evaluate("e=>getComputedStyle(e).display")=='none'
+        elif mode=='reduced':assert await page.locator('.curtain').get_attribute('data-state')=='open'
         await land(page,'.time-date-picker');await page.locator('[data-days="0"]').click()
         assert await page.locator('.time-contract-result').get_attribute('data-category')=='renew'
         await page.locator('[data-days="60"]').focus();await page.keyboard.press('Enter')
@@ -204,8 +209,7 @@ async def edges(browser):
     await land(page,'.case-next');await page.locator('[data-case-target=brandwall]').click()
     await page.wait_for_timeout(150);await page.go_back();await idle(page);await page.wait_for_timeout(1800)
     assert page.url==URL+'/',page.url
-    assert await page.locator('.time-flight').get_attribute('data-direction')=='idle'
-    assert await page.locator('.time-flight').evaluate('e=>+getComputedStyle(e).opacity')==0
+    assert await page.locator('.curtain').get_attribute('data-state')=='open'
     await clean(page);await ctx.close();results.append({'mode':'history-interruption','status':'passed'})
     return results
 

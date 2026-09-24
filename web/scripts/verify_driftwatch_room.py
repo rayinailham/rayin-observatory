@@ -1,4 +1,4 @@
-"""7C Development checks; viewport()/edges() are reusable by the Testing evidence pack.
+"""7C Development checks (Q49 update in 7F: hand-turned trace, roller curtain); viewport()/edges() are reusable by the Testing evidence pack.
 No collection requests; the room's illustrative rows stay separate from recorded evidence.
 Run via run_regressions.py. --sizes and --no-edges support mobile-first development.
 """
@@ -9,6 +9,7 @@ import os
 from datetime import datetime, timezone
 from pathlib import Path
 from playwright.async_api import async_playwright
+import q49
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'assets/renders/personal-driftwatch/dev'
@@ -90,11 +91,11 @@ async def viewport(browser, width, height):
     page.on('response', lambda r: requests.append([r.status, r.url]) if r.status >= 400 else None)
     await enter(page)
     await page.evaluate('window.__monitorCanvas=document.querySelector("canvas")')
-    box = await page.locator('#driftwatch').evaluate('e=>({top:e.offsetTop,h:e.offsetHeight,stage:e.querySelector(".instrument-stage").offsetHeight})')
+    # Q49: one-screen chapter; the trace draws with the visitor's hand turn of the seismograph.
+    await q49.to_chapter(page, 'driftwatch')
     trace = []
     for p in (.2, .8, .2):
-        await land(page, box['top'] + p * (box['h'] - box['stage']))
-        # The orbit var follows smoothed scroll on rAF; read once two samples agree (slow frames at 1920 lag).
+        await q49.turn(page, 'driftwatch', p)
         read = r'e=>Number(getComputedStyle(e).strokeDashoffset.match(/[-\d.]+/)[0])'
         value = None
         for _ in range(20):
@@ -107,14 +108,13 @@ async def viewport(browser, width, height):
     assert trace[1] < trace[0] and abs(trace[0] - trace[2]) < .03, trace
     await shot(page, f'chapter-{width}x{height}')
     origin = await page.evaluate('scrollY')
-    # Record ribbon transforms without relying on a single screenshot frame.
-    await page.evaluate('''() => {window.__ribbon=[];let stop=performance.now()+1700;const f=()=>{const e=document.querySelector('.monitor-ribbon');window.__ribbon.push({d:e.dataset.direction,t:getComputedStyle(e).transform,o:+getComputedStyle(e).opacity});if(performance.now()<stop)requestAnimationFrame(f)};f()}''')
+    # The chart-paper roller closes, the route changes behind it, and it rolls up again.
+    await q49.watch_curtain(page)
     button = page.locator('[data-open-case=driftwatch]')
     await (button.tap() if touch else button.click())
-    await page.wait_for_url('**/work/driftwatch')
+    log = await q49.curtain_log(page, '/work/driftwatch')
+    assert q49.closed_styles(log) == ['roller'], log
     await idle(page)
-    frames = await page.evaluate('__ribbon')
-    assert len({f['t'] for f in frames if f['d'] == 'out' and f['o'] > .1}) > 3
     assert await page.locator('.case-page .draft-label').count() == 0  # copy approved at gate 7C
     assert await page.locator('#case-heading').evaluate('e=>e===document.activeElement')
     await at(page, '#case-instrument', 0)
@@ -161,8 +161,11 @@ async def viewport(browser, width, height):
     await page.wait_for_url('**/work/driftwatch')
     await idle(page)
     await at(page, '.case-next')
+    await q49.watch_curtain(page)
     await page.locator('[data-case-target=duewatch]').click()
-    await page.wait_for_url('**/work/duewatch')
+    log = await q49.curtain_log(page, '/work/duewatch')
+    # Hand-over to DueWatch: the roller comes down, DueWatch's time slots open.
+    assert q49.closed_styles(log) == ['roller'] and ['moving', 'louvre', '/work/duewatch'] in log, log
     await idle(page)
     await page.go_back()
     await idle(page)
@@ -197,7 +200,7 @@ async def edges(browser):
             assert await page.locator('.case-inspection').get_attribute('data-leaders') != 'live'
         if reduced:
             assert await page.locator('.monitor-result').evaluate('e=>getComputedStyle(e).opacity') == '1'
-            assert await page.locator('.monitor-ribbon').evaluate('e=>getComputedStyle(e).display') == 'none'
+            assert await page.locator('.curtain').get_attribute('data-state') == 'open'
         await shot(page, 'fallback' if fallback else 'reduced')
         await page.set_viewport_size({'width': 1440, 'height': 900})
         await page.wait_for_timeout(300)
@@ -208,6 +211,7 @@ async def edges(browser):
         await page.locator('.case-next .case-back').click()
         await page.wait_for_url(URL + '/')
         await idle(page)
+        await q49.to_chapter(page, 'driftwatch')
         await page.locator('[data-open-case=driftwatch]').click()
         await page.wait_for_url('**/work/driftwatch')
         await idle(page)
@@ -216,8 +220,7 @@ async def edges(browser):
         await page.go_back()
         await idle(page)
         await page.wait_for_timeout(1200)
-        assert await page.locator('.monitor-ribbon').get_attribute('data-direction') == 'idle'
-        assert await page.locator('.monitor-ribbon').evaluate('e=>+getComputedStyle(e).opacity') == 0
+        assert await page.locator('.curtain').get_attribute('data-state') == 'open'
         results.append({'mode': 'fallback' if fallback else 'reduced', 'status': 'passed'})
         await context.close()
     return results

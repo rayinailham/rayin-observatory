@@ -567,6 +567,9 @@ button { transition: color .18s, background-color .18s, scale .12s ease-out; }
 .inspection-detail { min-height: 64px; margin-top: 10px; }
 .inspection-step-button { padding: 0; text-align: left; letter-spacing: inherit; text-transform: inherit; }
 .inspection-replay { margin-top: 12px; padding: 0; min-height: 36px; color: var(--amber); font: 10px 'JetBrains Mono', monospace; letter-spacing: .06em; text-transform: uppercase; }
+/* 7F: on phones Replay sits on the kicker row, so the matrix keeps its height on short screens (360×740). */
+.inspection-copy { position: relative; }
+.inspection-replay { position: absolute; top: -11px; right: 0; margin: 0; }
 .case-page .inspection-detail p { margin: 0; font-size: 11px; line-height: 1.6; }
 .case-page .inspection-detail .inspection-readout, .case-page .inspection-readout { margin-top: 5px; color: var(--amber); font: 10px/1.5 'JetBrains Mono', monospace; }
 .inspection-figure { display: flex; flex: 1; flex-direction: column; min-height: 0; margin: 8px 0 0; }
@@ -666,9 +669,14 @@ button { transition: color .18s, background-color .18s, scale .12s ease-out; }
   .inspection-step-index { display: block; position: absolute; left: 0; top: 18px; color: var(--amber); font: 11px 'JetBrains Mono', monospace; }
   .case-page .inspection-steps h3 { color: var(--ivory); font: 400 18px/1.3 Inter, sans-serif; letter-spacing: 0; text-transform: none; }
   .case-page .inspection-steps p { display: block; margin: 6px 0 0; font-size: 13px; line-height: 1.7; }
+  /* 7F: the active step keeps two lines for its text and two for its readout, so the centred copy never changes
+     height mid-scan (1440: the "Run the checks" readout wrapped and scroll anchoring moved the page 9 px). */
+  .case-page .inspection-steps p { min-height: 2lh; }
+  .inspection-stage { overflow-anchor: none; }
   .case-page .inspection-steps .inspection-readout { font-size: 11px; }
   .inspection-steps li:not([data-active=true]) p { display: none; }
   .inspection-detail { display: none; }
+  .inspection-replay { position: static; margin-top: 12px; }
   .inspection-figure { height: 100%; justify-content: center; margin: 0; }
   .inspection-matrix { flex: 0 1 auto; max-height: calc(100svh - 230px); }
   .inspection-matrix .lane-label { font-size: 9px; }

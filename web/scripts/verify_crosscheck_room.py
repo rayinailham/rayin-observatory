@@ -1,8 +1,8 @@
 """Phase 7A Development: CrossCheck inspection room, mobile first then tablet and desktop.
 
-Chapter lane strip (fills with the orbit, follows the lenses) → lens iris into the case → leaders only
-on a model → pinned inspection field scrubbed forward, backward and by fast flicks → four findings with
-evidence → Next teaser → iris back into the chapter lens. Edge cases on 390×844: Back during the
+Q49 (updated 7F): chapter lane strip fills with the visitor's hand turn (drag/tap) → stage curtain into the
+case → leaders only on a model → one-screen inspection field that plays itself, jumps by step buttons, settles
+after rapid taps and replays → four findings with evidence → Next teaser → curtain back to the chapter. Edge cases on 390×844: Back during the
 flight, model blocked (still view), reduced motion. Not the Testing evidence pack.
 
 Run from web/scripts with the production preview on :8767:
@@ -15,6 +15,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from playwright.async_api import async_playwright
+import q49
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'assets/renders/personal-crosscheck/dev'
@@ -55,30 +56,15 @@ async def land(page, y):
     raise AssertionError(f'could not land at {y}')
 
 
-async def field_at(page, p):
-    y = await page.locator('.inspection-field').evaluate('(e,p)=>e.getBoundingClientRect().top+scrollY+p*(e.offsetHeight-innerHeight)', p)
-    await land(page, y)
-    await page.wait_for_function('(p)=>Math.abs(Number(document.querySelector(".inspection-matrix").dataset.progress)-p)<.015', arg=p, timeout=5000)
+async def field_state(page):
     return await page.evaluate('({step: Number(document.querySelector(".inspection-field").dataset.step), progress: Number(document.querySelector(".inspection-matrix").dataset.progress), stageTop: document.querySelector(".inspection-stage").getBoundingClientRect().top, active: document.querySelector(".inspection-steps li[data-active=true] h3").textContent})')
 
 
-async def iris_trace(page, until_path, limit=4000, capture=None):
-    """Poll the iris while a flight runs; returns the ordered distinct states and centres.
-    `capture` = (state, radius px, path): one screenshot once that state passes that radius."""
-    seen, centres = [], []
-    for _ in range(limit // 40):
-        state = await page.evaluate("(()=>{const e=document.querySelector('.lens-iris');return [e.dataset.state,parseFloat(e.style.getPropertyValue('--iris-x'))||0,parseFloat(e.style.getPropertyValue('--iris-y'))||0,location.pathname]})()")
-        if not seen or seen[-1] != state[0]:
-            seen.append(state[0])
-        if state[0] != 'hidden':
-            centres.append(state[1:3])
-        if capture and state[0] == capture[0] and await page.evaluate("parseFloat(document.querySelector('.lens-iris').style.getPropertyValue('--iris-r'))") > capture[1]:
-            await page.screenshot(path=capture[2])
-            capture = None
-        if state[3] == until_path and state[0] == 'hidden' and len(seen) > 1:
-            break
-        await page.wait_for_timeout(40)
-    return seen, centres
+async def field_settles(page, p, timeout=12000):
+    """The scan plays itself (Q49); wait until it rests at progress p."""
+    await page.wait_for_function('(p)=>Math.abs(Number(document.querySelector(".inspection-matrix").dataset.progress)-p)<.002', arg=p, timeout=timeout)
+    await page.wait_for_timeout(120)
+    return await field_state(page)
 
 
 async def overflow(page):
@@ -100,15 +86,18 @@ async def viewport(browser, width, height):
 
     await enter(page)
     await page.evaluate("window.__canvas=document.querySelector('canvas')")
-    # A. Chapter lane strip: fills with the orbit, follows the lenses.
-    section = await page.locator('#crosscheck').evaluate('e=>({top:e.getBoundingClientRect().top+scrollY,h:e.offsetHeight})')
+    # A. Chapter lane strip: fills with the visitor's hand turn (Q49), follows the lenses.
+    await q49.to_chapter(page, 'crosscheck')
     fills = []
     for p in (0, .5, 1):
-        await land(page, section['top'] + p * (section['h'] - height))
-        await page.wait_for_timeout(500)
+        await q49.turn(page, 'crosscheck', p)
+        await page.wait_for_timeout(300)
         fills.append(await page.evaluate("[...document.querySelectorAll('.scan-lane i')].filter(i=>Number(getComputedStyle(i,'::after').opacity)>.5).length"))
     assert fills[0] <= 3 and fills[1] > fills[0] and fills[2] == 27, fills
-    await land(page, section['top'] + .45 * (section['h'] - height))
+    # Tap winds a full turn back, and plays it again.
+    assert await q49.tap(page, 'crosscheck') == 0
+    assert await q49.tap(page, 'crosscheck') == 1
+    await q49.turn(page, 'crosscheck', .45)
     lanes = set()
     for _ in range(36):
         lanes.add(await page.evaluate("document.querySelector('.observatory').dataset.scan"))
@@ -122,14 +111,17 @@ async def viewport(browser, width, height):
     result['chapterStrip'] = {'litCells': fills, 'lanesSeen': sorted(lanes)}
     origin = await page.evaluate('scrollY')
 
-    # B. Into the case through the lens.
+    # B. Into the case behind CrossCheck's stage curtain.
+    await q49.watch_curtain(page)
     await page.locator('[data-open-case=crosscheck]').click()
-    states, centres = await iris_trace(page, '/work/crosscheck', capture=('disc', width * .35, str(OUT / f'iris-closing-{tag}.png')))
-    assert states[:3] == ['disc', 'hole', 'hidden'] or states[:4] == ['hidden', 'disc', 'hole', 'hidden'], states
-    assert all(0 <= x <= width and 0 <= y <= height for x, y in centres), centres
+    await page.wait_for_function("document.querySelector('.curtain').dataset.state==='moving'")
+    await page.wait_for_timeout(280)
+    await page.screenshot(path=str(OUT / f'curtain-closing-{tag}.png'))
+    log = await q49.curtain_log(page, '/work/crosscheck')
+    assert q49.closed_styles(log) == ['stage'], log
     await idle(page)
     assert await page.evaluate("document.activeElement.id") == 'case-heading'
-    result['irisIn'] = states
+    result['curtainIn'] = log
     # C. Leaders only once projected onto the model.
     await page.locator('#case-instrument').scroll_into_view_if_needed()
     await page.wait_for_selector('.case-inspection[data-leaders=live]', timeout=10000)
@@ -142,32 +134,50 @@ async def viewport(browser, width, height):
     await shot('case-hotspot')
     await page.get_by_role('button', name='Close component card').click()
 
-    # D. Inspection field: forward, backward, flick.
-    forward = [await field_at(page, p) for p in (0, .3, .62, .9, 1)]
-    steps = [f['step'] for f in forward]
-    assert steps == sorted(steps) and steps[0] == 0 and steps[-1] == 3, forward
-    assert all(abs(f['stageTop']) < 2 for f in forward), forward
-    for p in (.3, .62, 1):
-        await field_at(page, p)
-        await shot(f'field-{int(p * 100):03d}')
+    # D. Inspection field (Q49): one screen, the scan plays itself once in view; steps jump, Replay restarts.
+    await land(page, await page.locator('.inspection-field').evaluate('e=>e.getBoundingClientRect().top+scrollY'))
+    await page.wait_for_timeout(200)
+    if (await field_state(page))['progress'] > .05:
+        # A tall screen may have shown the field (and started it) during the hotspot checks: watch a replay instead.
+        await page.locator('.inspection-replay').click()
+        await page.wait_for_function('Number(document.querySelector(".inspection-matrix").dataset.progress)<.05', timeout=3000)
+    seen = []
+    for _ in range(80):
+        seen.append(await field_state(page))
+        if seen[-1]['progress'] >= 1:
+            break
+        await page.wait_for_timeout(150)
+    steps = [f['step'] for f in seen]
+    assert steps == sorted(steps) and steps[-1] == 3 and {1, 2} <= set(steps), steps
+    assert all(abs(f['stageTop']) < 3 for f in seen), seen  # land() settles within 3 px
     chips = await page.evaluate("[...document.querySelectorAll('[data-chip]')].map(c=>Number(c.style.fillOpacity))")
     assert len(chips) == 18 and min(chips) > .95, chips
-    back = await field_at(page, .3)
+    await shot('field-100')
+    await page.locator('.inspection-step-button', has_text='Run the checks').click()
+    back = await field_settles(page, .5)
     assert back['step'] == 1 and back['active'] == 'Run the checks', back
     chips = await page.evaluate("Math.max(...[...document.querySelectorAll('[data-chip]')].map(c=>Number(c.style.fillOpacity)))")
     assert chips < .05, chips
-    top = await page.locator('.inspection-field').evaluate('e=>e.getBoundingClientRect().top+scrollY')
-    h = await page.locator('.inspection-field').evaluate('e=>e.offsetHeight-innerHeight')
-    for y in (top, top + h, top + .2 * h, top + h * .95, top + .5 * h):
-        await page.evaluate('(y)=>scrollTo(0,y)', y)
-        await page.wait_for_timeout(30)
-    flick = await field_at(page, .5)
+    await shot('field-050')
+    await page.locator('.inspection-step-button', has_text='Verify & sort').click()
+    sort = await field_settles(page, .76)
+    assert sort['step'] == 2, sort
+    await shot('field-076')
+    # Rapid taps settle on the last one, with no queue.
+    for title in ('Hand over the evidence', 'Map the app', 'Run the checks', 'Verify & sort', 'Run the checks'):
+        await page.locator('.inspection-step-button', has_text=title).click()
+        await page.wait_for_timeout(40)
+    flick = await field_settles(page, .5)
     assert flick['step'] == 1, flick
+    await page.locator('.inspection-replay').click()
+    await page.wait_for_function('Number(document.querySelector(".inspection-matrix").dataset.progress)<.1', timeout=3000)
+    replay = await field_settles(page, 1)
+    assert replay['step'] == 3, replay
     labels = await page.evaluate("[...document.querySelectorAll('.lane-label')].map(t=>t.getBoundingClientRect().width>0)")
     assert all(labels) and len(labels) == 3
     svg = await page.locator('.inspection-matrix').bounding_box()
     assert svg['height'] > (300 if not wide else 420) and svg['x'] >= 0 and svg['x'] + svg['width'] <= width + 1, svg
-    result['field'] = {'forward': forward, 'backTo30': back, 'afterFlick': flick, 'svg': svg}
+    result['field'] = {'autoplaySteps': steps, 'runTheChecks': back, 'verifySort': sort, 'afterRapidTaps': flick, 'replay': replay, 'svg': svg}
 
     # E. Findings: every card selects its own evidence.
     await page.locator('#findings-heading').scroll_into_view_if_needed()
@@ -200,18 +210,19 @@ async def viewport(browser, width, height):
         assert await overflow(page) <= 1, (finding, 'overflow')
     result['findings'] = per
 
-    # F. Next teaser, then back into the chapter lens.
+    # F. Next teaser, then back to the chapter behind the same curtain.
     teaser = await page.locator('.case-next-deck').inner_text()
     assert 'Every row sent once.' in teaser and 'Every success proven.' in teaser, teaser
     await page.locator('#next-heading').scroll_into_view_if_needed()
     await shot('next-teaser')
+    await q49.watch_curtain(page)
     await page.locator('.case-next .case-back').click()
-    states, centres = await iris_trace(page, '/', capture=('disc', width * .25, str(OUT / f'iris-return-{tag}.png')))
-    assert 'hole' in states and 'disc' in states and states[-1] == 'hidden', states
+    log = await q49.curtain_log(page, '/')
+    assert q49.closed_styles(log) == ['stage'], log
     await idle(page)
     assert abs(await page.evaluate('scrollY') - origin) < 3
     assert await page.evaluate("document.querySelector('canvas')===window.__canvas && document.querySelectorAll('canvas').length===1")
-    result['irisOut'] = states
+    result['curtainOut'] = log
     result['overflow'] = await overflow(page)
     assert result['overflow'] <= 1
     assert not errors, errors
@@ -223,7 +234,7 @@ async def viewport(browser, width, height):
 
 async def edges(browser):
     out = {}
-    # Back during the flight: the iris must still clear and the homepage stays usable.
+    # Back during the flight: the curtain must still open and the homepage stays usable.
     context = await browser.new_context(viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True)
     page = await context.new_page()
     errors = []
@@ -234,13 +245,13 @@ async def edges(browser):
     await page.wait_for_url(URL + '/work/crosscheck', timeout=5000)
     await page.go_back()
     await page.wait_for_url(URL + '/')
-    await page.wait_for_function("document.querySelector('.lens-iris').dataset.state==='hidden'", timeout=4000)
+    await page.wait_for_function("document.querySelector('.curtain').dataset.state==='open'", timeout=4000)
     await idle(page)
     assert not errors, errors
-    out['backDuringFlight'] = 'iris cleared, homepage idle'
+    out['backDuringFlight'] = 'curtain opened, homepage idle'
     await context.close()
 
-    # Model blocked: still view, no leaders into empty space, iris still clears.
+    # Model blocked: still view, no leaders into empty space, curtain still opens.
     context = await browser.new_context(viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True)
     page = await context.new_page()
     await page.route('**/models/ambient.glb', lambda route: route.abort())
@@ -250,7 +261,7 @@ async def edges(browser):
     await page.locator('[data-open-case=crosscheck]').click()
     await page.wait_for_url(URL + '/work/crosscheck')
     await idle(page)
-    await page.wait_for_function("document.querySelector('.lens-iris').dataset.state==='hidden'", timeout=4000)
+    await page.wait_for_function("document.querySelector('.curtain').dataset.state==='open'", timeout=4000)
     await page.locator('#case-instrument').scroll_into_view_if_needed()
     await page.wait_for_timeout(500)
     assert await page.locator('.case-inspection[data-leaders]').count() == 0
@@ -261,7 +272,7 @@ async def edges(browser):
     out['fallback'] = {'leaderOpacity': lines, 'still': still}
     await context.close()
 
-    # Reduced motion: final state at once, no iris.
+    # Reduced motion: final state at once, no curtain.
     context = await browser.new_context(viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True, reduced_motion='reduce')
     page = await context.new_page()
     await enter(page, '/work/crosscheck')
@@ -271,7 +282,7 @@ async def edges(browser):
     assert state == {'step': '3', 'chips': 1}, state
     await page.locator('.case-brief .case-back').click()
     await page.wait_for_url(URL + '/')
-    assert await page.evaluate("document.querySelector('.lens-iris').dataset.state") == 'hidden'
+    assert await page.evaluate("document.querySelector('.curtain').dataset.state") == 'open'
     await page.screenshot(path=str(OUT / 'reduced-motion-field-390x844.png'))
     out['reducedMotion'] = state
     await context.close()
