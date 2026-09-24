@@ -13,6 +13,24 @@ import { VisualStudio, StudioEvidence } from './brandwall-room';
 
 const lines = (text: readonly string[]) => text.map((line, i) => <Fragment key={line}>{i > 0 && <br />}{line}</Fragment>);
 
+// F1: WebKit crashed the whole case file on a <source type="video/mp4"> in the markup, so the
+// video starts without any source and gets its src only when the visitor (or a test) presses play.
+function DemoVideo({ id, label }: { id: InstrumentId; label: string }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  const [armed, setArmed] = useState(false);
+  const arm = () => {
+    const video = ref.current;
+    if (!video) return;
+    if (!video.getAttribute('src')) video.src = `/videos/${id}-explainer.mp4`;
+    setArmed(true);
+    void video.play().catch(() => {});
+  };
+  return <div className="case-video-frame">
+    <video ref={ref} className="case-video" controls={armed} playsInline muted preload="none" poster={`/images/${id}-demo-poster.jpg`} aria-label={label} onPlay={() => { if (!ref.current?.getAttribute('src')) arm(); }} />
+    {!armed && <button type="button" className="case-video-play" onClick={arm} aria-label={`Play: ${label}`}><span aria-hidden="true">▶</span></button>}
+  </div>;
+}
+
 export default function CaseFile({ id }: { id: InstrumentId }) {
   const index = caseFiles.findIndex(item => item.id === id);
   const file = caseFiles[index];
@@ -106,9 +124,7 @@ export default function CaseFile({ id }: { id: InstrumentId }) {
 
       <section className="case-section" aria-labelledby="demo-heading"><p className="section-kicker">Demo video</p><h2 id="demo-heading">See the evidence.</h2>
         <p>{file.video.intro}</p>
-        <video className="case-video" controls playsInline muted preload="none" poster={`/images/${id}-demo-poster.jpg`} aria-label={file.video.label}>
-          <source src={`/videos/${id}-explainer.mp4`} type="video/mp4" />Your browser does not support embedded video.
-        </video>
+        <DemoVideo id={id} label={file.video.label} />
         <a className="case-video-link" href={`/videos/${id}-explainer.mp4`}>Open video full size ↗</a>
       </section>
 

@@ -1,6 +1,8 @@
 # CODEMAP — Peta kode Rayin Observatory
 
-Update terbaru 2026-09-24 · Claude Code: **Fase 8 Testing** — skrip baru `web/scripts/launch_evidence.py` (bukti terhadap URL produksi, impor `observatory_evidence.py`), paket `assets/renders/launch/evidence/`; tanpa perubahan kode app. Temuan F1: WebKit headless crash di case file (pemicu `<source type="video/mp4">` di `components/case-file.tsx:110`), belum diperbaiki. Lihat entri "Fase 8 — Testing" di PROGRESS.
+Update terbaru 2026-09-24 · Claude Code: **Fix F1 Safari/WebKit** — `components/case-file.tsx` (`DemoVideo`: video tanpa `<source>`, src dipasang saat play) + `app/globals.css` (`.case-video-frame`, `.case-video-play`). WebKit headless: case file 10/10 crash → 0/10. Harness `launch_evidence.py` masih membuang `<source>` (kini tak berefek).
+
+Sebelumnya Update terbaru 2026-09-24 · Claude Code: **Fase 8 Testing** — skrip baru `web/scripts/launch_evidence.py` (bukti terhadap URL produksi, impor `observatory_evidence.py`), paket `assets/renders/launch/evidence/`; tanpa perubahan kode app. Temuan F1: WebKit headless crash di case file (pemicu `<source type="video/mp4">` di `components/case-file.tsx:110`), belum diperbaiki. Lihat entri "Fase 8 — Testing" di PROGRESS.
 
 Sebelumnya Update terbaru 2026-09-24 · Claude Code: **Fix parallax HP (revisi 2)** — `observatory-scene.tsx`: HP tetap meluncur bareng teks (tukar-skala pertama membuat artefak lenyap saat scroll sedikit, dibuang); jarak geser kini diukur dalam tinggi section (`.instrument-stage`, di-cache `stageHeight`, reset saat lebar berubah) bukan tinggi canvas, ukuran home HP .33, pusat .53 section; `globals.css` `.scene-layer` `height: 100lvh` (canvas tak resize saat URL bar bergerak). Desktop tak berubah.
 
@@ -816,7 +818,7 @@ Brief personal + tabel sumber copy DRAFT: `web/README.md` bagian Phase 7A.
 - **Bergantung pada:** `lib/cases.ts`, `lib/instruments.ts` (nama/kategori), GSAP, Next Link; `/images/<slug>-fallback.png`,
   `/images/<slug>-demo-poster.jpg`, `/videos/<slug>-explainer.mp4`.
 - **State / efek samping:** selected card; `inspect(next, pointer)` mengubah selection + WAAPI opacity/translate 180ms untuk pointer; animasi lama dibatalkan saat tap berikut/cleanup. `data-active` pada leader, `data-selected` pada kartu. IntersectionObserver count-up sekali per reading; cleanup tween/observer.
-  Video native controls, muted, playsInline, preload none.
+  Video: `DemoVideo` lokal — `.case-video-frame` > `video.case-video` (muted, playsInline, preload none, poster, **tanpa `<source>`/`src` di markup**) + `button.case-video-play` (▶). Tap tombol, atau event `play` (tes lama yang memanggil `v.play()`), memasang `src=/videos/<slug>-explainer.mp4`, menyalakan native `controls` dan melepas tombol. Alasan: temuan F1 — `<source type="video/mp4">` di markup meng-crash seluruh case file di WebKit (fix 2026-09-24).
 - **Catatan:** pengganti `crosscheck-case.tsx`; teks CrossCheck identik kecuali blok Next (kini "Open the next case file" → case SurgeLine, approved di gate Fase 5).
   Fase 6: wrapper `.case-title` + `.case-brief-copy` untuk brief desktop; `.case-inspection` berisi still/SVG/marker dengan koordinat lokal, terpisah dari heading/kartu. Mobile tetap satu stage.
   Next = case berikut urutan PLAN §5, BrandWall → CrossCheck. Link `onNavigate` preventDefault; modifier-click tetap link normal.
@@ -1032,6 +1034,7 @@ Brief personal + tabel sumber copy DRAFT: `web/README.md` bagian Phase 7A.
   `--instrument-0-offset` … `--instrument-4-offset` (`.scene-layer`), `--instrument-<i>-orbit` (section chapter) — default di `.observatory`; `.instrument-*`, `.skill-*`, `.portrait-scan`,
   `.scan-line`, `.text-section`, `.contact-links`, `.email-cta`.
 - **Dipakai oleh:** layout, page, shell.
+- **Case video (fix F1 2026-09-24):** `.case-video-frame` (relative, pembawa margin atas; desktop `width: min(100%,1120px)`), `.case-video-play` (overlay penuh, lingkaran amber 64 px, hover/focus terisi amber).
 - **Bergantung pada:** tiga TTF, fallback PNG lokal (image paths disuplai shell), portrait.
 - **State / efek samping:** transform/opacity, highlight skill target, stage chapter satu layar (Q49), tirai `.curtain`, fixed readout.
   `data-chapter` selain dome menyembunyikan CTA hero; outro mempertahankan notice still view.

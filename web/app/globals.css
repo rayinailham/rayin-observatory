@@ -311,7 +311,11 @@ button { transition: color .18s, background-color .18s, scale .12s ease-out; }
 .case-tools a { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 48px; color: var(--ivory); text-decoration: none; font: 11px/1.6 'JetBrains Mono', monospace; }
 .case-tools a span { color: var(--amber); }
 .case-tools a:hover { color: var(--amber); }
-.case-video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; background: var(--panel); margin-top: 26px; }
+.case-video-frame { position: relative; margin-top: 26px; }
+.case-video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; background: var(--panel); }
+.case-video-play { position: absolute; inset: 0; display: grid; place-items: center; width: 100%; padding: 0; border: 0; background: transparent; color: var(--ivory); cursor: pointer; }
+.case-video-play span { display: grid; place-items: center; width: 64px; height: 64px; border: 1px solid var(--amber); border-radius: 50%; background: rgb(0 0 0 / .55); color: var(--amber); font-size: 20px; padding-left: 4px; }
+.case-video-play:hover span, .case-video-play:focus-visible span { background: var(--amber); color: var(--panel); }
 .case-video-link { display: inline-flex; align-items: center; min-height: 48px; color: var(--amber); font-size: 11px; }
 .case-next { padding-bottom: 100px; }
 .case-next .case-button { text-decoration: none; color: var(--ivory); }
@@ -461,7 +465,8 @@ button { transition: color .18s, background-color .18s, scale .12s ease-out; }
   .case-limits p { font-size: 13px; }
   .case-tools { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 48px; margin-top: 44px; }
   .case-tools a { min-height: 64px; font-size: 13px; }
-  .case-video { width: min(100%, 1120px); max-height: 72svh; margin-top: 40px; object-fit: contain; }
+  .case-video-frame { width: min(100%, 1120px); margin-top: 40px; }
+  .case-video { max-height: 72svh; object-fit: contain; }
   .case-video-link { font-size: 13px; }
   .case-next { display: grid; grid-template-columns: 1fr 1fr; gap: 0 80px; padding-bottom: 130px; }
   .case-next .section-kicker, .case-next h2 { grid-column: 1; }
